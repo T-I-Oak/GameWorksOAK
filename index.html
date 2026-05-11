@@ -27,65 +27,19 @@
             </p>
         </section>
 
-        <section class="games-grid">
-            <!-- Burst Cascade -->
-            <div class="game-card animate-fade delay-1">
-                <div class="game-img" style="background-image: url('assets/burst_cascade.png');">
-                    <span class="badge">COMING SOON</span>
-                </div>
-                <div class="game-info">
-                    <h3>Burst Cascade</h3>
-                    <div class="tags">
-                        <span class="tag">対戦型陣取り</span>
-                        <span class="tag">ヘキサ・ストラテジー</span>
-                        <span class="tag">バースト・連鎖</span>
-                    </div>
-                    <p>
-                        ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。
-                    </p>
-                    <a href="#" class="btn-more" data-href="https://t-i-oak.github.io/BurstCascade/">VIEW PROJECT</a>
-                </div>
-            </div>
-
-            <!-- Magic Crystal -->
-            <div class="game-card animate-fade delay-2">
-                <div class="game-img" style="background-image: url('assets/magic_crystal.png');">
-                    <span class="badge">COMING SOON</span>
-                </div>
-                <div class="game-info">
-                    <h3>Magic Crystal</h3>
-                    <div class="tags">
-                        <span class="tag">レトロ・アクション</span>
-                        <span class="tag">パズル</span>
-                        <span class="tag">ステージクリア型</span>
-                    </div>
-                    <p>
-                        魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。全ての結晶を回収し、始まりの場所（ポータル）への帰還を目指せ。
-                    </p>
-                    <a href="#" class="btn-more" data-href="https://t-i-oak.github.io/MagicCrystal/">VIEW PROJECT</a>
-                </div>
-            </div>
-
-            <!-- Gravity Freight -->
-            <div class="game-card animate-fade delay-3">
-                <div class="game-img" style="background-image: url('assets/gravity_freight.png');">
-                    <span class="badge">COMING SOON</span>
-                </div>
-                <div class="game-info">
-                    <h3>Gravity Freight</h3>
-                    <div class="tags">
-                        <span class="tag">ローグライク</span>
-                        <span class="tag">重力航法</span>
-                        <span class="tag">機体ビルド</span>
-                    </div>
-                    <p>
-                        天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。目的地（Exit Arcs）への航路を切り拓き、銀河の深淵へ貨物を届け抜け。
-                    </p>
-                    <a href="#" class="btn-more" data-href="https://t-i-oak.github.io/GravityFreight/">VIEW PROJECT</a>
-                </div>
-            </div>
+        <section class="games-grid" id="gamesGrid">
+            <!-- Projects will be injected here by JS -->
         </section>
-    </main>
+    <!-- Update History Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <h2 class="modal-title" id="modalTitle">Update History</h2>
+            <div id="modalBody">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="container">
@@ -94,22 +48,140 @@
     </footer>
 
     <script>
-        // Smooth appearance for sections on scroll (Simple implementation)
-        const observerOptions = {
-            threshold: 0.1
-        };
+        const PROJECTS = [
+            {
+                id: "burst-cascade",
+                title: "Burst Cascade",
+                tags: ["対戦型陣取り", "ヘキサ・ストラテジー", "バースト・連鎖"],
+                description: "ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。",
+                image: "assets/burst_cascade.png",
+                url: "dev_update_history.json",
+                status: "COMING SOON"
+            },
+            {
+                id: "magic-crystal",
+                title: "Magic Crystal",
+                tags: ["レトロ・アクション", "パズル", "ステージクリア型"],
+                description: "魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。全ての結晶を回収し、始まりの場所（ポータル）への帰還を目指せ。",
+                image: "assets/magic_crystal.png",
+                url: "https://t-i-oak.github.io/MagicCrystal/",
+                status: "COMING SOON"
+            },
+            {
+                id: "gravity-freight",
+                title: "Gravity Freight",
+                tags: ["ローグライク", "重力航法", "機体ビルド"],
+                description: "天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。目的地（Exit Arcs）への航路を切り拓き、銀河の深淵へ貨物を届け抜け。",
+                image: "assets/gravity_freight.png",
+                url: "https://t-i-oak.github.io/GravityFreight/",
+                status: "COMING SOON"
+            }
+        ];
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
+        function renderProjects() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = PROJECTS.map((project, index) => `
+                <div class="game-card animate-fade" style="animation-delay: ${0.2 * (index + 1)}s">
+                    <div class="game-img" style="background-image: url('${project.image}');">
+                        <span class="badge">${project.status}</span>
+                    </div>
+                    <div class="game-info">
+                        <h3>${project.title}</h3>
+                        <div class="tags">
+                            ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <p>${project.description}</p>
+                        <div class="btn-group">
+                            <button class="btn-secondary" onclick="showHistory('${project.id}')">HISTORY</button>
+                            <a href="#" class="btn-more" data-href="${project.url}">VIEW PROJECT</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Re-initialize intersection observer for new elements
+            initObserver();
+        }
+
+        function initObserver() {
+            const observerOptions = { threshold: 0.1 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.game-card').forEach(card => {
+                observer.observe(card);
             });
-        }, observerOptions);
+        }
 
-        document.querySelectorAll('.game-card').forEach(card => {
-            observer.observe(card);
+        // Modal Logic
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalClose = document.getElementById('modalClose');
+
+        async function showHistory(projectId) {
+            const project = PROJECTS.find(p => p.id === projectId);
+            if (!project) return;
+
+            modalTitle.textContent = `${project.title} - Update History`;
+            modalBody.innerHTML = '<div class="loading-spinner">Loading history...</div>';
+            modalOverlay.classList.add('active');
+
+            try {
+                // Fetch update_history.json from project URL
+                const baseUrl = project.url.endsWith('/') ? project.url : project.url + '/';
+                const fetchUrl = project.url.includes('.json') ? project.url : baseUrl + 'update_history.json';
+                const response = await fetch(fetchUrl);
+                if (!response.ok) throw new Error('History not found');
+                
+                const history = await response.json();
+                renderHistory(history);
+            } catch (error) {
+                modalBody.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <p>現在、更新履歴は公開されていません。</p>
+                        <p style="font-size: 0.8rem; margin-top: 1rem;">(${error.message})</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderHistory(history) {
+            if (!history || history.length === 0) {
+                modalBody.innerHTML = '<p>No history available.</p>';
+                return;
+            }
+
+            modalBody.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-version">v${item.version}</span>
+                        <span class="history-date">${item.date}</span>
+                    </div>
+                    <div class="history-title">${item.title}</div>
+                    ${item.description ? `<p style="margin-bottom: 0.5rem; font-size: 0.9rem;">${item.description}</p>` : ''}
+                    <ul class="history-changes">
+                        ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        modalClose.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
         });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', renderProjects);
     </script>
 </body>
 </html>

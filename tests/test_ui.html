@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>UI State Test - GameWorks OAK</title>
+    <link rel="stylesheet" href="../index.css">
+    <style>
+        .test-container { padding: 2rem; border: 1px dashed #666; margin-bottom: 2rem; }
+        .test-label { font-weight: bold; margin-bottom: 1rem; display: block; color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>UI Components & States Test</h1>
+
+        <div class="test-container">
+            <span class="test-label">1. Game Card (Dynamic Style)</span>
+            <div class="games-grid" id="testGrid"></div>
+        </div>
+
+        <div class="test-container">
+            <span class="test-label">2. Modal States (Overlay)</span>
+            <button onclick="document.getElementById('modalOverlay').classList.add('active')">Open Modal</button>
+        </div>
+    </div>
+
+    <!-- Modal Mock -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('active')">&times;</button>
+            <h2 class="modal-title">Test Modal</h2>
+            <div id="modalBody">
+                <div class="loading-spinner">Loading spinner test...</div>
+            </div>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                <button onclick="renderSampleHistory()">Render Sample History</button>
+                <button onclick="renderError()">Render Error State</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SAMPLE_PROJECT = {
+            id: "test",
+            title: "Test Game",
+            tags: ["Tag1", "Tag2"],
+            description: "This is a test description for the dynamically generated card.",
+            image: "../assets/burst_cascade.png",
+            url: "#",
+            status: "TESTING"
+        };
+
+        const SAMPLE_HISTORY = [
+            {
+                version: "1.0.0",
+                date: "2026-05-11",
+                title: "Initial Test",
+                description: "Description of test update.",
+                changes: ["Change A", "Change B"]
+            }
+        ];
+
+        function renderTestCard() {
+            const grid = document.getElementById('testGrid');
+            grid.innerHTML = `
+                <div class="game-card visible">
+                    <div class="game-img" style="background-image: url('${SAMPLE_PROJECT.image}');">
+                        <span class="badge">${SAMPLE_PROJECT.status}</span>
+                    </div>
+                    <div class="game-info">
+                        <h3>${SAMPLE_PROJECT.title}</h3>
+                        <div class="tags">
+                            ${SAMPLE_PROJECT.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <p>${SAMPLE_PROJECT.description}</p>
+                        <div class="btn-group">
+                            <button class="btn-secondary">HISTORY</button>
+                            <a href="#" class="btn-more">VIEW PROJECT</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSampleHistory() {
+            const body = document.getElementById('modalBody');
+            body.innerHTML = SAMPLE_HISTORY.map(item => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-version">v${item.version}</span>
+                        <span class="history-date">${item.date}</span>
+                    </div>
+                    <div class="history-title">${item.title}</div>
+                    <ul class="history-changes">
+                        ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        function renderError() {
+            const body = document.getElementById('modalBody');
+            body.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Error state test message.</p>';
+        }
+
+        window.onload = renderTestCard;
+    </script>
+</body>
+</html>

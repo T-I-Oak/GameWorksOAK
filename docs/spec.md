@@ -29,13 +29,16 @@ T.I.OAK が開発中の複数のゲームを紹介し、各ゲームへの入り
 ## 技術スタック
 - HTML5 (Semantic HTML)
 - CSS3 (Vanilla CSS, Custom Properties, Flexbox/Grid)
-- JavaScript (Intersection Observer によるフェードイン演出)
+- JavaScript (Intersection Observer によるフェードイン演出, プロジェクトカードの動的生成, 更新履歴のフェッチ)
 
 ## 構成
 - **Header**: グラデーションロゴ。
 - **Hero**: ブランドイメージを象徴するキャッチコピー。
 - **Games Section**: 
-  - 3枚のカード。ホバー時に浮き上がり、ネオンシャドウが強調される演出。
-  - 「Coming Soon」のバッジと「VIEW PROJECT」ボタン。
+  - プロジェクトデータに基づき動的に生成される3枚以上のカード。ホバー時に浮き上がり、ネオンシャドウが強調される演出。
+  - 「Coming Soon」のバッジ、「VIEW PROJECT」ボタン、および「HISTORY」ボタン。
   - ボタンには `data-href` 属性で将来的な GitHub Pages へのリンクを保持。
+- **Update History Modal**:
+  - 各プロジェクトの `update_history.json` を取得して表示する共通モーダル。
+  - ガラスモフィズムを採用したプレミアムなデザイン。
 - **Footer**: シンプルなコピーライト表示。
