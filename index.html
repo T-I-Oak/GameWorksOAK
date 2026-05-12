@@ -54,23 +54,24 @@
                 title: "Burst Cascade",
                 titleClass: "title-burst-cascade",
                 logoImage: "assets/burst_cascade_logo.svg",
-                logoHeight: "36px", // SVG特有のサイズを微調整する場合
+                logoHeight: "36px", 
                 tags: ["対戦型陣取り", "ヘキサ・ストラテジー", "バースト・連鎖"],
                 description: "ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。",
                 image: "assets/burst_cascade.png",
                 url: "https://t-i-oak.github.io/BurstCascade/",
-                status: "COMING SOON"
+                status: "COMING SOON",
+                isComingSoon: true
             },
             {
                 id: "magic-crystal",
                 title: "Magic Crystal",
                 titleClass: "title-magic-crystal",
-                // logoImage: "assets/magic_crystal_logo.png", // 画像ロゴが用意された場合はここを指定
                 tags: ["レトロ・アクション", "パズル", "ステージクリア型"],
                 description: "魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。全ての結晶を回収し、始まりの場所（ポータル）への帰還を目指せ。",
                 image: "assets/magic_crystal.png",
                 url: "https://t-i-oak.github.io/MagicCrystal/",
-                status: "COMING SOON"
+                status: "COMING SOON",
+                isComingSoon: true
             },
             {
                 id: "gravity-freight",
@@ -80,7 +81,8 @@
                 description: "天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。目的地（Exit Arcs）への航路を切り拓き、銀河の深淵へ貨物を届け抜け。",
                 image: "assets/gravity_freight.png",
                 url: "https://t-i-oak.github.io/GravityFreight/",
-                status: "COMING SOON"
+                status: "COMING SOON",
+                isComingSoon: true
             }
         ];
 
@@ -90,6 +92,8 @@
                 const titleHtml = project.logoImage 
                     ? `<img src="${project.logoImage}" alt="${project.title}" class="game-logo-img" style="--logo-height: ${project.logoHeight || '40px'}">`
                     : `<h3 class="${project.titleClass || ''}">${project.title}</h3>`;
+
+                const isSoon = project.isComingSoon;
 
                 return `
                 <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
@@ -106,7 +110,11 @@
                         </div>
                         <p>${project.description}</p>
                         <div class="btn-group">
-                            <a href="#" class="btn-more" data-href="${project.url}">PLAY</a>
+                            <a href="${isSoon ? 'javascript:void(0)' : project.url}" 
+                               class="btn-more ${isSoon ? 'disabled' : ''}" 
+                               ${isSoon ? 'onclick="return false;"' : ''}>
+                               ${isSoon ? 'COMING SOON' : 'PLAY'}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -127,8 +135,8 @@
                 });
             }, observerOptions);
 
-            document.querySelectorAll('.game-card').forEach(card => {
-                observer.observe(card);
+            document.querySelectorAll('.animate-fade').forEach(el => {
+                observer.observe(el);
             });
         }
 

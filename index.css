@@ -128,11 +128,6 @@ header {
     flex-direction: column;
 }
 
-.game-card:hover {
-    transform: translateY(-12px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--neon-shadow);
-    border-color: rgba(58, 134, 255, 0.5);
-}
 
 .game-img {
     width: 100%;
@@ -214,10 +209,14 @@ header {
     text-align: center;
 }
 
-.btn-more:hover {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 0 15px var(--primary);
+
+.btn-more.disabled {
+    border-color: var(--text-muted);
+    color: var(--text-muted);
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(1);
 }
 
 .history-link {
@@ -231,12 +230,10 @@ header {
     transition: all 0.3s ease;
     text-decoration: underline;
     opacity: 0.6;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
-.history-link:hover {
-    opacity: 1;
-    color: var(--primary);
-}
 
 /* Game Title Styles (Logos) */
 .title-burst-cascade {
@@ -306,6 +303,71 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero {
+        padding: 80px 0 40px;
+    }
+    
+    .games-grid {
+        grid-template-columns: 1fr; /* スマホでは1カラムに固定 */
+        gap: 1.5rem;
+    }
+
+    .game-info {
+        padding: 1.5rem;
+    }
+
+    .card-header {
+        min-height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .history-link {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .logo {
+        font-size: 1.4rem;
+    }
+
+    header {
+        height: 80px;
+    }
+}
+
+/* Fix sticky hover on touch devices */
+@media (hover: hover) {
+    .game-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--neon-shadow);
+        border-color: rgba(58, 134, 255, 0.5);
+    }
+
+    .btn-more:hover:not(.disabled) {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 0 15px var(--primary);
+    }
+    
+    .history-link:hover {
+        opacity: 1;
+        color: var(--primary);
+    }
+
+    .modal-close:hover {
+        color: var(--secondary);
+    }
+}
+
 /* Animations */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
@@ -313,6 +375,10 @@ footer {
 }
 
 .animate-fade {
+    opacity: 0;
+}
+
+.animate-fade.visible {
     animation: fadeIn 1s ease var(--delay, 0s) forwards;
 }
 
@@ -379,9 +445,6 @@ footer {
     transition: color 0.3s ease;
 }
 
-.modal-close:hover {
-    color: var(--secondary);
-}
 
 .modal-title {
     margin-bottom: 2rem;

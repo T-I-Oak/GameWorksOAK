@@ -63,19 +63,36 @@
         function renderTestCard() {
             const grid = document.getElementById('testGrid');
             grid.innerHTML = `
+                <!-- Normal Project -->
                 <div class="game-card visible">
                     <div class="game-img" style="background-image: url('${SAMPLE_PROJECT.image}');">
-                        <span class="badge">${SAMPLE_PROJECT.status}</span>
+                        <span class="badge">RELEASED</span>
                     </div>
                     <div class="game-info">
-                        <h3>${SAMPLE_PROJECT.title}</h3>
+                        <h3>${SAMPLE_PROJECT.title} (Released)</h3>
                         <div class="tags">
                             ${SAMPLE_PROJECT.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>
                         <p>${SAMPLE_PROJECT.description}</p>
                         <div class="btn-group">
-                            <button class="btn-secondary">HISTORY</button>
-                            <a href="#" class="btn-more">VIEW PROJECT</a>
+                            <a href="#" class="btn-more">PLAY</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disabled Project -->
+                <div class="game-card visible">
+                    <div class="game-img" style="background-image: url('${SAMPLE_PROJECT.image}');">
+                        <span class="badge">COMING SOON</span>
+                    </div>
+                    <div class="game-info">
+                        <h3>${SAMPLE_PROJECT.title} (Coming Soon)</h3>
+                        <div class="tags">
+                            ${SAMPLE_PROJECT.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <p>${SAMPLE_PROJECT.description}</p>
+                        <div class="btn-group">
+                            <a href="javascript:void(0)" class="btn-more disabled" onclick="return false;">COMING SOON</a>
                         </div>
                     </div>
                 </div>

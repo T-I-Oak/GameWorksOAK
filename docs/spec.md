@@ -29,18 +29,22 @@ T.I.OAK が開発中の複数のゲームを紹介し、各ゲームへの入り
 ## 技術スタック
 - HTML5 (Semantic HTML)
 - CSS3 (Vanilla CSS, Custom Properties, Flexbox/Grid)
-- JavaScript (Intersection Observer によるフェードイン演出, プロジェクトカードの動的生成, 更新履歴のフェッチ)
+- JavaScript (Intersection Observer によるフェードイン演出, プロジェクトデータ（`PROJECTS` 定数）に基づく動的生成, 更新履歴のフェッチ)
 
 ## 構成
 - **Header**: グラデーションロゴ。
 - **Hero**: ブランドイメージを象徴するキャッチコピー。
 - **Games Section**: 
-  - プロジェクトデータに基づき動的に生成される3枚以上のカード。ホバー時に浮き上がり、ネオンシャドウが強調される演出。
-  - 「Coming Soon」のバッジ、カード下部の「PLAY」ボタン。
-  - タイトル横に控えめに配置された「Update History」テキストリンク。
-  - ボタンには `data-href` 属性で将来的な GitHub Pages へのリンクを保持。
+  - `index.html` 内の `PROJECTS` 配列データに基づき動的に生成されるカード。
+  - **プロジェクトの追加・更新**: `PROJECTS` 配列にデータを追加・編集するだけでポータルに反映される。
+  - **COMING SOON 状態**:
+    - `isComingSoon: true` フラグが設定されているプロジェクトは、ボタンが自動的に無効化（Disabled）される。
+    - ボタンラベルは `COMING SOON` となり、クリック不可、グレーアウト表示となる。
+    - ホバーエフェクトも無効化される。
+  - **公開状態**:
+    - `isComingSoon: false` に書き換えると、ボタンが有効化され、`url` へのリンクが機能するようになる。
+  - タイトル横に配置された 「Update History」テキストリンクから、各プロジェクトの `update_history.json` を取得・表示可能。
 - **Update History Modal**:
-  - 各プロジェクトの `update_history.json` を取得して表示する共通モーダル。
-  - **表示順**: JSON 配列の記述順に表示される。運用ルールとして、配列の先頭に最新の更新内容を記載すること。
+  - 各プロジェクトの `update_history.json` を非同期で取得して表示。
   - ガラスモフィズムを採用したプレミアムなデザイン。
 - **Footer**: シンプルなコピーライト表示。
