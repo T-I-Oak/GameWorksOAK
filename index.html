@@ -11,7 +11,7 @@
     <div class="bg-mesh"></div>
 
     <header>
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="container header-inner">
             <div class="logo">GameWorks OAK</div>
             <nav>
                 <!-- 将来的なナビゲーション用 -->
@@ -53,6 +53,8 @@
                 id: "burst-cascade",
                 title: "Burst Cascade",
                 titleClass: "title-burst-cascade",
+                logoImage: "assets/burst_cascade_logo.svg",
+                logoHeight: "36px", // SVG特有のサイズを微調整する場合
                 tags: ["対戦型陣取り", "ヘキサ・ストラテジー", "バースト・連鎖"],
                 description: "ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。",
                 image: "assets/burst_cascade.png",
@@ -63,7 +65,7 @@
                 id: "magic-crystal",
                 title: "Magic Crystal",
                 titleClass: "title-magic-crystal",
-                logoImage: "assets/magic_crystal_logo.png",
+                // logoImage: "assets/magic_crystal_logo.png", // 画像ロゴが用意された場合はここを指定
                 tags: ["レトロ・アクション", "パズル", "ステージクリア型"],
                 description: "魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。全ての結晶を回収し、始まりの場所（ポータル）への帰還を目指せ。",
                 image: "assets/magic_crystal.png",
@@ -86,16 +88,16 @@
             const grid = document.getElementById('gamesGrid');
             grid.innerHTML = PROJECTS.map((project, index) => {
                 const titleHtml = project.logoImage 
-                    ? `<img src="${project.logoImage}" alt="${project.title}" class="game-logo-img">`
+                    ? `<img src="${project.logoImage}" alt="${project.title}" class="game-logo-img" style="--logo-height: ${project.logoHeight || '40px'}">`
                     : `<h3 class="${project.titleClass || ''}">${project.title}</h3>`;
 
                 return `
-                <div class="game-card animate-fade" style="animation-delay: ${0.2 * (index + 1)}s">
-                    <div class="game-img" style="background-image: url('${project.image}');">
+                <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
+                    <div class="game-img" style="--bg-image: url('${project.image}')">
                         <span class="badge">${project.status}</span>
                     </div>
                     <div class="game-info">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <div class="card-header">
                             ${titleHtml}
                             <button class="history-link" onclick="showHistory('${project.id}')">Update History</button>
                         </div>

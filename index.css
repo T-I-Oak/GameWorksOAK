@@ -68,12 +68,18 @@ header {
     height: 100px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--glass-border);
+}
+
+.header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
 .logo {
@@ -131,6 +137,7 @@ header {
 .game-img {
     width: 100%;
     height: 220px;
+    background-image: var(--bg-image);
     background-size: cover;
     background-position: center;
     position: relative;
@@ -159,8 +166,15 @@ header {
 
 .game-info h3 {
     font-size: 1.6rem;
-    margin-bottom: 0.5rem;
     color: var(--text-main);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    min-height: 45px;
 }
 
 .tags {
@@ -188,27 +202,85 @@ header {
 
 .btn-more {
     text-decoration: none;
-    flex: 2;
-}
-
-.btn-secondary {
+    width: 100%; /* 全幅に戻す */
     padding: 0.8rem 1.5rem;
     border-radius: 12px;
-    border: 1px solid var(--text-muted);
+    border: 1px solid var(--primary);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--primary);
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
-    text-decoration: none;
-    flex: 1;
 }
 
-.btn-secondary:hover {
-    border-color: var(--text-main);
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
+.btn-more:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 15px var(--primary);
+}
+
+.history-link {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    text-decoration: underline;
+    opacity: 0.6;
+}
+
+.history-link:hover {
+    opacity: 1;
+    color: var(--primary);
+}
+
+/* Game Title Styles (Logos) */
+.title-burst-cascade {
+    font-family: 'Outfit', sans-serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: 1.8rem !important;
+    background: linear-gradient(to right, #ff006e, #3a86ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 5px rgba(255, 0, 110, 0.3));
+    letter-spacing: -1px;
+}
+
+.title-magic-crystal {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    color: #fff;
+    text-shadow: 
+        0 0 10px rgba(0, 242, 255, 0.8),
+        0 0 20px rgba(0, 242, 255, 0.4);
+    letter-spacing: 2px;
+}
+
+/* 画像ロゴ用のスタイル（ユーザーが画像を用意した場合） */
+.game-logo-img {
+    height: 40px; /* デフォルトの高さ */
+    max-height: var(--logo-height, 40px); /* 個別調整用 */
+    width: 100%;
+    max-width: 65%; /* 横に長すぎる場合はここで制限 */
+    object-fit: contain;
+    object-position: left center; /* 縮小された際に左側に寄せて配置 */
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+}
+
+.title-gravity-freight {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 900;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 
+        1px 1px 0px #000,
+        0 0 10px rgba(58, 134, 255, 0.6);
 }
 
 .btn-group {
@@ -241,7 +313,7 @@ footer {
 }
 
 .animate-fade {
-    animation: fadeIn 1s ease forwards;
+    animation: fadeIn 1s ease var(--delay, 0s) forwards;
 }
 
 .delay-1 { animation-delay: 0.2s; }

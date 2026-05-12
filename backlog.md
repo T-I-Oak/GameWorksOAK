@@ -1,33 +1,6 @@
 # Backlog - GameWorks OAK
 
-## Phase 1: Landing Page Design & Implementation (Completed)
-- [x] プロジェクト構成の初期化 (Backlog, Spec) <!-- id: 0 -->
-- [x] デザインシステムの定義 (index.css) <!-- id: 1 -->
-- [x] メインページ (index.html) の作成 <!-- id: 2 -->
-    - [x] ヒーローセクション <!-- id: 3 -->
-    - [x] ゲーム紹介セクション (3つのゲーム) <!-- id: 4 -->
-    - [x] フッター <!-- id: 5 -->
-- [x] モバイル対応 (レスポンシブ) <!-- id: 6 -->
-- [x] アニメーションとインタラクションの追加 <!-- id: 7 -->
-
-## Phase 2: Content Enrichment (Completed)
-- [x] 各ゲームの象徴的なコンセプトアート生成 <!-- id: 8 -->
-- [x] 各ゲームの詳細説明文のブラッシュアップ（How to Play準拠） <!-- id: 9 -->
-- [x] 象徴タグの実装（カプセルデザイン） <!-- id: 12 -->
-
 ## Phase 3: Deployment & Final Polishing
 - [ ] 各ボタンの `data-href` から `href` へのリンク有効化 <!-- id: 13 -->
 - [ ] GitHub Pages へのデプロイ <!-- id: 10 -->
 - [ ] 実機（モバイル端末等）での最終調整 <!-- id: 11 -->
-
-## Phase 4: Dynamic Content & Update History
-- [x] 各プロジェクトの定義を JS Object に移行 <!-- id: 14 -->
-- [x] カードの動的生成ロジックの実装 <!-- id: 15 -->
-- [x] 更新履歴表示用モーダルの実装 <!-- id: 16 -->
-- [x] `update_history.json` のフェッチ・整形表示ロジックの実装 <!-- id: 17 -->
-
-## 次のチャットへの宿題
-- **リンクの有効化**: 準備済みの `data-href` を `href` に反映し、実際に各ゲームページへ遷移できるようにする。
-- **デプロイ作業**: GitHub リポジトリを作成し、GitHub Pages で一般公開する。
-- **実機検証**: モバイルブラウザでの表示崩れやアニメーションの挙動を最終確認する。
-- **更新履歴の運用**: 各プロジェクト側に `update_history.json` を実際に配置し、正しく読み込まれるか確認する。
