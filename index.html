@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameWorks OAK | Games by T.I.OAK</title>
+    <meta name="description" content="T.I.OAKが開発中の次世代インディーゲームポータル。Gravity Freight, Burst Cascade, Magic Crystalの最新情報をチェック。">
+  <link rel="stylesheet" crossorigin href="/GameWorksOAK/assets/main-BE5Njltk.css">
+</head>
+<body>
+    <div class="bg-mesh"></div>
+
+    <header>
+        <div class="container header-inner">
+            <div class="logo">GameWorks OAK</div>
+            <nav>
+                <!-- 将来的なナビゲーション用 -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero animate-fade">
+            <h1>Simple to Start.<br>Deep to Master.</h1>
+            <p>
+                T.I.OAKが贈る、独自の世界観と革新的なゲームプレイ。
+            </p>
+        </section>
+
+        <section class="games-grid" id="gamesGrid">
+            <!-- Projects will be injected here by JS -->
+        </section>
+    <!-- Update History Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <h2 class="modal-title" id="modalTitle">Update History</h2>
+            <div id="modalBody">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p class="copyright">&copy; 2026 T.I.OAK. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const PROJECTS = [
+            {
+                id: "burst-cascade",
+                title: "Burst Cascade",
+                titleClass: "title-burst-cascade",
+                logoImage: "assets/burst_cascade_logo.svg",
+                logoHeight: "36px", 
+                tags: ["対戦型陣取り", "ヘキサ・ストラテジー", "バースト・連鎖"],
+                description: "ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。",
+                image: "assets/burst_cascade.png",
+                url: "https://t-i-oak.github.io/BurstCascade/",
+                status: "COMING SOON",
+                isComingSoon: true
+            },
+            {
+                id: "magic-crystal",
+                title: "Magic Crystal",
+                titleClass: "title-magic-crystal",
+                tags: ["レトロ・アクション", "パズル", "ステージクリア型"],
+                description: "魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。全ての結晶を回収し、始まりの場所（ポータル）への帰還を目指せ。",
+                image: "assets/magic_crystal.png",
+                url: "https://t-i-oak.github.io/MagicCrystal/",
+                status: "COMING SOON",
+                isComingSoon: true
+            },
+            {
+                id: "gravity-freight",
+                title: "Gravity Freight",
+                titleClass: "title-gravity-freight",
+                tags: ["ローグライク", "重力航法", "機体ビルド"],
+                description: "天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。目的地（Exit Arcs）への航路を切り拓き、銀河の深淵へ貨物を届け抜け。",
+                image: "assets/gravity_freight.png",
+                url: "https://t-i-oak.github.io/GravityFreight/",
+                status: "COMING SOON",
+                isComingSoon: true
+            }
+
+
+        ];
+
+        function renderProjects() {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = PROJECTS.map((project, index) => {
+                const titleHtml = project.logoImage 
+                    ? `<img src="${project.logoImage}" alt="${project.title}" class="game-logo-img" style="--logo-height: ${project.logoHeight || '40px'}">`
+                    : `<h3 class="${project.titleClass || ''}">${project.title}</h3>`;
+
+                const isSoon = project.isComingSoon;
+
+                return `
+                <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
+                    <div class="game-img" style="--bg-image: url('${project.image}')">
+                        <span class="badge">${project.status}</span>
+                    </div>
+                    <div class="game-info">
+                        <div class="card-header">
+                            ${titleHtml}
+                            <button class="history-link" onclick="showHistory('${project.id}')">Update History</button>
+                        </div>
+                        <div class="tags">
+                            ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <p>${project.description}</p>
+                        <div class="btn-group">
+                            <a href="${isSoon ? 'javascript:void(0)' : project.url}" 
+                               class="btn-more ${isSoon ? 'disabled' : ''}" 
+                               ${isSoon ? 'onclick="return false;"' : ''}>
+                               ${isSoon ? 'COMING SOON' : 'PLAY'}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // Re-initialize intersection observer for new elements
+            initObserver();
+        }
+
+        function initObserver() {
+            const observerOptions = { threshold: 0.1 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.animate-fade').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Modal Logic
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalClose = document.getElementById('modalClose');
+
+        async function showHistory(projectId) {
+            const project = PROJECTS.find(p => p.id === projectId);
+            if (!project) return;
+
+            modalTitle.textContent = `${project.title} - Update History`;
+            modalBody.innerHTML = '<div class="loading-spinner">Loading history...</div>';
+            modalOverlay.classList.add('active');
+
+            try {
+                // Fetch update_history.json from project URL
+                const baseUrl = project.url.endsWith('/') ? project.url : project.url + '/';
+                const fetchUrl = project.url.includes('.json') ? project.url : baseUrl + 'update_history.json';
+                const response = await fetch(fetchUrl);
+                if (!response.ok) throw new Error('History not found');
+                
+                const history = await response.json();
+                renderHistory(history);
+            } catch (error) {
+                modalBody.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <p>現在、更新履歴は公開されていません。</p>
+                        <p style="font-size: 0.8rem; margin-top: 1rem;">(${error.message})</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderHistory(history) {
+            if (!history || history.length === 0) {
+                modalBody.innerHTML = '<p>No history available.</p>';
+                return;
+            }
+
+            modalBody.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-version">v${item.version}</span>
+                        <span class="history-date">${item.date}</span>
+                    </div>
+                    <div class="history-title">${item.title}</div>
+                    ${item.description ? `<p style="margin-bottom: 0.5rem; font-size: 0.9rem;">${item.description}</p>` : ''}
+                    <ul class="history-changes">
+                        ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        modalClose.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', renderProjects);
+    </script>
+</body>
+</html>
