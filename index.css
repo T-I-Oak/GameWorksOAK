@@ -260,10 +260,11 @@ header {
 
 /* 画像ロゴ用のスタイル（ユーザーが画像を用意した場合） */
 .game-logo-img {
-    height: 40px; /* デフォルトの高さ */
-    max-height: var(--logo-height, 40px); /* 個別調整用 */
+    height: auto; /* 高さを自動にして横幅を優先 */
+    max-height: var(--logo-height, 80px); /* 上限を 80px に引き上げ */
     width: 100%;
     max-width: 90%; /* 幅を広く使うように調整 */
+
 
     object-fit: contain;
     object-position: left center; /* 縮小された際に左側に寄せて配置 */
