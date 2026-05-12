@@ -107,12 +107,12 @@
                 return `
                 <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
                     <div class="game-img" style="--bg-image: url('${project.image}')">
+                        <div class="game-title-overlay">
+                            ${titleHtml}
+                        </div>
                         <span class="badge">${project.status}</span>
                     </div>
                     <div class="game-info">
-                        <div class="card-header">
-                            ${titleHtml}
-                        </div>
                         <div class="tags">
                             ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>

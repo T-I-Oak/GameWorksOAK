@@ -140,8 +140,9 @@ header {
 
 .badge {
     position: absolute;
-    top: 1rem;
+    bottom: 1rem;
     right: 1rem;
+
     background: rgba(0, 0, 0, 0.6);
     padding: 0.4rem 1rem;
     border-radius: 100px;
@@ -165,12 +166,17 @@ header {
 }
 
 .card-header {
-    display: flex;
-    justify-content: center; /* 中央寄せに変更 */
-    align-items: center;
-    margin-bottom: 0.5rem;
-    min-height: 45px;
-    text-align: center; /* テキストタイトル用 */
+    display: none; /* 画像内に移動するため非表示 */
+}
+
+.game-title-overlay {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    z-index: 10;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 10px rgba(0,0,0,0.8));
 }
 
 .tags {
@@ -268,7 +274,7 @@ header {
 
 
     object-fit: contain;
-    object-position: center; /* 中央配置に変更 */
+    object-position: left center; /* 左寄せに戻す */
     filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
 }
 
