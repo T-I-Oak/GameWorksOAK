@@ -7,7 +7,7 @@
     <title>GameWorks OAK | Games by T.I.OAK</title>
     <meta name="description" content="T.I.OAKが開発中の次世代インディーゲームポータル。Gravity Freight, Burst Cascade, Magic Crystalの最新情報をチェック。">
     <link rel="icon" type="image/png" href="assets/burst_cascade.png"> <!-- 代替のfavicon設定 -->
-  <link rel="stylesheet" crossorigin href="/GameWorksOAK/assets/main-BE5Njltk.css">
+  <link rel="stylesheet" crossorigin href="/GameWorksOAK/assets/main-DxrZT3D6.css">
 </head>
 
 <body>
@@ -81,7 +81,7 @@
                 title: "Gravity Freight",
                 titleClass: "title-gravity-freight",
                 logoImage: "/GameWorksOAK/assets/gravity_freight_logo.svg",
-                logoHeight: "36px",
+                logoHeight: "80px",
                 tags: ["ローグライク", "重力航法", "機体ビルド"],
                 description: "天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。目的地（Exit Arcs）への航路を切り拓き、銀河の深淵へ貨物を届け抜け。",
                 image: "/GameWorksOAK/assets/gravity_freight.png",
@@ -107,22 +107,22 @@
                 return `
                 <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
                     <div class="game-img" style="--bg-image: url('${project.image}')">
+                        <div class="game-title-overlay">
+                            ${titleHtml}
+                        </div>
                         <span class="badge">${project.status}</span>
                     </div>
                     <div class="game-info">
-                        <div class="card-header">
-                            ${titleHtml}
-                            <button class="history-link" onclick="showHistory('${project.id}')">Update History</button>
-                        </div>
                         <div class="tags">
                             ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>
                         <p>${project.description}</p>
-                        <div class="btn-group">
+                        <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
+                            <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" onclick="showHistory('${project.id}')">Update History</button>
                             <a href="${isSoon ? 'javascript:void(0)' : project.url}" 
                                class="btn-more ${isSoon ? 'disabled' : ''}" 
                                ${isSoon ? 'onclick="return false;"' : ''}>
-                               ${isSoon ? 'COMING SOON' : 'PLAY'}
+                               ${isSoon ? 'COMING SOON' : 'PLAY NOW'}
                             </a>
                         </div>
                     </div>
