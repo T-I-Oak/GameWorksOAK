@@ -27,9 +27,10 @@ T.I.OAK が開発中の複数のゲームを紹介し、各ゲームへの入り
 - **レスポンシブ**: PC、タブレット、スマートフォンすべてで最適化。
 
 ## 技術スタック
-- HTML5 (Semantic HTML)
-- CSS3 (Vanilla CSS, Custom Properties, Flexbox/Grid)
-- JavaScript (Intersection Observer によるフェードイン演出, プロジェクトデータ（`PROJECTS` 定数）に基づく動的生成, 更新履歴のフェッチ)
+- **Environment**: Node.js (Vite)
+- **Deployment**: GitHub Actions (Target: `gh-pages` branch)
+- **Structure**: HTML5 (Semantic HTML), CSS3 (Vanilla CSS, Custom Properties), JavaScript (Vanilla JS, ES Modules)
+- **Assets**: SVG (Game Logos), PNG (Concept Arts)
 
 ## 構成
 - **Header**: グラデーションロゴ。
