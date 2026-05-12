@@ -263,7 +263,8 @@ header {
     height: 40px; /* デフォルトの高さ */
     max-height: var(--logo-height, 40px); /* 個別調整用 */
     width: 100%;
-    max-width: 65%; /* 横に長すぎる場合はここで制限 */
+    max-width: 90%; /* 幅を広く使うように調整 */
+
     object-fit: contain;
     object-position: left center; /* 縮小された際に左側に寄せて配置 */
     filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
