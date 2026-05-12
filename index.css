@@ -166,10 +166,11 @@ header {
 
 .card-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* 中央寄せに変更 */
     align-items: center;
     margin-bottom: 0.5rem;
     min-height: 45px;
+    text-align: center; /* テキストタイトル用 */
 }
 
 .tags {
@@ -267,7 +268,7 @@ header {
 
 
     object-fit: contain;
-    object-position: left center; /* 縮小された際に左側に寄せて配置 */
+    object-position: center; /* 中央配置に変更 */
     filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
 }
 
