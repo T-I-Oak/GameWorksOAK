@@ -118,7 +118,7 @@
                         </div>
                         <p>${project.description}</p>
                         <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
-                            <button class="history-link" style="text-align: center; margin-bottom: 0.2rem;" onclick="showHistory('${project.id}')">Update History</button>
+                            <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" onclick="showHistory('${project.id}')">Update History</button>
                             <a href="${isSoon ? 'javascript:void(0)' : project.url}" 
                                class="btn-more ${isSoon ? 'disabled' : ''}" 
                                ${isSoon ? 'onclick="return false;"' : ''}>
