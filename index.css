@@ -73,6 +73,13 @@ header {
     z-index: 100;
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+header.scrolled {
+    height: 70px;
+    background: rgba(5, 5, 10, 0.8);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .header-inner {
@@ -83,11 +90,24 @@ header {
 }
 
 .logo {
-    font-size: 1.8rem;
-    font-weight: 900;
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+}
+
+.logo-svg {
+    height: 60px;
+    width: auto;
+    display: block;
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+header.scrolled .logo-svg {
+    height: 40px;
+}
+
+.logo-svg text {
+    user-select: none;
+    pointer-events: none;
 }
 
 /* Hero Section */
@@ -444,45 +464,72 @@ footer {
     background: var(--bg-card);
     width: 90%;
     max-width: 700px;
-    max-height: 80vh;
-    border-radius: 32px;
+    max-height: 85vh;
+    border-radius: 24px;
     border: 1px solid var(--glass-border);
-    padding: 3rem;
     position: relative;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* ヘッダーとボディの境界を角丸に合わせる */
     transform: translateY(40px);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@media (max-width: 600px) {
-    .modal-content {
-        padding: 2rem 1.5rem;
-    }
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 
 .modal-overlay.active .modal-content {
     transform: translateY(0);
 }
 
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
 .modal-close {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 1.5rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.2s ease;
 }
 
+.modal-close:hover {
+    color: var(--text-main);
+}
 
-.modal-title {
-    margin-bottom: 2rem;
-    font-size: 2rem;
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+@media (max-width: 600px) {
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
+    .modal-body {
+        padding: 1.5rem;
+    }
+    .modal-title {
+        font-size: 1.2rem;
+    }
 }
 
 /* Timeline */

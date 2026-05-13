@@ -35,7 +35,9 @@ T.I.OAK が開発中の複数のゲームを紹介し、各ゲームへの入り
 - **Assets**: SVG (Game Logos), PNG (Concept Arts)
 
 ## 構成
-- **Header**: グラデーションロゴ。
+- **Header**: 
+  - **インラインロゴ**: Inkscape で調整されたパスデータを `index.html` に直接インライン展開。CSS 変数や外部ファイルに依存せず、いかなる環境でも 100% 正確な造形を維持する。
+  - **Shrinking Effect**: ユーザーのスクロールに合わせてヘッダー（100px → 70px）とロゴ（60px → 40px）がスムーズに縮小し、コンテンツの閲覧エリアを広げる。
 - **Hero**: ブランドイメージを象徴するキャッチコピー。
 - **Games Section**: 
   - `public/data/project_list.json` (マニフェスト) および `public/data/projects/*.json` (詳細データ) に基づき動的に生成されるカード。
@@ -49,5 +51,6 @@ T.I.OAK が開発中の複数のゲームを紹介し、各ゲームへの入り
   - **Update History**: 各カードの右下に配置されたテキストリンクから、各プロジェクトの `update_history.json` を取得・表示可能。
 - **Update History Modal**:
   - 各プロジェクトの `update_history.json` を非同期で取得して表示。
-  - ガラスモフィズムを採用したプレミアムなデザイン。
+  - **構造**: `modal-header` と `modal-body` を分離し、タイトルと閉じるボタンを上部に固定。
+  - デザイン: ガラスモフィズムを採用したプレミアムかつインダストリアルなデザイン。派手な装飾を排し、情報の読みやすさを最優先。
 - **Footer**: シンプルなコピーライト表示。
