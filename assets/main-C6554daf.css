@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=Inter:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=Inter:wght@300;400;700;900&display=swap');
 
 /* Design System - GameWorks OAK */
 :root {
@@ -66,6 +66,12 @@ header {
     z-index: 100;
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+header.scrolled {
+    height: 70px;
+    background: rgba(5, 5, 10, 0.8);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 .header-inner {
     display: flex;
@@ -74,11 +80,22 @@ header {
     width: 100%;
 }
 .logo {
-    font-size: 1.8rem;
-    font-weight: 900;
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+}
+.logo-svg {
+    height: 80px;
+    width: auto;
+    display: block;
+    overflow: visible;
+    transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+header.scrolled .logo-svg {
+    height: 55px;
+}
+.logo-svg text {
+    user-select: none;
+    pointer-events: none;
 }
 /* Hero Section */
 .hero {
@@ -155,11 +172,15 @@ header {
     right: 1.5rem;
     z-index: 10;
     pointer-events: none;
+    text-align: center;
     /* 複数のシャドウを重ねて輪郭を強調 */
     filter: 
         drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9)) 
         drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7))
         drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
+}
+.game-title-overlay h3 {
+    transition: transform 0.3s ease-out;
 }
 .tags {
     display: flex;
@@ -246,8 +267,24 @@ header {
 
 
     object-fit: contain;
-    object-position: left center; /* 左寄せに戻す */
+    object-position: center; /* 中央寄せに変更 */
     filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+}
+.game-logo-wrapper {
+    height: var(--logo-height, 40px);
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* 中央寄せに変更 */
+    transition: transform 0.3s ease-out;
+}
+.game-logo-wrapper svg {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    overflow: visible; /* 枠外の微細なはみ出し（文字の端など）を許容して欠けを防ぐ */
 }
 .title-gravity-freight {
     font-family: 'Outfit', sans-serif;
@@ -325,6 +362,11 @@ footer {
         border-color: rgba(58, 134, 255, 0.5);
     }
 
+    .game-card:hover .game-logo-wrapper,
+    .game-card:hover .game-title-overlay h3 {
+        transform: scale(1.05);
+    }
+
     .btn-more:hover:not(.disabled) {
         background: var(--primary);
         color: white;
@@ -379,40 +421,65 @@ footer {
     background: var(--bg-card);
     width: 90%;
     max-width: 700px;
-    max-height: 80vh;
-    border-radius: 32px;
+    max-height: 85vh;
+    border-radius: 24px;
     border: 1px solid var(--glass-border);
-    padding: 3rem;
     position: relative;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* ヘッダーとボディの境界を角丸に合わせる */
     transform: translateY(40px);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-@media (max-width: 600px) {
-    .modal-content {
-        padding: 2rem 1.5rem;
-    }
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 .modal-overlay.active .modal-content {
     transform: translateY(0);
 }
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
 .modal-close {
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 1.5rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: color 0.3s ease;
+    transition: color 0.2s ease;
 }
-.modal-title {
-    margin-bottom: 2rem;
-    font-size: 2rem;
-    background: linear-gradient(45deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.modal-close:hover {
+    color: var(--text-main);
+}
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+@media (max-width: 600px) {
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
+    .modal-body {
+        padding: 1.5rem;
+    }
+    .modal-title {
+        font-size: 1.2rem;
+    }
 }
 /* Timeline */
 .history-item {

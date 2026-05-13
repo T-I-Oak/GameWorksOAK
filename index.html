@@ -7,7 +7,7 @@
     <title>GameWorks OAK | Games by T.I.OAK</title>
     <meta name="description" content="T.I.OAKが開発中の次世代インディーゲームポータル。Gravity Freight, Burst Cascade, Magic Crystalの最新情報をチェック。">
     <link rel="icon" type="image/png" href="assets/burst_cascade.png"> <!-- 代替のfavicon設定 -->
-  <link rel="stylesheet" crossorigin href="/GameWorksOAK/assets/main-DxrZT3D6.css">
+  <link rel="stylesheet" crossorigin href="/GameWorksOAK/assets/main-C6554daf.css">
 </head>
 
 <body>
@@ -15,7 +15,22 @@
 
     <header>
         <div class="container header-inner">
-            <div class="logo">GameWorks OAK</div>
+            <div class="logo">
+                <svg class="logo-svg" viewBox="0 -25 300 100" version="1.1" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">
+                    <style>
+                        .logo-svg .script-text { font-family: 'Bauhaus 93', 'Righteous', cursive; fill: #F9F9DB; font-size: 32px; }
+                        .logo-svg .serif-text { font-family: 'Bauhaus 93', 'Playfair Display', serif; fill: #F9F9DB; font-size: 80px; letter-spacing: -2px; }
+                        .logo-svg .cog-inner { fill: #E19A4E; }
+                    </style>
+                    <text x="-0.84375" y="31.054012" class="script-text">Game</text>
+                    <text x="20.642746" y="54.117077" class="script-text">Works</text>
+                    <g class="cog-inner" transform="translate(-12.717617,-6.7748182)">
+                        <path d="m 112.54682,10.367438 0.5112,-3.5926198 5.42502,1.76274 -1.69794,3.2070598 2.9547,2.14668 2.52522,-2.60604 3.35286,4.61484 -3.25872,1.59642 1.1286,3.47346 3.5748,-0.62388 v 5.7042 l -3.5748,-0.62388 -1.1286,3.47346 3.25872,1.59642 -3.35286,4.61484 -2.52522,-2.60604 -2.9547,2.14668 1.69794,3.20706 -5.42502,1.76274 -0.5112,-3.59262 h -3.6522 l -0.5112,3.59262 -5.42502,-1.76274 1.69794,-3.20706 -2.9547,-2.14668 -2.525219,2.60604 -3.35286,-4.61484 3.25872,-1.59642 -1.1286,-3.47346 -3.5748,0.62388 v -5.7042 l 3.5748,0.62388 1.1286,-3.47346 -3.25872,-1.59642 3.35286,-4.61484 2.525219,2.60604 2.9547,-2.14668 -1.69794,-3.2070598 5.42502,-1.76274 0.5112,3.5926198 z m -1.8261,12.83076 m -5.4,0 a 5.4,5.4 0 1 0 10.8,0 5.4,5.4 0 1 0 -10.8,0" fill-rule="evenodd" />
+                        <path d="m 110.145,28.718 2.84,-19.959 30.139,9.793 -9.433,17.817 16.415,11.926 14.029,-14.478 18.627,25.638 -18.104,8.869 6.27,19.297 19.86,-3.466 v 31.69 l -19.86,-3.466 -6.27,19.297 18.104,8.869 -18.627,25.638 -14.029,-14.478 -16.415,11.926 9.433,17.817 -30.139,9.793 -2.84,-19.959 h -20.29 l -2.84,19.959 -30.139,-9.793 9.433,-17.817 -16.415,-11.926 -14.029,14.478 -18.627,-25.638 18.104,-8.869 -6.27,-19.297 -19.86,3.466 v -31.69 l 19.86,3.466 6.27,-19.297 L 17.238,59.455 35.865,33.817 49.894,48.295 66.309,36.369 56.876,18.552 87.015,8.759 89.855,28.718 Z M 100,100 m -30,0 a 30,30 0 1 0 60,0 30,30 0 1 0 -60,0" fill-rule="evenodd" transform="matrix(0.17386665,0.04658743,-0.04658743,0.17386665,124.54416,18.909185)" />
+                    </g>
+                    <text x="141.87697" y="54.801754" class="serif-text">OAK</text>
+                </svg>
+            </div>
             <nav>
                 <!-- 将来的なナビゲーション用 -->
             </nav>
@@ -36,9 +51,13 @@
     <!-- Update History Modal -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal-content">
-            <button class="modal-close" id="modalClose">&times;</button>
-            <h2 class="modal-title" id="modalTitle">Update History</h2>
-            <div id="modalBody">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Update History</h2>
+                <button class="modal-close" id="modalClose">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
                 <!-- Content will be injected here -->
             </div>
         </div>
@@ -51,66 +70,63 @@
     </footer>
 
     <script>
-        const PROJECTS = [
-            {
-                id: "burst-cascade",
-                title: "Burst Cascade",
-                titleClass: "title-burst-cascade",
-                logoImage: "/GameWorksOAK/assets/burst_cascade_logo.svg",
-                logoHeight: "36px", 
-                tags: ["対戦型陣取り", "ヘキサ・ストラテジー", "バースト・連鎖"],
-                description: "ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。",
-                image: "/GameWorksOAK/assets/burst_cascade.png",
-                url: "https://t-i-oak.github.io/BurstCascade/",
-                status: "COMING SOON",
-                isComingSoon: true
-            },
-            {
-                id: "magic-crystal",
-                title: "Magic Crystal",
-                titleClass: "title-magic-crystal",
-                tags: ["レトロ・アクション", "パズル", "ステージクリア型"],
-                description: "魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。全ての結晶を回収し、始まりの場所（ポータル）への帰還を目指せ。",
-                image: "/GameWorksOAK/assets/magic_crystal.png",
-                url: "https://t-i-oak.github.io/MagicCrystal/",
-                status: "COMING SOON",
-                isComingSoon: true
-            },
-            {
-                id: "gravity-freight",
-                title: "Gravity Freight",
-                titleClass: "title-gravity-freight",
-                logoImage: "/GameWorksOAK/assets/gravity_freight_logo.svg",
-                logoHeight: "80px",
-                tags: ["ローグライク", "重力航法", "機体ビルド"],
-                description: "天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。目的地（Exit Arcs）への航路を切り拓き、銀河の深淵へ貨物を届け抜け。",
-                image: "/GameWorksOAK/assets/gravity_freight.png",
-                url: "https://t-i-oak.github.io/GravityFreight/",
-                status: "COMING SOON",
-                isComingSoon: true
-            }
-
-
-
-
-        ];
-
-        function renderProjects() {
+        async function loadProjects() {
             const grid = document.getElementById('gamesGrid');
-            grid.innerHTML = PROJECTS.map((project, index) => {
-                const titleHtml = project.logoImage 
-                    ? `<img src="${project.logoImage}" alt="${project.title}" class="game-logo-img" style="--logo-height: ${project.logoHeight || '40px'}">`
-                    : `<h3 class="${project.titleClass || ''}">${project.title}</h3>`;
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Loading projects...</div>';
 
-                const isSoon = project.isComingSoon;
+            try {
+                // 1. プロジェクトリストを取得
+                const listRes = await fetch('data/project_list.json');
+                if (!listRes.ok) throw new Error('Failed to load project list');
+                const projectIds = await listRes.json();
+
+                // 2. 各プロジェクトの詳細データを取得（並列）
+                const projectData = await Promise.all(projectIds.map(async id => {
+                    try {
+                        const res = await fetch(`data/projects/${id}.json`);
+                        if (!res.ok) throw new Error(`Failed to load ${id}`);
+                        const data = await res.json();
+                        data.id = id;
+
+                        // 3. ロゴのSVGをfetchしてinlining（フォント適用のため）
+                        if (data.logo && data.logo.path) {
+                            const logoRes = await fetch(data.logo.path);
+                            if (logoRes.ok) {
+                                data.logo.content = await logoRes.text();
+                            }
+                        }
+                        return data;
+                    } catch (e) {
+                        console.error(e);
+                        return null;
+                    }
+                }));
+
+                // 有効なデータのみで描画
+                renderProjects(projectData.filter(p => p !== null));
+            } catch (error) {
+                console.error("Critical error loading projects:", error);
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--secondary);">データの読み込みに失敗しました。</div>';
+            }
+        }
+
+        function renderProjects(projects) {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = projects.map((project, index) => {
+                const logoHtml = project.logo.content 
+                    ? `<div class="game-logo-wrapper" style="--logo-height: ${project.logo.style.height || '40px'}; ${Object.entries(project.logo.style).filter(([k]) => k !== 'height').map(([k,v]) => `${k}:${v}`).join(';')}">${project.logo.content}</div>`
+                    : `<h3>${project.title}</h3>`;
+
+                const btn = project.button;
+                const status = project.status;
 
                 return `
                 <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
                     <div class="game-img" style="--bg-image: url('${project.image}')">
                         <div class="game-title-overlay">
-                            ${titleHtml}
+                            ${logoHtml}
                         </div>
-                        <span class="badge">${project.status}</span>
+                        <span class="badge" style="${Object.entries(status.style || {}).map(([k,v]) => `${k}:${v}`).join(';')}">${status.content}</span>
                     </div>
                     <div class="game-info">
                         <div class="tags">
@@ -119,10 +135,11 @@
                         <p>${project.description}</p>
                         <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
                             <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" onclick="showHistory('${project.id}')">Update History</button>
-                            <a href="${isSoon ? 'javascript:void(0)' : project.url}" 
-                               class="btn-more ${isSoon ? 'disabled' : ''}" 
-                               ${isSoon ? 'onclick="return false;"' : ''}>
-                               ${isSoon ? 'COMING SOON' : 'PLAY NOW'}
+                            <a href="${btn.disabled ? 'javascript:void(0)' : btn.url}" 
+                               class="btn-more ${btn.disabled ? 'disabled' : ''}" 
+                               ${btn.disabled ? 'onclick="return false;"' : ''}
+                               style="${Object.entries(btn.style || {}).map(([k,v]) => `${k}:${v}`).join(';')}">
+                               ${btn.content}
                             </a>
                         </div>
                     </div>
@@ -130,7 +147,6 @@
                 `;
             }).join('');
 
-            // Re-initialize intersection observer for new elements
             initObserver();
         }
 
@@ -156,17 +172,20 @@
         const modalClose = document.getElementById('modalClose');
 
         async function showHistory(projectId) {
-            const project = PROJECTS.find(p => p.id === projectId);
-            if (!project) return;
-
-            modalTitle.textContent = `${project.title} - Update History`;
+            // モーダル表示時に詳細データを再取得するか、保持しているデータから探す
+            // ここでは簡易的に、現在表示されているカードの情報からタイトルを取得
+            modalTitle.textContent = `Update History`; 
             modalBody.innerHTML = '<div class="loading-spinner">Loading history...</div>';
             modalOverlay.classList.add('active');
 
             try {
-                // Fetch update_history.json from project URL
-                const baseUrl = project.url.endsWith('/') ? project.url : project.url + '/';
-                const fetchUrl = project.url.includes('.json') ? project.url : baseUrl + 'update_history.json';
+                // プロジェクトデータを再フェッチしてURLを取得
+                const res = await fetch(`data/projects/${projectId}.json`);
+                const project = await res.json();
+                modalTitle.textContent = `${project.title} - Update History`;
+
+                const baseUrl = project.button.url.endsWith('/') ? project.button.url : project.button.url + '/';
+                const fetchUrl = project.button.url.includes('.json') ? project.button.url : baseUrl + 'update_history.json';
                 const response = await fetch(fetchUrl);
                 if (!response.ok) throw new Error('History not found');
                 
@@ -211,8 +230,18 @@
             if (e.target === modalOverlay) modalOverlay.classList.remove('active');
         });
 
+        // Header shrink effect
+        const header = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
         // Initialize on load
-        document.addEventListener('DOMContentLoaded', renderProjects);
+        document.addEventListener('DOMContentLoaded', loadProjects);
     </script>
 </body>
 </html>
