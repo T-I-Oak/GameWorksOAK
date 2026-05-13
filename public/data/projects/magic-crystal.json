@@ -1,0 +1,20 @@
+{
+  "title": "Magic Crystal",
+  "logo": {
+    "path": "/GameWorksOAK/assets/magic_crystal_logo.svg",
+    "style": { "height": "40px" }
+  },
+  "status": {
+    "content": "7月公開予定",
+    "style": { "color": "#ffbe0b", "border-color": "#ffbe0b" }
+  },
+  "button": {
+    "content": "7月公開予定",
+    "url": "https://t-i-oak.github.io/MagicCrystal/",
+    "disabled": true,
+    "style": {}
+  },
+  "tags": ["レトロ・アクション", "パズル", "ステージクリア型"],
+  "description": "魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。",
+  "image": "/GameWorksOAK/assets/magic_crystal.png"
+}

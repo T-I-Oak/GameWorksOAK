@@ -1,5 +1,5 @@
 /* Design System - GameWorks OAK */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=Inter:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=Inter:wght@300;400;700;900&display=swap');
 
 :root {
     --bg-dark: #05050a;
@@ -281,6 +281,23 @@ header {
     object-fit: contain;
     object-position: left center; /* 左寄せに戻す */
     filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+}
+
+.game-logo-wrapper {
+    height: var(--logo-height, 40px);
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.game-logo-wrapper svg {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    overflow: visible; /* 枠外の微細なはみ出し（文字の端など）を許容して欠けを防ぐ */
 }
 
 .title-gravity-freight {

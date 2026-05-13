@@ -51,66 +51,63 @@
     </footer>
 
     <script>
-        const PROJECTS = [
-            {
-                id: "burst-cascade",
-                title: "Burst Cascade",
-                titleClass: "title-burst-cascade",
-                logoImage: "/GameWorksOAK/assets/burst_cascade_logo.svg",
-                logoHeight: "36px", 
-                tags: ["対戦型陣取り", "ヘキサ・ストラテジー", "バースト・連鎖"],
-                description: "ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。",
-                image: "/GameWorksOAK/assets/burst_cascade.png",
-                url: "https://t-i-oak.github.io/BurstCascade/",
-                status: "COMING SOON",
-                isComingSoon: true
-            },
-            {
-                id: "magic-crystal",
-                title: "Magic Crystal",
-                titleClass: "title-magic-crystal",
-                tags: ["レトロ・アクション", "パズル", "ステージクリア型"],
-                description: "魔導師見習いとして、大地の記憶を操る「魔力の結晶」を集める冒険へ。赤と青、ふたつの魔力を使い分け、変化する地形を乗り越えて。全ての結晶を回収し、始まりの場所（ポータル）への帰還を目指せ。",
-                image: "/GameWorksOAK/assets/magic_crystal.png",
-                url: "https://t-i-oak.github.io/MagicCrystal/",
-                status: "COMING SOON",
-                isComingSoon: true
-            },
-            {
-                id: "gravity-freight",
-                title: "Gravity Freight",
-                titleClass: "title-gravity-freight",
-                logoImage: "/GameWorksOAK/assets/gravity_freight_logo.svg",
-                logoHeight: "80px",
-                tags: ["ローグライク", "重力航法", "機体ビルド"],
-                description: "天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。目的地（Exit Arcs）への航路を切り拓き、銀河の深淵へ貨物を届け抜け。",
-                image: "/GameWorksOAK/assets/gravity_freight.png",
-                url: "https://t-i-oak.github.io/GravityFreight/",
-                status: "COMING SOON",
-                isComingSoon: true
-            }
-
-
-
-
-        ];
-
-        function renderProjects() {
+        async function loadProjects() {
             const grid = document.getElementById('gamesGrid');
-            grid.innerHTML = PROJECTS.map((project, index) => {
-                const titleHtml = project.logoImage 
-                    ? `<img src="${project.logoImage}" alt="${project.title}" class="game-logo-img" style="--logo-height: ${project.logoHeight || '40px'}">`
-                    : `<h3 class="${project.titleClass || ''}">${project.title}</h3>`;
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Loading projects...</div>';
 
-                const isSoon = project.isComingSoon;
+            try {
+                // 1. プロジェクトリストを取得
+                const listRes = await fetch('data/project_list.json');
+                if (!listRes.ok) throw new Error('Failed to load project list');
+                const projectIds = await listRes.json();
+
+                // 2. 各プロジェクトの詳細データを取得（並列）
+                const projectData = await Promise.all(projectIds.map(async id => {
+                    try {
+                        const res = await fetch(`data/projects/${id}.json`);
+                        if (!res.ok) throw new Error(`Failed to load ${id}`);
+                        const data = await res.json();
+                        data.id = id;
+
+                        // 3. ロゴのSVGをfetchしてinlining（フォント適用のため）
+                        if (data.logo && data.logo.path) {
+                            const logoRes = await fetch(data.logo.path);
+                            if (logoRes.ok) {
+                                data.logo.content = await logoRes.text();
+                            }
+                        }
+                        return data;
+                    } catch (e) {
+                        console.error(e);
+                        return null;
+                    }
+                }));
+
+                // 有効なデータのみで描画
+                renderProjects(projectData.filter(p => p !== null));
+            } catch (error) {
+                console.error("Critical error loading projects:", error);
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--secondary);">データの読み込みに失敗しました。</div>';
+            }
+        }
+
+        function renderProjects(projects) {
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = projects.map((project, index) => {
+                const logoHtml = project.logo.content 
+                    ? `<div class="game-logo-wrapper" style="--logo-height: ${project.logo.style.height || '40px'}; ${Object.entries(project.logo.style).filter(([k]) => k !== 'height').map(([k,v]) => `${k}:${v}`).join(';')}">${project.logo.content}</div>`
+                    : `<h3>${project.title}</h3>`;
+
+                const btn = project.button;
+                const status = project.status;
 
                 return `
                 <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
                     <div class="game-img" style="--bg-image: url('${project.image}')">
                         <div class="game-title-overlay">
-                            ${titleHtml}
+                            ${logoHtml}
                         </div>
-                        <span class="badge">${project.status}</span>
+                        <span class="badge" style="${Object.entries(status.style || {}).map(([k,v]) => `${k}:${v}`).join(';')}">${status.content}</span>
                     </div>
                     <div class="game-info">
                         <div class="tags">
@@ -119,10 +116,11 @@
                         <p>${project.description}</p>
                         <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
                             <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" onclick="showHistory('${project.id}')">Update History</button>
-                            <a href="${isSoon ? 'javascript:void(0)' : project.url}" 
-                               class="btn-more ${isSoon ? 'disabled' : ''}" 
-                               ${isSoon ? 'onclick="return false;"' : ''}>
-                               ${isSoon ? 'COMING SOON' : 'PLAY NOW'}
+                            <a href="${btn.disabled ? 'javascript:void(0)' : btn.url}" 
+                               class="btn-more ${btn.disabled ? 'disabled' : ''}" 
+                               ${btn.disabled ? 'onclick="return false;"' : ''}
+                               style="${Object.entries(btn.style || {}).map(([k,v]) => `${k}:${v}`).join(';')}">
+                               ${btn.content}
                             </a>
                         </div>
                     </div>
@@ -130,7 +128,6 @@
                 `;
             }).join('');
 
-            // Re-initialize intersection observer for new elements
             initObserver();
         }
 
@@ -156,17 +153,20 @@
         const modalClose = document.getElementById('modalClose');
 
         async function showHistory(projectId) {
-            const project = PROJECTS.find(p => p.id === projectId);
-            if (!project) return;
-
-            modalTitle.textContent = `${project.title} - Update History`;
+            // モーダル表示時に詳細データを再取得するか、保持しているデータから探す
+            // ここでは簡易的に、現在表示されているカードの情報からタイトルを取得
+            modalTitle.textContent = `Update History`; 
             modalBody.innerHTML = '<div class="loading-spinner">Loading history...</div>';
             modalOverlay.classList.add('active');
 
             try {
-                // Fetch update_history.json from project URL
-                const baseUrl = project.url.endsWith('/') ? project.url : project.url + '/';
-                const fetchUrl = project.url.includes('.json') ? project.url : baseUrl + 'update_history.json';
+                // プロジェクトデータを再フェッチしてURLを取得
+                const res = await fetch(`data/projects/${projectId}.json`);
+                const project = await res.json();
+                modalTitle.textContent = `${project.title} - Update History`;
+
+                const baseUrl = project.button.url.endsWith('/') ? project.button.url : project.button.url + '/';
+                const fetchUrl = project.button.url.includes('.json') ? project.button.url : baseUrl + 'update_history.json';
                 const response = await fetch(fetchUrl);
                 if (!response.ok) throw new Error('History not found');
                 
@@ -212,7 +212,7 @@
         });
 
         // Initialize on load
-        document.addEventListener('DOMContentLoaded', renderProjects);
+        document.addEventListener('DOMContentLoaded', loadProjects);
     </script>
 </body>
 </html>
