@@ -95,14 +95,15 @@ header.scrolled {
 }
 
 .logo-svg {
-    height: 60px;
+    height: 80px;
     width: auto;
     display: block;
+    overflow: visible;
     transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 header.scrolled .logo-svg {
-    height: 40px;
+    height: 55px;
 }
 
 .logo-svg text {
@@ -196,11 +197,16 @@ header.scrolled .logo-svg {
     right: 1.5rem;
     z-index: 10;
     pointer-events: none;
+    text-align: center;
     /* 複数のシャドウを重ねて輪郭を強調 */
     filter: 
         drop-shadow(0 2px 4px rgba(0, 0, 0, 0.9)) 
         drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7))
         drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
+}
+
+.game-title-overlay h3 {
+    transition: transform 0.3s ease-out;
 }
 
 
@@ -299,7 +305,7 @@ header.scrolled .logo-svg {
 
 
     object-fit: contain;
-    object-position: left center; /* 左寄せに戻す */
+    object-position: center; /* 中央寄せに変更 */
     filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
 }
 
@@ -308,7 +314,8 @@ header.scrolled .logo-svg {
     max-width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center; /* 中央寄せに変更 */
+    transition: transform 0.3s ease-out;
 }
 
 .game-logo-wrapper svg {
@@ -401,6 +408,11 @@ footer {
         transform: translateY(-12px) scale(1.02);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--neon-shadow);
         border-color: rgba(58, 134, 255, 0.5);
+    }
+
+    .game-card:hover .game-logo-wrapper,
+    .game-card:hover .game-title-overlay h3 {
+        transform: scale(1.05);
     }
 
     .btn-more:hover:not(.disabled) {
