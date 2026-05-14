@@ -97,6 +97,10 @@ header.scrolled .logo-svg {
     user-select: none;
     pointer-events: none;
 }
+/* Cog rotation is handled via JS and SVG attributes for precision */
+#logo-cog-1, #logo-cog-2 {
+    pointer-events: none;
+}
 /* Hero Section */
 .hero {
     padding: 120px 0 80px;
