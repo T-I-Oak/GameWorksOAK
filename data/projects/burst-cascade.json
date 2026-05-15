@@ -2,17 +2,16 @@
   "title": "Burst Cascade",
   "logo": {
     "path": "https://t-i-oak.github.io/BurstCascade/burst_cascade/logo.svg",
-    "style": { "height": "36px" }
+    "type": "standard"
   },
-  "status": {
-    "content": "COMING SOON",
-    "style": { "color": "#ffbe0b", "border-color": "#ffbe0b" }
+  "badge": {
+    "content": "HOT",
+    "type": "hot"
   },
   "button": {
-    "content": "COMING SOON",
+    "content": "PLAY NOW",
     "url": "https://t-i-oak.github.io/BurstCascade/",
-    "disabled": true,
-    "style": {}
+    "type": "published"
   },
   "tags": ["対戦型陣取り", "ヘキサ・ストラテジー", "バースト・連鎖"],
   "description": "ヘキサグリッドを舞台にした陣取りストラテジー。エネルギーを Burst（爆発）させ、発生する連続ターンを繋いで一気に盤面を制圧せよ。",

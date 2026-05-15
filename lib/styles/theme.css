@@ -1,0 +1,49 @@
+/* GameWorks OAK Common Theme Tokens */
+
+:root {
+    /* Colors */
+    --oak-color-bg-dark: #05050a;
+    --oak-color-bg-card: rgba(20, 20, 35, 0.7);
+    --oak-color-primary: #3a86ff;
+    --oak-color-secondary: #ff006e;
+    --oak-color-accent: #ffbe0b;
+    --oak-color-text-main: #f8f9fa;
+    --oak-color-text-muted: #adb5bd;
+    
+    /* Borders & Glassmorphism */
+    --oak-glass-border: rgba(255, 255, 255, 0.1);
+    --oak-glass-blur: blur(12px);
+    
+    /* Shadows & Glows */
+    --oak-shadow-neon: 0 0 15px rgba(58, 134, 255, 0.4);
+    --oak-shadow-card: 0 20px 40px rgba(0, 0, 0, 0.4);
+    
+    /* Typography */
+    --oak-font-heading: 'Outfit', sans-serif;
+    --oak-font-body: 'Inter', sans-serif;
+}
+
+/* Base Styles */
+.theme-dark {
+    background-color: var(--oak-color-bg-dark);
+    color: var(--oak-color-text-main);
+    font-family: var(--oak-font-body);
+}
+
+/* Texture Classes (Style Guide compliant) */
+.texture-glass {
+    background: var(--oak-color-bg-card);
+    backdrop-filter: var(--oak-glass-blur);
+    border: 1px solid var(--oak-glass-border);
+}
+
+.texture-neon-glow {
+    box-shadow: var(--oak-shadow-neon);
+}
+
+/* Functional Classes (UpperCamelCase) */
+.Container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}

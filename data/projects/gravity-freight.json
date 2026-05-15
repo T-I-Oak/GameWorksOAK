@@ -2,17 +2,16 @@
   "title": "Gravity Freight",
   "logo": {
     "path": "/GameWorksOAK/assets/gravity_freight_logo.svg",
-    "style": { "height": "80px" }
+    "type": "standard"
   },
-  "status": {
-    "content": "6月公開予定",
-    "style": { "color": "#ffbe0b", "border-color": "#ffbe0b" }
+  "badge": {
+    "content": "COMING IN JUNE",
+    "type": "info"
   },
   "button": {
-    "content": "6月公開予定",
+    "content": "COMING SOON",
     "url": "https://t-i-oak.github.io/GravityFreight/",
-    "disabled": true,
-    "style": {}
+    "type": "pending"
   },
   "tags": ["ローグライク", "重力航法", "機体ビルド"],
   "description": "天体の重力を利用して宇宙を往く、ローグライク・航行シミュレーション。限られたリソースで機体をビルドし、予測不能な重力の荒波を越えろ。",
