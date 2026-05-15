@@ -1,4 +1,5 @@
-import { DataManager } from '../../../../src/common/core/dataManager.js';
+import { it, expect, describe } from 'vitest';
+import { DataManager } from '../../../../src/lib/core/dataManager.js';
 
 export const testDataManager = () => {
     const results = [];
@@ -54,3 +55,12 @@ export const testDataManager = () => {
 
     return results;
 };
+
+describe('DataManager', () => {
+    it('should pass all implementation tests', () => {
+        const results = testDataManager();
+        results.forEach(res => {
+            expect(res.pass, `${res.name}: ${res.error}`).toBe(true);
+        });
+    });
+});

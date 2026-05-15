@@ -1,4 +1,4 @@
-@import "./src/common/styles/theme.css";
+@import "./src/lib/styles/theme.css";
 
 :root {
     --bg-dark: var(--oak-color-bg-dark);
@@ -161,21 +161,37 @@ header.scrolled .logo-svg {
     background-size: cover;
     background-position: center;
     position: relative;
+    overflow: hidden;
 }
 
 .badge {
     position: absolute;
     bottom: 1rem;
     right: 1rem;
-
-    background: rgba(0, 0, 0, 0.6);
     padding: 0.4rem 1rem;
     border-radius: 100px;
     font-size: 0.8rem;
     font-weight: 700;
-    border: 1px solid var(--accent);
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.badge.texture-hot {
+    background: #b0003a;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 10px rgba(255, 0, 110, 0.4);
+}
+
+.badge.texture-info {
+    background: #000000;
     color: var(--accent);
-    backdrop-filter: blur(5px);
+    border: 1px solid var(--accent);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.badge.none {
+    display: none;
 }
 
 .game-info {
@@ -239,26 +255,37 @@ header.scrolled .logo-svg {
 
 .btn-more {
     text-decoration: none;
-    width: 100%; /* 全幅に戻す */
+    width: 100%;
     padding: 0.8rem 1.5rem;
     border-radius: 12px;
-    border: 1px solid var(--primary);
-    background: transparent;
-    color: var(--primary);
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
+    border: 1px solid transparent;
 }
 
+.btn-more.state-published {
+    border-color: var(--primary);
+    background: rgba(58, 134, 255, 0.1);
+    color: var(--primary);
+}
 
-.btn-more.disabled {
-    border-color: var(--text-muted);
+.btn-more.state-published:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 20px rgba(58, 134, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-more.state-pending {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--glass-border);
     color: var(--text-muted);
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
+    cursor: default;
     filter: grayscale(1);
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .history-link {
@@ -282,7 +309,8 @@ header.scrolled .logo-svg {
     font-family: 'Outfit', sans-serif;
     font-style: italic;
     font-weight: 900;
-    font-size: 1.8rem !important;
+    /* 余裕があるときは 2.8rem を維持し、狭くなると縮小を開始 */
+    font-size: clamp(1.5rem, 18cqw, 2.8rem) !important;
     background: linear-gradient(to right, #ff006e, #3a86ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -298,6 +326,7 @@ header.scrolled .logo-svg {
         0 0 10px rgba(0, 242, 255, 0.8),
         0 0 20px rgba(0, 242, 255, 0.4);
     letter-spacing: 2px;
+    font-size: clamp(1.2rem, 15cqw, 2.4rem);
 }
 
 /* 画像ロゴ用のスタイル（ユーザーが画像を用意した場合） */
@@ -314,21 +343,41 @@ header.scrolled .logo-svg {
 }
 
 .game-logo-wrapper {
-    height: var(--logo-height, 40px);
-    max-width: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center; /* 中央寄せに変更 */
-    transition: transform 0.3s ease-out;
+    align-items: flex-start;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 100%;
+    pointer-events: none;
+    container-type: inline-size; /* 文字サイズの動的調整用 */
 }
 
-.game-logo-wrapper svg {
+.game-logo-wrapper.LogoStandard {
+    width: 240px;
+    height: 240px;
+    max-width: 100%;
+    max-height: 160px; /* 画像エリア (220px) 内に収まるように調整 */
+    margin: 0 auto;
+}
+
+.game-logo-wrapper.LogoText {
+    height: 60px; /* テキスト表示時のデフォルト高さ */
+}
+
+.game-logo-wrapper.LogoText h3 {
+    margin: 0;
+    font-size: clamp(1rem, 15cqw, 2.2rem);
+    white-space: nowrap; /* 折り返しを防止して縮小を優先 */
+}
+
+.game-logo-wrapper svg,
+.game-logo-wrapper img {
     max-height: 100%;
     max-width: 100%;
-    width: auto;
-    height: auto;
+    object-fit: scale-down;
+    object-position: center;
     display: block;
-    overflow: visible; /* 枠外の微細なはみ出し（文字の端など）を許容して欠けを防ぐ */
+    overflow: visible;
 }
 
 .title-gravity-freight {
@@ -340,6 +389,7 @@ header.scrolled .logo-svg {
     text-shadow: 
         1px 1px 0px #000,
         0 0 10px rgba(58, 134, 255, 0.6);
+    font-size: clamp(1rem, 15cqw, 2.2rem);
 }
 
 .btn-group {
@@ -419,7 +469,7 @@ footer {
         transform: scale(1.05);
     }
 
-    .btn-more:hover:not(.disabled) {
+    .btn-more.state-published:hover {
         background: var(--primary);
         color: white;
         box-shadow: 0 0 15px var(--primary);

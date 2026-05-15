@@ -1,4 +1,5 @@
-import { getAppVersion, getMajorVersion } from '../../../../src/common/utils/env.js';
+import { it, expect, describe } from 'vitest';
+import { getAppVersion, getMajorVersion } from '../../../../src/lib/utils/env.js';
 
 export const testEnv = () => {
     const results = [];
@@ -18,3 +19,12 @@ export const testEnv = () => {
 
     return results;
 };
+
+describe('Env Utils', () => {
+    it('should pass all implementation tests', () => {
+        const results = testEnv();
+        results.forEach(res => {
+            expect(res.pass, `${res.name}: ${res.error}`).toBe(true);
+        });
+    });
+});

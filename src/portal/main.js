@@ -1,4 +1,4 @@
-import { commonFetch } from '../common/utils/fetch.js';
+import { commonFetch } from '../lib/utils/fetch.js';
 
 /**
  * GameWorks OAK Portal Main Logic
@@ -13,58 +13,52 @@ async function loadProjects() {
     const grid = document.getElementById('gamesGrid');
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Loading projects...</div>';
 
-    try {
-        // 1. プロジェクトリストを取得
-        const projectIds = await commonFetch('data/project_list.json');
+    // 1. プロジェクトリストを取得
+    const projectIds = await commonFetch('data/project_list.json');
 
-        // 2. 各プロジェクトの詳細データを取得
-        const projectData = await Promise.all(projectIds.map(async id => {
-            try {
-                const data = await commonFetch(`data/projects/${id}.json`);
-                data.id = id;
+    // 2. 各プロジェクトの詳細データを取得
+    const projectData = await Promise.all(projectIds.map(async id => {
+        const data = await commonFetch(`data/projects/${id}.json`);
+        data.id = id;
 
-                // 3. ロゴのSVGをfetchしてinlining
-                if (data.logo && data.logo.path) {
-                    try {
-                        const logoRes = await fetch(data.logo.path);
-                        if (logoRes.ok) {
-                            data.logo.content = await logoRes.text();
-                        }
-                    } catch (e) {
-                        console.warn(`Failed to inline logo for ${id}:`, e);
-                    }
-                }
-                return data;
-            } catch (e) {
-                console.error(`Failed to load project data for ${id}:`, e);
-                return null;
+        // 3. ロゴのSVGをfetchしてinlining
+        if (data.logo && data.logo.path) {
+            const logoRes = await fetch(data.logo.path);
+            if (logoRes.ok) {
+                data.logo.content = await logoRes.text();
             }
-        }));
+        }
+        return data;
+    }));
 
-        renderProjects(projectData.filter(p => p !== null));
-    } catch (error) {
-        console.error("Critical error loading projects:", error);
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--secondary);">データの読み込みに失敗しました。</div>';
-    }
+    renderProjects(projectData.filter(p => p !== null));
 }
 
 function renderProjects(projects) {
     const grid = document.getElementById('gamesGrid');
     grid.innerHTML = projects.map((project, index) => {
-        const logoHtml = project.logo.content 
-            ? `<div class="game-logo-wrapper" style="--logo-height: ${project.logo.style.height || '40px'}; ${Object.entries(project.logo.style).filter(([k]) => k !== 'height').map(([k,v]) => `${k}:${v}`).join(';')}">${project.logo.content}</div>`
-            : `<h3>${project.title}</h3>`;
+        const logo = project.logo;
+        const badge = project.badge;
+        const button = project.button;
 
-        const btn = project.button;
-        const status = project.status;
+        // ロゴのHTML生成
+        const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
+        const logoContentHtml = logo.content 
+            ? `<div class="game-logo-wrapper Logo${logoType}">${logo.content}</div>`
+            : `<div class="game-logo-wrapper LogoText"><h3>${project.title}</h3></div>`;
+
+        // ボタンの無効化判定（pending の場合はクリック不可にする）
+        const isPending = button.type === 'pending';
+        const buttonUrl = isPending ? 'javascript:void(0)' : button.url;
+        const buttonAttr = isPending ? 'onclick="return false;"' : '';
 
         return `
         <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
             <div class="game-img" style="--bg-image: url('${project.image}')">
                 <div class="game-title-overlay">
-                    ${logoHtml}
+                    ${logoContentHtml}
                 </div>
-                <span class="badge" style="${Object.entries(status.style || {}).map(([k,v]) => `${k}:${v}`).join(';')}">${status.content}</span>
+                <span class="badge texture-${badge.type || 'none'}">${badge.content || ''}</span>
             </div>
             <div class="game-info">
                 <div class="tags">
@@ -73,11 +67,10 @@ function renderProjects(projects) {
                 <p>${project.description}</p>
                 <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
                     <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" data-project-id="${project.id}">Update History</button>
-                    <a href="${btn.disabled ? 'javascript:void(0)' : btn.url}" 
-                       class="btn-more ${btn.disabled ? 'disabled' : ''}" 
-                       ${btn.disabled ? 'onclick="return false;"' : ''}
-                       style="${Object.entries(btn.style || {}).map(([k,v]) => `${k}:${v}`).join(';')}">
-                       ${btn.content}
+                    <a href="${buttonUrl}" 
+                       class="btn-more state-${button.type || 'published'}" 
+                       ${buttonAttr}>
+                       ${button.content}
                     </a>
                 </div>
             </div>
@@ -127,13 +120,15 @@ async function showHistory(projectId) {
         
         const history = await commonFetch(fetchUrl);
         renderHistory(history, modalBody);
-    } catch (error) {
+    } catch (e) {
         modalBody.innerHTML = `
-            <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                <p>現在、更新履歴は公開されていません。</p>
-                <p style="font-size: 0.8rem; margin-top: 1rem;">(${error.message})</p>
+            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <p style="margin-bottom: 1.5rem;">Failed to load update history.</p>
+                <button onclick="document.getElementById('modalOverlay').classList.remove('active')" class="btn-more" style="font-size: 0.9rem; padding: 0.6rem 1.2rem;">Close</button>
             </div>
         `;
+        throw e; // 規約に基づき、開発者が気づけるようコンソールにもエラーを出す
     }
 }
 
