@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Implementation Tests - GameWorks OAK</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #e0e0e0; padding: 2rem; line-height: 1.5; }
+        .test-group { margin-bottom: 2rem; background: #1e1e1e; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
+        .group-header { padding: 1rem; background: #2a2a2a; font-weight: bold; border-bottom: 1px solid #333; color: #3a86ff; }
+        .test-item { padding: 0.8rem 1rem; border-bottom: 1px solid #333; display: flex; align-items: center; }
+        .test-item:last-child { border-bottom: none; }
+        .pass { color: #2ecc71; }
+        .fail { color: #e74c3c; }
+        .status-icon { margin-right: 1rem; font-weight: bold; }
+        .error-log { font-size: 0.8rem; color: #ff9f43; margin-top: 0.5rem; display: block; }
+    </style>
+</head>
+<body>
+    <h1>Implementation Tests Runner</h1>
+    <div id="test-results"></div>
+
+    <script type="module">
+        import { testEnv } from './common/utils/env.test.js';
+        import { testDataManager } from './common/core/dataManager.test.js';
+
+        const container = document.getElementById('test-results');
+
+        function renderGroup(title, results) {
+            const group = document.createElement('div');
+            group.className = 'test-group';
+            
+            let html = `<div class="group-header">${title}</div>`;
+            results.forEach(res => {
+                html += `
+                    <div class="test-item">
+                        <span class="status-icon ${res.pass ? 'pass' : 'fail'}">${res.pass ? '✓' : '✗'}</span>
+                        <div>
+                            <span>${res.name}</span>
+                            ${res.error ? `<span class="error-log">${res.error}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            group.innerHTML = html;
+            container.appendChild(group);
+        }
+
+        // Run all tests
+        renderGroup('Common Utils: Env', testEnv());
+        renderGroup('Common Core: DataManager', testDataManager());
+    </script>
+</body>
+</html>

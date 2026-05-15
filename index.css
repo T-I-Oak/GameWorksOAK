@@ -1,19 +1,18 @@
-/* Design System - GameWorks OAK */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&family=Inter:wght@300;400;700;900&display=swap');
+@import "./src/common/styles/theme.css";
 
 :root {
-    --bg-dark: #05050a;
-    --bg-card: rgba(20, 20, 35, 0.7);
-    --primary: #3a86ff;
-    --secondary: #ff006e;
-    --accent: #ffbe0b;
-    --text-main: #f8f9fa;
-    --text-muted: #adb5bd;
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --neon-shadow: 0 0 15px rgba(58, 134, 255, 0.4);
+    --bg-dark: var(--oak-color-bg-dark);
+    --bg-card: var(--oak-color-bg-card);
+    --primary: var(--oak-color-primary);
+    --secondary: var(--oak-color-secondary);
+    --accent: var(--oak-color-accent);
+    --text-main: var(--oak-color-text-main);
+    --text-muted: var(--oak-color-text-muted);
+    --glass-border: var(--oak-glass-border);
+    --neon-shadow: var(--oak-shadow-neon);
     
-    --font-heading: 'Outfit', sans-serif;
-    --font-body: 'Inter', sans-serif;
+    --font-heading: var(--oak-font-heading);
+    --font-body: var(--oak-font-body);
 }
 
 * {
