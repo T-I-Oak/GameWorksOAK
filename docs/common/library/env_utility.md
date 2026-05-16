@@ -16,7 +16,7 @@
 
 ## 使用例
 ```javascript
-import { getAppVersion, getMajorVersion } from './utils/env.js';
+import { getAppVersion, getMajorVersion } from 'https://t-i-oak.github.io/GameWorksOAK/lib/utils/env.js';
 
 const version = getAppVersion();
 const major = getMajorVersion();

@@ -39,6 +39,8 @@ GameWorks OAK プロジェクトにおけるデータの永続化と取得を抽
 
 ## 使用例
 ```javascript
+import { DataManager } from 'https://t-i-oak.github.io/GameWorksOAK/lib/core/dataManager.js';
+
 const migrationMap = {
     init: () => ({ score: 0, items: [] }),
     1: (data) => ({ ...data, rank: 'C' }),
