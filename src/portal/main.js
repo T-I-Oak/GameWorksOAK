@@ -143,16 +143,24 @@ function renderHistory(history, container) {
         return;
     }
 
+    const typeLabels = {
+        new: '新機能',
+        imp: '改善',
+        fix: '修正',
+        etc: 'その他'
+    };
+
     container.innerHTML = history.map(item => `
         <div class="history-item">
             <div class="history-header">
                 <span class="history-version">v${item.version}</span>
                 <span class="history-date">${item.date}</span>
             </div>
-            <div class="history-title">${item.title}</div>
-            ${item.description ? `<p style="margin-bottom: 0.5rem; font-size: 0.9rem;">${item.description}</p>` : ''}
             <ul class="history-changes">
-                ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                ${item.content.map(change => {
+                    const label = typeLabels[change.type];
+                    return `<li><span class="history-tag tag-${change.type}">[${label}]</span> ${change.text}</li>`;
+                }).join('')}
             </ul>
         </div>
     `).join('');

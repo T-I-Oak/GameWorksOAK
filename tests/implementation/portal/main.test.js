@@ -34,7 +34,7 @@ describe('portal main.js - showHistory', () => {
         commonFetch.mockResolvedValueOnce(projectData);
         // 2回目の fetch (更新履歴)
         commonFetch.mockResolvedValueOnce([
-            { version: '0.1', date: '2026-05-16', changes: ['test'] }
+            { version: '0.1', date: '2026-05-16', content: [{ type: 'new', text: 'test' }] }
         ]);
 
         await showHistory(projectId);
