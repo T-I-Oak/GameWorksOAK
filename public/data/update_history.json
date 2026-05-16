@@ -3,7 +3,7 @@
     "version": "0.3",
     "date": "2026-05-16",
     "content": [
-      "共通仕様準拠チェックリスト（99.compliance_checklist.md）の追加",
+      "共通仕様準拠チェックリスト（99.compliance_checklist.md）の追加と詳細化",
       "共通仕様ガイドライン（単純性、バックログ管理ルール）の明確化",
       "Update History 読み込みエラー時の表示改善（「準備中」表示の導入）"
     ]
