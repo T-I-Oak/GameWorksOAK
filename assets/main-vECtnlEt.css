@@ -707,10 +707,15 @@ footer {
 }
 
 .history-changes li::before {
-    content: "•";
-    position: absolute;
-    left: 0;
-    color: var(--primary);
+    display: none; /* ドットを非表示にしてタグを優先 */
+}
+
+.history-tag {
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    color: var(--primary); /* 共通色としてプライマリカラーを使用 */
+    white-space: nowrap;
 }
 
 .loading-spinner {
