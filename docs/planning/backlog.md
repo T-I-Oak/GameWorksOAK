@@ -6,6 +6,8 @@
 - [ ] Viteログのエラー解消: `@import "./src/lib/styles/theme.css"` が解決できない問題の修正
 - [x] envライブラリの `__APP_VERSION__` 依存解消と `setAppVersion` の導入
 - [ ] ポータルサイトの共通仕様準拠状況の見直しと修正
+    - [x] 各プロジェクトの `update_history.json` 取得パスを仕様（`data/` 配下）に合わせる修正
+
 
 
 

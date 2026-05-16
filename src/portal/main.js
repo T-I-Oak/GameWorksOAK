@@ -109,7 +109,7 @@ function initObserver() {
 }
 
 // Modal Logic
-async function showHistory(projectId) {
+export async function showHistory(projectId) {
     const modalOverlay = document.getElementById('modalOverlay');
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
@@ -123,7 +123,7 @@ async function showHistory(projectId) {
         modalTitle.textContent = `${project.title} - Update History`;
 
         const baseUrl = project.button.url.endsWith('/') ? project.button.url : project.button.url + '/';
-        const fetchUrl = project.button.url.includes('.json') ? project.button.url : baseUrl + 'update_history.json';
+        const fetchUrl = project.button.url.includes('.json') ? project.button.url : baseUrl + 'data/update_history.json';
         
         const history = await commonFetch(fetchUrl);
         renderHistory(history, modalBody);
