@@ -5,6 +5,12 @@ import { commonFetch } from '../lib/utils/fetch.js';
  */
 
 export async function initPortal() {
+    // バージョン表示の設定
+    const versionEl = document.getElementById('portal-version');
+    if (versionEl) {
+        versionEl.textContent = `v${__APP_VERSION__}`;
+    }
+
     await loadProjects();
     initScrollEffects();
 }
@@ -69,6 +75,7 @@ function renderProjects(projects) {
                     <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" data-project-id="${project.id}">Update History</button>
                     <a href="${buttonUrl}" 
                        class="btn-more state-${button.type || 'published'}" 
+                       ${isPending ? '' : 'target="_blank" rel="noopener noreferrer"'}
                        ${buttonAttr}>
                        ${button.content}
                     </a>
@@ -122,10 +129,8 @@ async function showHistory(projectId) {
         renderHistory(history, modalBody);
     } catch (e) {
         modalBody.innerHTML = `
-            <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-                <p style="margin-bottom: 1.5rem;">Failed to load update history.</p>
-                <button onclick="document.getElementById('modalOverlay').classList.remove('active')" class="btn-more" style="font-size: 0.9rem; padding: 0.6rem 1.2rem;">Close</button>
+            <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                <p style="font-size: 1.1rem; letter-spacing: 0.1em;">- 準備中 -</p>
             </div>
         `;
         throw e; // 規約に基づき、開発者が気づけるようコンソールにもエラーを出す
