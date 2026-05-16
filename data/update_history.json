@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.5",
+    "date": "2026-05-16",
+    "content": [
+      "各プロジェクトの Update History 取得パスを共通仕様（data/配下）に準拠"
+    ]
+  },
+  {
     "version": "0.4",
     "date": "2026-05-16",
     "content": [
