@@ -1,5 +1,6 @@
 import { it, expect, describe } from 'vitest';
 import { DataManager } from '../../../../src/lib/core/dataManager.js';
+import { setAppVersion } from '../../../../src/lib/utils/env.js';
 
 export const testDataManager = () => {
     const results = [];
@@ -17,8 +18,8 @@ export const testDataManager = () => {
     // window.localStorage を差し替える
     Object.defineProperty(window, 'localStorage', { value: localStorageMock, configurable: true });
 
-    // Mock Version
-    window.__APP_VERSION__ = "1.0.0";
+    // Set App Version via utility
+    setAppVersion("1.0.0");
 
     try {
         localStorage.clear();

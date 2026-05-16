@@ -5,19 +5,29 @@
 
 ## API
 
+### `setAppVersion(version: string): void`
+- **詳細**:
+    - アプリケーションのバージョンを設定します。
+    - 本ユーティリティの他の機能を利用する前に、必ず呼び出す必要があります。
+
 ### `getAppVersion(): string`
 - **詳細**: 
-    - ビルドツールによって注入された `__APP_VERSION__` をそのまま返します。
+    - `setAppVersion()` で設定されたバージョン文字列を返します。
+    - 未設定の場合は `undefined` を返します。
 
 ### `getMajorVersion(): number`
 - **詳細**:
-    - `getAppVersion()` で取得した文字列の最初の数字（メジャーバージョン）を数値として返します。
+    - 設定されたバージョン文字列の最初の数字（メジャーバージョン）を数値として返します。
     - 例: `"1.2.3"` -> `1`
+    - バージョンが未設定の場合、実行時に自然にエラーが発生します。
 
 ## 使用例
 ```javascript
-import { getAppVersion, getMajorVersion } from 'https://t-i-oak.github.io/GameWorksOAK/lib/utils/env.js';
+import { setAppVersion, getAppVersion, getMajorVersion } from 'https://t-i-oak.github.io/GameWorksOAK/lib/utils/env.js';
 
-const version = getAppVersion();
-const major = getMajorVersion();
+// 初期化時にアプリケーション側で定義されているバージョンを注入
+setAppVersion('1.2.3');
+
+const version = getAppVersion(); // "1.2.3"
+const major = getMajorVersion(); // 1
 ```
