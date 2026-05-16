@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.4",
+    "date": "2026-05-16",
+    "content": [
+      "envライブラリの __APP_VERSION__ 依存解消と setAppVersion の導入（他プロジェクトからのURLインポート時のエラー防止）"
+    ]
+  },
+  {
     "version": "0.3",
     "date": "2026-05-16",
     "content": [
