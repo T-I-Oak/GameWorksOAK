@@ -187,8 +187,8 @@ export async function showHistory(projectId) {
         renderHistory(history, modalBody);
     } catch (e) {
         modalBody.innerHTML = `
-            <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
-                <p style="font-size: 1.1rem; letter-spacing: 0.1em;">- 準備中 -</p>
+            <div class="modal-placeholder">
+                <p>- 準備中 -</p>
             </div>
         `;
         throw e; // 規約に基づき、開発者が気づけるようコンソールにもエラーを出す
@@ -217,7 +217,7 @@ function renderHistory(history, container) {
             <ul class="history-changes">
                 ${item.content.map(change => {
                     const label = typeLabels[change.type];
-                    return `<li><span class="history-tag tag-${change.type}">[${label}]</span> ${change.text}</li>`;
+                    return `<li><span class="history-tag tag-${change.type}">${label}</span>${change.text}</li>`;
                 }).join('')}
             </ul>
         </div>
