@@ -99,25 +99,26 @@ function renderProjects(projects) {
                 <div class="game-img img-maintenance">
                     <div class="maintenance-overlay">
                         <div class="maintenance-icon animate-pulse">
-                            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--accent-glow)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="12" y1="8" x2="12" y2="12"></line>
                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
                             </svg>
                         </div>
                         <h3>${project.title}</h3>
-                        <span class="maintenance-status">UNDER CONSTRUCTION</span>
+                        <span class="maintenance-status">MAINTENANCE</span>
                     </div>
-                    <span class="badge texture-info">COMING SOON</span>
+                    <span class="badge texture-info">MAINTENANCE</span>
                 </div>
                 <div class="game-info">
                     <div class="tags">
-                        <span class="tag tag-maintenance">準備中</span>
+                        <span class="tag tag-maintenance">データ取得不可</span>
                     </div>
-                    <p>天体間通信リンクを確立中、または一時的なシステム調整を行っています。ゲームの公開までしばらくお待ちください。</p>
+                    <p>プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。</p>
                     <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
-                        <button class="btn-more state-pending" onclick="return false;">
-                            COMING SOON
+                        <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem; cursor: not-allowed; opacity: 0.3;" onclick="return false;" disabled>Update History</button>
+                        <button class="btn-more state-pending" style="width: 100%;" onclick="return false;" disabled>
+                            UNAVAILABLE
                         </button>
                     </div>
                 </div>

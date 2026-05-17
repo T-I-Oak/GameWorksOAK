@@ -694,7 +694,6 @@ footer {
     align-items: center;
     justify-content: center;
     margin-bottom: 0.2rem;
-    --accent-glow: rgba(58, 134, 255, 0.8);
 }
 
 .maintenance-overlay h3 {
@@ -710,9 +709,8 @@ footer {
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.2em;
-    color: var(--accent);
-    text-shadow: 0 0 10px rgba(58, 134, 255, 0.4);
-    opacity: 0.85;
+    color: var(--text-muted);
+    opacity: 0.8;
 }
 
 .tag-maintenance {
@@ -721,20 +719,18 @@ footer {
     border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Brightness animation for neon warnings */
+/* Calm opacity pulse for warning icons */
 @keyframes pulse {
     0%, 100% {
-        opacity: 0.9;
+        opacity: 0.85;
         transform: scale(1);
-        filter: drop-shadow(0 0 8px rgba(58, 134, 255, 0.6));
     }
     50% {
-        opacity: 0.45;
+        opacity: 0.35;
         transform: scale(0.96);
-        filter: drop-shadow(0 0 2px rgba(58, 134, 255, 0.1));
     }
 }
 
 .animate-pulse {
-    animation: pulse 2.5s infinite ease-in-out;
+    animation: pulse 3s infinite ease-in-out;
 }
