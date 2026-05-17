@@ -28,3 +28,6 @@
     - [x] Burst Cascade (配置・公開完了 / 移行用にポータル側 `public/data/projects/burst-cascade.json` を一時保存)
 - [ ] 各プロジェクトへの共通ライブラリ適用
     - ※共通ライブラリの公開後、各プロジェクト側で参照設定を行う必要がある
+- [ ] 移行完了に伴う不要なローカルファイル・フォルダーの完全削除
+    - ※すべてのゲームプロジェクト（Gravity Freight, Magic Crystal）の `project_info.json` 公開完了後に実施
+    - [ ] `public/data/projects/` フォルダおよび配下の JSON ファイル群の完全削除
