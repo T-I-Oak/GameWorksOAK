@@ -659,3 +659,82 @@ footer {
     padding: 3rem;
     color: var(--text-muted);
 }
+
+/* Maintenance Card Fallback Styles */
+.card-maintenance {
+    border-color: rgba(255, 255, 255, 0.04) !important;
+    background: rgba(15, 15, 25, 0.6) !important;
+}
+
+.img-maintenance {
+    background: linear-gradient(135deg, rgba(25, 25, 45, 0.9) 0%, rgba(8, 8, 16, 0.95) 100%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.maintenance-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 5, 10, 0.65);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 10;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.maintenance-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.2rem;
+    --accent-glow: rgba(58, 134, 255, 0.8);
+}
+
+.maintenance-overlay h3 {
+    font-size: clamp(1.2rem, 15cqw, 2.2rem);
+    font-weight: 900;
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+.maintenance-status {
+    font-family: var(--font-heading);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-shadow: 0 0 10px rgba(58, 134, 255, 0.4);
+    opacity: 0.85;
+}
+
+.tag-maintenance {
+    color: var(--text-muted) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Brightness animation for neon warnings */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.9;
+        transform: scale(1);
+        filter: drop-shadow(0 0 8px rgba(58, 134, 255, 0.6));
+    }
+    50% {
+        opacity: 0.45;
+        transform: scale(0.96);
+        filter: drop-shadow(0 0 2px rgba(58, 134, 255, 0.1));
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2.5s infinite ease-in-out;
+}
