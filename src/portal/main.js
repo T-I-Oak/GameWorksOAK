@@ -49,16 +49,16 @@ async function loadProjects() {
                 title: title,
                 isMaintenance: true,
                 button: {
-                    content: 'COMING SOON',
+                    content: 'UNAVAILABLE',
                     url: 'javascript:void(0)',
                     type: 'pending'
                 },
                 badge: {
-                    content: 'COMING SOON',
-                    type: 'info'
+                    content: '',
+                    type: 'none'
                 },
-                tags: ['準備中'],
-                description: 'ただいま一時的にアクセスできません。'
+                tags: ['データ取得不可'],
+                description: 'プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。'
             };
         } else {
             // ロード成功時の共通初期化
