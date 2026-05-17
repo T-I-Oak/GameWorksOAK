@@ -91,54 +91,24 @@ function renderProjects(projects) {
         const logo = project.logo;
         const badge = project.badge;
         const button = project.button;
-
-        if (project.isMaintenance) {
-            // メンテナンス中（簡易表示）カードのHTML生成
-            return `
-            <div class="game-card card-maintenance animate-fade" style="--delay: ${0.2 * (index + 1)}s">
-                <div class="game-img img-maintenance">
-                    <div class="maintenance-overlay">
-                        <div class="maintenance-icon animate-pulse">
-                            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="8" x2="12" y2="12"></line>
-                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                            </svg>
-                        </div>
-                        <h3>${project.title}</h3>
-                        <span class="maintenance-status">MAINTENANCE</span>
-                    </div>
-                    <span class="badge texture-info">MAINTENANCE</span>
-                </div>
-                <div class="game-info">
-                    <div class="tags">
-                        <span class="tag tag-maintenance">データ取得不可</span>
-                    </div>
-                    <p>プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。</p>
-                    <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
-                        <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem; cursor: not-allowed; opacity: 0.3;" onclick="return false;" disabled>Update History</button>
-                        <button class="btn-more state-pending" style="width: 100%;" onclick="return false;" disabled>
-                            UNAVAILABLE
-                        </button>
-                    </div>
-                </div>
-            </div>
-            `;
-        }
+        const isMaintenance = project.isMaintenance;
 
         // ロゴのHTML生成
-        const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
-        const logoContentHtml = logo.content 
-            ? `<div class="game-logo-wrapper Logo${logoType}">${logo.content}</div>`
-            : `<div class="game-logo-wrapper LogoText"><h3>${project.title}</h3></div>`;
+        let logoContentHtml = '';
+        if (logo && logo.content) {
+            const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
+            logoContentHtml = `<div class="game-logo-wrapper Logo${logoType}">${logo.content}</div>`;
+        } else {
+            logoContentHtml = `<div class="game-logo-wrapper LogoText"><h3>${project.title}</h3></div>`;
+        }
 
-        // ボタンの無効化判定（pending の場合はクリック不可にする）
-        const isPending = button.type === 'pending';
+        // ボタンの無効化判定（pending または maintenance の場合はクリック不可にする）
+        const isPending = button.type === 'pending' || isMaintenance;
         const buttonUrl = isPending ? 'javascript:void(0)' : button.url;
         const buttonAttr = isPending ? 'onclick="return false;"' : '';
 
         return `
-        <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
+        <div class="game-card ${isMaintenance ? 'state-maintenance' : ''} animate-fade" style="--delay: ${0.2 * (index + 1)}s">
             <div class="game-img" style="--bg-image: url('${project.image || ''}')">
                 <div class="game-title-overlay">
                     ${logoContentHtml}
@@ -151,10 +121,15 @@ function renderProjects(projects) {
                 </div>
                 <p>${project.description || ''}</p>
                 <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
-                    <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" data-project-id="${project.id}">Update History</button>
+                    <button class="history-link" 
+                            style="align-self: flex-end; margin-bottom: 0.2rem;" 
+                            data-project-id="${project.id}"
+                            ${isMaintenance ? 'disabled style="cursor: not-allowed; opacity: 0.3;"' : ''}>
+                        Update History
+                    </button>
                     <a href="${buttonUrl}" 
                        class="btn-more state-${button.type || 'published'}" 
-                       ${isPending ? '' : 'target="_blank" rel="noopener noreferrer"'}
+                       ${!isPending ? 'target="_blank" rel="noopener noreferrer"' : ''}
                        ${buttonAttr}>
                        ${button.content}
                     </a>
