@@ -734,3 +734,41 @@ footer {
 .animate-pulse {
     animation: pulse 3s infinite ease-in-out;
 }
+
+/* Button Alignment and History Link Styles (Separated from HTML Inline Styles) */
+.btn-group {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: auto;
+}
+
+.history-link {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    text-decoration: underline;
+    opacity: 0.6;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 0.2rem;
+}
+
+.history-link:hover {
+    color: var(--text-main);
+    opacity: 0.9;
+}
+
+/* Disabled state inside maintenance cards */
+.game-card.state-maintenance .history-link {
+    cursor: not-allowed !important;
+    opacity: 0.25 !important;
+    pointer-events: none !important;
+}
