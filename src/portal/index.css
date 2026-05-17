@@ -1,4 +1,4 @@
-@import "./src/lib/styles/theme.css";
+@import "../lib/styles/theme.css";
 
 :root {
     --bg-dark: var(--oak-color-bg-dark);

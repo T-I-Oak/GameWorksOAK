@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.8",
+    "date": "2026-05-17",
+    "content": [
+      { "type": "etc", "text": "内部改善" }
+    ]
+  },
+  {
     "version": "0.7",
     "date": "2026-05-16",
     "content": [

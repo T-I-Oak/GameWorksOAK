@@ -3,7 +3,7 @@
 ## 完結タスク（本プロジェクト内のみで実施可能）
 ポータルサイト自体の品質向上や共通基盤の構築など、他のリポジトリの変更を待たずに着手できるタスクです。
 
-- [ ] Viteログのエラー解消: `@import "./src/lib/styles/theme.css"` が解決できない問題の修正
+- [x] Viteログのエラー解消: `@import "./src/lib/styles/theme.css"` が解決できない問題の修正
 - [x] update_history.json の仕様変更（タグ対応）とポータルサイトの表示改善
 - [x] envライブラリの `__APP_VERSION__` 依存解消と `setAppVersion` の導入
 - [ ] ポータルサイトの共通仕様準拠状況の見直しと修正
