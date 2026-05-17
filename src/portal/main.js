@@ -19,21 +19,67 @@ async function loadProjects() {
     const grid = document.getElementById('gamesGrid');
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Loading projects...</div>';
 
-    // 1. プロジェクトリストを取得
-    const projectIds = await commonFetch('data/project_list.json');
+    // 1. プロジェクトリストを取得 (id, title のオブジェクト配列)
+    const projects = await commonFetch('data/project_list.json');
 
     // 2. 各プロジェクトの詳細データを取得
-    const projectData = await Promise.all(projectIds.map(async id => {
-        const data = await commonFetch(`data/projects/${id}.json`);
-        data.id = id;
+    const projectData = await Promise.all(projects.map(async project => {
+        const id = project.id;
+        const title = project.title;
+        const baseUrl = `https://t-i-oak.github.io/${id}/`;
 
-        // 3. ロゴのSVGをfetchしてinlining
-        if (data.logo && data.logo.path) {
-            const logoRes = await fetch(data.logo.path);
-            if (logoRes.ok) {
-                data.logo.content = await logoRes.text();
+        let data = null;
+
+        // リモートの project_info.json からのロードを最優先で試みる
+        const remoteInfoUrl = resolveAbsoluteUrl('data/project_info.json', baseUrl);
+        try {
+            const infoRes = await fetch(remoteInfoUrl);
+            if (infoRes.ok) {
+                data = await infoRes.json();
+                data.isMaintenance = false;
+            }
+        } catch (e) {
+            // ロード失敗時は catch して null のままとする
+        }
+
+        // ロードに失敗した（準備中やネットワークエラー等）場合は簡易表示モードにする
+        if (!data) {
+            data = {
+                id: id,
+                title: title,
+                isMaintenance: true,
+                image: '',
+                badge: {
+                    content: '',
+                    type: 'none'
+                },
+                tags: ['データ取得不可'],
+                description: 'プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。',
+                button: {
+                    content: 'UNAVAILABLE',
+                    url: 'javascript:void(0)',
+                    type: 'pending'
+                }
+            };
+        } else {
+            // ロード成功時の共通初期化
+            data.id = id;
+            if (!data.button) {
+                data.button = { url: baseUrl, content: 'PLAY NOW', type: 'published' };
+            } else if (!data.button.url) {
+                data.button.url = baseUrl;
+            }
+
+            // ロゴのSVGをfetchしてinlining
+            if (data.logo && data.logo.path) {
+                const absoluteLogoPath = resolveAbsoluteUrl(data.logo.path, baseUrl);
+                const logoRes = await fetch(absoluteLogoPath);
+                if (logoRes.ok) {
+                    data.logo.content = await logoRes.text();
+                }
             }
         }
+
         return data;
     }));
 
@@ -46,36 +92,44 @@ function renderProjects(projects) {
         const logo = project.logo;
         const badge = project.badge;
         const button = project.button;
+        const isMaintenance = project.isMaintenance;
 
         // ロゴのHTML生成
-        const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
-        const logoContentHtml = logo.content 
-            ? `<div class="game-logo-wrapper Logo${logoType}">${logo.content}</div>`
-            : `<div class="game-logo-wrapper LogoText"><h3>${project.title}</h3></div>`;
+        let logoContentHtml = '';
+        if (logo && logo.content) {
+            const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
+            logoContentHtml = `<div class="game-logo-wrapper Logo${logoType}">${logo.content}</div>`;
+        } else {
+            logoContentHtml = `<div class="game-logo-wrapper LogoText"><h3>${project.title}</h3></div>`;
+        }
 
-        // ボタンの無効化判定（pending の場合はクリック不可にする）
-        const isPending = button.type === 'pending';
+        // ボタンの無効化判定（pending または maintenance の場合はクリック不可にする）
+        const isPending = button.type === 'pending' || isMaintenance;
         const buttonUrl = isPending ? 'javascript:void(0)' : button.url;
         const buttonAttr = isPending ? 'onclick="return false;"' : '';
 
         return `
-        <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
+        <div class="game-card ${isMaintenance ? 'state-maintenance' : ''} animate-fade" style="--delay: ${0.2 * (index + 1)}s">
             <div class="game-img" style="--bg-image: url('${project.image}')">
                 <div class="game-title-overlay">
                     ${logoContentHtml}
                 </div>
-                <span class="badge texture-${badge.type || 'none'}">${badge.content || ''}</span>
+                <span class="badge texture-${badge.type}">${badge.content}</span>
             </div>
             <div class="game-info">
                 <div class="tags">
                     ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                 </div>
                 <p>${project.description}</p>
-                <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
-                    <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" data-project-id="${project.id}">Update History</button>
+                <div class="btn-group">
+                    <button class="history-link" 
+                            data-project-id="${project.id}"
+                            ${isMaintenance ? 'disabled' : ''}>
+                        Update History
+                    </button>
                     <a href="${buttonUrl}" 
-                       class="btn-more state-${button.type || 'published'}" 
-                       ${isPending ? '' : 'target="_blank" rel="noopener noreferrer"'}
+                       class="btn-more state-${button.type}" 
+                       ${!isPending ? 'target="_blank" rel="noopener noreferrer"' : ''}
                        ${buttonAttr}>
                        ${button.content}
                     </a>
@@ -119,18 +173,22 @@ export async function showHistory(projectId) {
     modalOverlay.classList.add('active');
 
     try {
-        const project = await commonFetch(`data/projects/${projectId}.json`);
-        modalTitle.textContent = `${project.title} - Update History`;
+        // マニフェストからタイトルを取得
+        const projects = await commonFetch('data/project_list.json');
+        const project = projects.find(p => p.id === projectId);
+        const title = project ? project.title : projectId;
 
-        const baseUrl = project.button.url.endsWith('/') ? project.button.url : project.button.url + '/';
-        const fetchUrl = project.button.url.includes('.json') ? project.button.url : baseUrl + 'data/update_history.json';
+        modalTitle.textContent = `${title} - Update History`;
+
+        const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
+        const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
         
         const history = await commonFetch(fetchUrl);
         renderHistory(history, modalBody);
     } catch (e) {
         modalBody.innerHTML = `
-            <div style="text-align: center; padding: 4rem; color: var(--text-muted);">
-                <p style="font-size: 1.1rem; letter-spacing: 0.1em;">- 準備中 -</p>
+            <div class="modal-placeholder">
+                <p>- 準備中 -</p>
             </div>
         `;
         throw e; // 規約に基づき、開発者が気づけるようコンソールにもエラーを出す
@@ -159,7 +217,7 @@ function renderHistory(history, container) {
             <ul class="history-changes">
                 ${item.content.map(change => {
                     const label = typeLabels[change.type];
-                    return `<li><span class="history-tag tag-${change.type}">[${label}]</span> ${change.text}</li>`;
+                    return `<li><span class="history-tag tag-${change.type}">${label}</span>${change.text}</li>`;
                 }).join('')}
             </ul>
         </div>
@@ -202,4 +260,46 @@ function initScrollEffects() {
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) modalOverlay.classList.remove('active');
     });
+}
+
+/**
+ * ロゴSVGなどのパスを、プロジェクトのベースURLを基準とする動的絶対パスに変換する
+ * @param {string} path 対象の相対パスまたは絶対パス
+ * @param {string} baseUrl 基準とするベースURL
+ * @returns {string} 解決された絶対パス
+ */
+export function resolveAbsoluteUrl(path, baseUrl) {
+    if (!path) return '';
+    
+    // すでに絶対URLである場合はそのまま返す
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+
+    // baseUrl が指定されていない場合は path をそのまま返す
+    if (!baseUrl) return path;
+
+    // baseUrl の末尾スラッシュ処理
+    let base = baseUrl;
+    if (!base.endsWith('/')) {
+        try {
+            const urlObj = new URL(base);
+            const pathname = urlObj.pathname;
+            // 最後のセグメントを取得
+            const lastSegment = pathname.substring(pathname.lastIndexOf('/') + 1);
+            // 最後のセグメントにドットが含まれていない（ファイル名ではない＝ディレクトリである）場合は、末尾にスラッシュを補完
+            if (!lastSegment.includes('.')) {
+                base = base + '/';
+            }
+        } catch (e) {
+            // URLとして解析できない場合はスラッシュを補完しない
+        }
+    }
+
+    try {
+        return new URL(path, base).href;
+    } catch (e) {
+        // 解析エラー時のフォールバック
+        return path;
+    }
 }
