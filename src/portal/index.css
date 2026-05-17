@@ -660,18 +660,18 @@ footer {
     color: var(--text-muted);
 }
 
-/* Maintenance Card Fallback Styles */
-.card-maintenance {
+/* Maintenance Card Fallback Styles (State-based Unification) */
+.game-card.state-maintenance {
     border-color: rgba(255, 255, 255, 0.04) !important;
     background: rgba(15, 15, 25, 0.6) !important;
 }
 
-.img-maintenance {
+.game-card.state-maintenance .game-img {
     background: linear-gradient(135deg, rgba(25, 25, 45, 0.9) 0%, rgba(8, 8, 16, 0.95) 100%) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.maintenance-overlay {
+.game-card.state-maintenance .game-title-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -686,31 +686,31 @@ footer {
     gap: 0.5rem;
     z-index: 10;
     padding: 1.5rem;
-    text-align: center;
+    pointer-events: none;
 }
 
-.maintenance-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Calm warn icon via CSS pseudo-element ::before */
+.game-card.state-maintenance .game-title-overlay::before {
+    content: "";
+    width: 36px;
+    height: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
     margin-bottom: 0.2rem;
+    animation: pulse 3s infinite ease-in-out;
 }
 
-.maintenance-overlay h3 {
-    font-size: clamp(1.2rem, 15cqw, 2.2rem);
-    font-weight: 900;
-    color: var(--text-main);
-    letter-spacing: -0.01em;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
-}
-
-.maintenance-status {
+/* Objective MAITENANCE text via CSS pseudo-element ::after */
+.game-card.state-maintenance .game-title-overlay::after {
+    content: "MAINTENANCE";
     font-family: var(--font-heading);
     font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.2em;
     color: var(--text-muted);
     opacity: 0.8;
+    margin-top: 0.2rem;
 }
 
 .tag-maintenance {
