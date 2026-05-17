@@ -19,21 +19,66 @@ async function loadProjects() {
     const grid = document.getElementById('gamesGrid');
     grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Loading projects...</div>';
 
-    // 1. プロジェクトリストを取得
-    const projectIds = await commonFetch('data/project_list.json');
+    // 1. プロジェクトリストを取得 (id, title のオブジェクト配列)
+    const projects = await commonFetch('data/project_list.json');
 
     // 2. 各プロジェクトの詳細データを取得
-    const projectData = await Promise.all(projectIds.map(async id => {
-        const data = await commonFetch(`data/projects/${id}.json`);
-        data.id = id;
+    const projectData = await Promise.all(projects.map(async project => {
+        const id = project.id;
+        const title = project.title;
+        const baseUrl = `https://t-i-oak.github.io/${id}/`;
 
-        // 3. ロゴのSVGをfetchしてinlining
-        if (data.logo && data.logo.path) {
-            const logoRes = await fetch(data.logo.path);
-            if (logoRes.ok) {
-                data.logo.content = await logoRes.text();
+        let data = null;
+
+        // リモートの project_info.json からのロードを最優先で試みる
+        const remoteInfoUrl = resolveAbsoluteUrl('data/project_info.json', baseUrl);
+        try {
+            const infoRes = await fetch(remoteInfoUrl);
+            if (infoRes.ok) {
+                data = await infoRes.json();
+                data.isMaintenance = false;
+            }
+        } catch (e) {
+            // ロード失敗時は catch して null のままとする
+        }
+
+        // ロードに失敗した（準備中やネットワークエラー等）場合は簡易表示モードにする
+        if (!data) {
+            data = {
+                id: id,
+                title: title,
+                isMaintenance: true,
+                button: {
+                    content: 'COMING SOON',
+                    url: 'javascript:void(0)',
+                    type: 'pending'
+                },
+                badge: {
+                    content: 'COMING SOON',
+                    type: 'info'
+                },
+                tags: ['準備中'],
+                description: 'ただいま一時的にアクセスできません。'
+            };
+        } else {
+            // ロード成功時の共通初期化
+            data.id = id;
+            if (!data.button) {
+                data.button = { url: baseUrl, content: 'PLAY NOW', type: 'published' };
+            } else if (!data.button.url) {
+                data.button.url = baseUrl;
+            }
+
+            // ロゴのSVGをfetchしてinlining
+            if (data.logo && data.logo.path) {
+                const absoluteLogoPath = resolveAbsoluteUrl(data.logo.path, baseUrl);
+                const logoRes = await fetch(absoluteLogoPath);
+                if (logoRes.ok) {
+                    data.logo.content = await logoRes.text();
+                }
             }
         }
+
         return data;
     }));
 
@@ -46,6 +91,39 @@ function renderProjects(projects) {
         const logo = project.logo;
         const badge = project.badge;
         const button = project.button;
+
+        if (project.isMaintenance) {
+            // メンテナンス中（簡易表示）カードのHTML生成
+            return `
+            <div class="game-card card-maintenance animate-fade" style="--delay: ${0.2 * (index + 1)}s">
+                <div class="game-img img-maintenance">
+                    <div class="maintenance-overlay">
+                        <div class="maintenance-icon animate-pulse">
+                            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--accent-glow)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                        <h3>${project.title}</h3>
+                        <span class="maintenance-status">UNDER CONSTRUCTION</span>
+                    </div>
+                    <span class="badge texture-info">COMING SOON</span>
+                </div>
+                <div class="game-info">
+                    <div class="tags">
+                        <span class="tag tag-maintenance">準備中</span>
+                    </div>
+                    <p>天体間通信リンクを確立中、または一時的なシステム調整を行っています。ゲームの公開までしばらくお待ちください。</p>
+                    <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
+                        <button class="btn-more state-pending" onclick="return false;">
+                            COMING SOON
+                        </button>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
 
         // ロゴのHTML生成
         const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
@@ -60,7 +138,7 @@ function renderProjects(projects) {
 
         return `
         <div class="game-card animate-fade" style="--delay: ${0.2 * (index + 1)}s">
-            <div class="game-img" style="--bg-image: url('${project.image}')">
+            <div class="game-img" style="--bg-image: url('${project.image || ''}')">
                 <div class="game-title-overlay">
                     ${logoContentHtml}
                 </div>
@@ -68,9 +146,9 @@ function renderProjects(projects) {
             </div>
             <div class="game-info">
                 <div class="tags">
-                    ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    ${(project.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
                 </div>
-                <p>${project.description}</p>
+                <p>${project.description || ''}</p>
                 <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
                     <button class="history-link" style="align-self: flex-end; margin-bottom: 0.2rem;" data-project-id="${project.id}">Update History</button>
                     <a href="${buttonUrl}" 
@@ -119,11 +197,15 @@ export async function showHistory(projectId) {
     modalOverlay.classList.add('active');
 
     try {
-        const project = await commonFetch(`data/projects/${projectId}.json`);
-        modalTitle.textContent = `${project.title} - Update History`;
+        // マニフェストからタイトルを取得
+        const projects = await commonFetch('data/project_list.json');
+        const project = projects.find(p => p.id === projectId);
+        const title = project ? project.title : projectId;
 
-        const baseUrl = project.button.url.endsWith('/') ? project.button.url : project.button.url + '/';
-        const fetchUrl = project.button.url.includes('.json') ? project.button.url : baseUrl + 'data/update_history.json';
+        modalTitle.textContent = `${title} - Update History`;
+
+        const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
+        const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
         
         const history = await commonFetch(fetchUrl);
         renderHistory(history, modalBody);
@@ -202,4 +284,46 @@ function initScrollEffects() {
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) modalOverlay.classList.remove('active');
     });
+}
+
+/**
+ * ロゴSVGなどのパスを、プロジェクトのベースURLを基準とする動的絶対パスに変換する
+ * @param {string} path 対象の相対パスまたは絶対パス
+ * @param {string} baseUrl 基準とするベースURL
+ * @returns {string} 解決された絶対パス
+ */
+export function resolveAbsoluteUrl(path, baseUrl) {
+    if (!path) return '';
+    
+    // すでに絶対URLである場合はそのまま返す
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+
+    // baseUrl が指定されていない場合は path をそのまま返す
+    if (!baseUrl) return path;
+
+    // baseUrl の末尾スラッシュ処理
+    let base = baseUrl;
+    if (!base.endsWith('/')) {
+        try {
+            const urlObj = new URL(base);
+            const pathname = urlObj.pathname;
+            // 最後のセグメントを取得
+            const lastSegment = pathname.substring(pathname.lastIndexOf('/') + 1);
+            // 最後のセグメントにドットが含まれていない（ファイル名ではない＝ディレクトリである）場合は、末尾にスラッシュを補完
+            if (!lastSegment.includes('.')) {
+                base = base + '/';
+            }
+        } catch (e) {
+            // URLとして解析できない場合はスラッシュを補完しない
+        }
+    }
+
+    try {
+        return new URL(path, base).href;
+    } catch (e) {
+        // 解析エラー時のフォールバック
+        return path;
+    }
 }
