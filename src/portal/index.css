@@ -647,11 +647,56 @@ footer {
 }
 
 .history-tag {
-    font-weight: 700;
-    font-size: 0.8rem;
-    margin-right: 0.5rem;
-    color: var(--primary); /* 共通色としてプライマリカラーを使用 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    margin-right: 0.6rem;
     white-space: nowrap;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    vertical-align: middle;
+}
+
+.history-tag.tag-new {
+    color: hsl(180, 100%, 60%);
+    background: hsla(180, 100%, 60%, 0.08);
+    box-shadow: 0 0 8px hsla(180, 100%, 60%, 0.12);
+}
+
+.history-tag.tag-imp {
+    color: hsl(285, 100%, 72%);
+    background: hsla(285, 100%, 72%, 0.08);
+    box-shadow: 0 0 8px hsla(285, 100%, 72%, 0.12);
+}
+
+.history-tag.tag-fix {
+    color: hsl(35, 100%, 60%);
+    background: hsla(35, 100%, 60%, 0.08);
+    box-shadow: 0 0 8px hsla(35, 100%, 60%, 0.12);
+}
+
+.history-tag.tag-etc {
+    color: hsl(0, 0%, 75%);
+    background: hsla(0, 0%, 75%, 0.06);
+}
+
+.modal-placeholder {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+}
+
+.modal-placeholder p {
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    margin: 0;
 }
 
 .loading-spinner {
