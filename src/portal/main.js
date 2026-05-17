@@ -48,17 +48,18 @@ async function loadProjects() {
                 id: id,
                 title: title,
                 isMaintenance: true,
-                button: {
-                    content: 'UNAVAILABLE',
-                    url: 'javascript:void(0)',
-                    type: 'pending'
-                },
+                image: '',
                 badge: {
                     content: '',
                     type: 'none'
                 },
                 tags: ['データ取得不可'],
-                description: 'プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。'
+                description: 'プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。',
+                button: {
+                    content: 'UNAVAILABLE',
+                    url: 'javascript:void(0)',
+                    type: 'pending'
+                }
             };
         } else {
             // ロード成功時の共通初期化
@@ -109,26 +110,25 @@ function renderProjects(projects) {
 
         return `
         <div class="game-card ${isMaintenance ? 'state-maintenance' : ''} animate-fade" style="--delay: ${0.2 * (index + 1)}s">
-            <div class="game-img" style="--bg-image: url('${project.image || ''}')">
+            <div class="game-img" style="--bg-image: url('${project.image}')">
                 <div class="game-title-overlay">
                     ${logoContentHtml}
                 </div>
-                <span class="badge texture-${badge.type || 'none'}">${badge.content || ''}</span>
+                <span class="badge texture-${badge.type}">${badge.content}</span>
             </div>
             <div class="game-info">
                 <div class="tags">
-                    ${(project.tags || []).map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                 </div>
-                <p>${project.description || ''}</p>
-                <div class="btn-group" style="flex-direction: column; align-items: stretch; gap: 0.5rem;">
+                <p>${project.description}</p>
+                <div class="btn-group">
                     <button class="history-link" 
-                            style="align-self: flex-end; margin-bottom: 0.2rem;" 
                             data-project-id="${project.id}"
-                            ${isMaintenance ? 'disabled style="cursor: not-allowed; opacity: 0.3;"' : ''}>
+                            ${isMaintenance ? 'disabled' : ''}>
                         Update History
                     </button>
                     <a href="${buttonUrl}" 
-                       class="btn-more state-${button.type || 'published'}" 
+                       class="btn-more state-${button.type}" 
                        ${!isPending ? 'target="_blank" rel="noopener noreferrer"' : ''}
                        ${buttonAttr}>
                        ${button.content}
