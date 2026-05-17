@@ -20,8 +20,11 @@
     - ※各プロジェクト側で assets/logo.svg が配置・公開されるのを待機
     - [ ] Gravity Freight
     - [ ] Magic Crystal
-    - [ ] Burst Cascade
+    - [x] Burst Cascade (配置・公開完了)
 - [ ] 各プロジェクトの詳細データ取得元を標準パスへ変更
     - ※各プロジェクト側で data/project_info.json が配置・公開されるのを待機
+    - [ ] Gravity Freight (待機中 / 移行用にポータル側 `public/data/projects/gravity-freight.json` を一時保存)
+    - [ ] Magic Crystal (待機中 / 移行用にポータル側 `public/data/projects/magic-crystal.json` を一時保存)
+    - [x] Burst Cascade (配置・公開完了 / 移行用にポータル側 `public/data/projects/burst-cascade.json` を一時保存)
 - [ ] 各プロジェクトへの共通ライブラリ適用
     - ※共通ライブラリの公開後、各プロジェクト側で参照設定を行う必要がある
