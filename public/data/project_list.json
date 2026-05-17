@@ -1,5 +1,14 @@
 [
-  "burst-cascade",
-  "gravity-freight",
-  "magic-crystal"
+  {
+    "id": "BurstCascade",
+    "title": "Burst Cascade"
+  },
+  {
+    "id": "GravityFreight",
+    "title": "Gravity Freight"
+  },
+  {
+    "id": "MagicCrystal",
+    "title": "Magic Crystal"
+  }
 ]
