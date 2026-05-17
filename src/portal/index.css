@@ -662,6 +662,7 @@ footer {
     text-transform: uppercase;
     transition: all 0.3s ease;
     vertical-align: middle;
+    min-width: 3.5rem;
 }
 
 .history-tag.tag-new {
