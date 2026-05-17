@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { showHistory } from '../../../src/portal/main.js';
+import { showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
 
 // DOM のモック
 document.body.innerHTML = `
@@ -21,17 +21,14 @@ describe('portal main.js - showHistory', () => {
         vi.clearAllMocks();
     });
 
-    it('should fetch update_history.json from the data/ folder', async () => {
-        const projectId = 'burst-cascade';
-        const projectData = {
-            title: 'Burst Cascade',
-            button: {
-                url: 'https://example.com/BurstCascade/'
-            }
-        };
+    it('should fetch update_history.json directly from standard remote path using manifest title', async () => {
+        const projectId = 'BurstCascade';
+        const manifestData = [
+            { id: 'BurstCascade', title: 'Burst Cascade' }
+        ];
 
-        // 1回目の fetch (プロジェクトデータ)
-        commonFetch.mockResolvedValueOnce(projectData);
+        // 1回目の fetch (マニフェスト)
+        commonFetch.mockResolvedValueOnce(manifestData);
         // 2回目の fetch (更新履歴)
         commonFetch.mockResolvedValueOnce([
             { version: '0.1', date: '2026-05-16', content: [{ type: 'new', text: 'test' }] }
@@ -39,27 +36,39 @@ describe('portal main.js - showHistory', () => {
 
         await showHistory(projectId);
 
-        // プロジェクトデータの取得を確認
-        expect(commonFetch).toHaveBeenCalledWith(`data/projects/${projectId}.json`);
+        // マニフェストの取得を確認
+        expect(commonFetch).toHaveBeenCalledWith('data/project_list.json');
 
-        // 更新履歴の取得パスを確認 (data/ フォルダが含まれているか)
-        expect(commonFetch).toHaveBeenCalledWith('https://example.com/BurstCascade/data/update_history.json');
+        // 更新履歴の取得パスが共通仕様に準拠しているか確認
+        expect(commonFetch).toHaveBeenCalledWith('https://t-i-oak.github.io/BurstCascade/data/update_history.json');
+    });
+});
+
+describe('portal main.js - resolveAbsoluteUrl', () => {
+    it('should return empty string if path is empty', () => {
+        expect(resolveAbsoluteUrl('', 'https://example.com')).toBe('');
+        expect(resolveAbsoluteUrl(null, 'https://example.com')).toBe('');
     });
 
-    it('should handle project URLs without trailing slash', async () => {
-        const projectId = 'test-project';
-        const projectData = {
-            title: 'Test Project',
-            button: {
-                url: 'https://example.com/TestProject'
-            }
-        };
+    it('should return the path unchanged if it is already an absolute URL', () => {
+        expect(resolveAbsoluteUrl('https://other.com/logo.svg', 'https://example.com/')).toBe('https://other.com/logo.svg');
+        expect(resolveAbsoluteUrl('http://other.com/logo.svg', 'https://example.com/')).toBe('http://other.com/logo.svg');
+    });
 
-        commonFetch.mockResolvedValueOnce(projectData);
-        commonFetch.mockResolvedValueOnce([]);
+    it('should resolve root-relative paths against the origin of the base URL', () => {
+        expect(resolveAbsoluteUrl('/assets/logo.svg', 'https://example.com/project/')).toBe('https://example.com/assets/logo.svg');
+        expect(resolveAbsoluteUrl('/GameWorksOAK/assets/logo.svg', 'http://localhost:3000/GameWorksOAK/')).toBe('http://localhost:3000/GameWorksOAK/assets/logo.svg');
+    });
 
-        await showHistory(projectId);
+    it('should resolve relative paths against directory base URL with trailing slash', () => {
+        expect(resolveAbsoluteUrl('assets/logo.svg', 'https://example.com/project/')).toBe('https://example.com/project/assets/logo.svg');
+    });
 
-        expect(commonFetch).toHaveBeenCalledWith('https://example.com/TestProject/data/update_history.json');
+    it('should resolve relative paths against directory base URL without trailing slash', () => {
+        expect(resolveAbsoluteUrl('assets/logo.svg', 'https://example.com/project')).toBe('https://example.com/project/assets/logo.svg');
+    });
+
+    it('should resolve relative paths against base URL containing filename', () => {
+        expect(resolveAbsoluteUrl('assets/logo.svg', 'https://example.com/project/index.html')).toBe('https://example.com/project/assets/logo.svg');
     });
 });
