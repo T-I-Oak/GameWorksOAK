@@ -70,6 +70,11 @@ async function loadProjects() {
                 data.button.url = baseUrl;
             }
 
+            // サムネイル画像の相対URLを絶対URLに解決
+            if (data.image) {
+                data.image = resolveAbsoluteUrl(data.image, baseUrl);
+            }
+
             // ロゴのSVGをfetchしてinlining
             if (data.logo && data.logo.path) {
                 const absoluteLogoPath = resolveAbsoluteUrl(data.logo.path, baseUrl);

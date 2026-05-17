@@ -1,11 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
+import { initPortal, showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
 
 // DOM のモック
 document.body.innerHTML = `
+    <header></header>
+    <div id="portal-version"></div>
+    <div id="gamesGrid"></div>
+    <svg>
+        <g id="logo-cog-1"></g>
+        <g id="logo-cog-2"></g>
+    </svg>
     <div id="modalOverlay">
         <div id="modalTitle"></div>
         <div id="modalBody"></div>
+        <button id="modalClose"></button>
     </div>
 `;
 
@@ -19,6 +27,14 @@ import { commonFetch } from '../../../src/lib/utils/fetch.js';
 describe('portal main.js - showHistory', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // showHistory用の最小限のDOMを設定
+        document.body.innerHTML = `
+            <div id="modalOverlay">
+                <div id="modalTitle"></div>
+                <div id="modalBody"></div>
+                <button id="modalClose"></button>
+            </div>
+        `;
     });
 
     it('should fetch update_history.json directly from standard remote path using manifest title', async () => {
@@ -70,5 +86,77 @@ describe('portal main.js - resolveAbsoluteUrl', () => {
 
     it('should resolve relative paths against base URL containing filename', () => {
         expect(resolveAbsoluteUrl('assets/logo.svg', 'https://example.com/project/index.html')).toBe('https://example.com/project/assets/logo.svg');
+    });
+});
+
+describe('portal main.js - initPortal', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        // DOMの初期化
+        document.body.innerHTML = `
+            <header></header>
+            <div id="portal-version"></div>
+            <div id="gamesGrid"></div>
+            <svg>
+                <g id="logo-cog-1"></g>
+                <g id="logo-cog-2"></g>
+            </svg>
+            <div id="modalOverlay">
+                <div id="modalTitle"></div>
+                <div id="modalBody"></div>
+                <button id="modalClose"></button>
+            </div>
+        `;
+        global.__APP_VERSION__ = '0.10.0';
+        
+        // global.fetch のモック
+        global.fetch = vi.fn();
+
+        // IntersectionObserver のモック (JSDOM環境用)
+        global.IntersectionObserver = class {
+            constructor() {}
+            observe() {}
+            unobserve() {}
+            disconnect() {}
+        };
+    });
+
+    it('should resolve thumbnail relative image URL to absolute URL correctly', async () => {
+        const projectList = [
+            { id: 'BurstCascade', title: 'Burst Cascade' }
+        ];
+
+        const projectInfo = {
+            title: 'Burst Cascade',
+            description: 'A cascade of bursts.',
+            tags: ['Puzzle'],
+            badge: { content: 'NEW', type: 'hot' },
+            image: 'assets/thumbnail.png',
+            button: { content: 'PLAY', url: 'https://t-i-oak.github.io/BurstCascade/index.html', type: 'published' }
+        };
+
+        // commonFetch のモック (project_list.json のロード)
+        commonFetch.mockResolvedValueOnce(projectList);
+
+        // global.fetch のモック (project_info.json のロード用)
+        global.fetch.mockImplementation((url) => {
+            if (url.includes('project_info.json')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve(projectInfo)
+                });
+            }
+            // 他のfetch（ロゴなど）は空のレスポンス
+            return Promise.resolve({
+                ok: true,
+                text: () => Promise.resolve('<svg></svg>')
+            });
+        });
+
+        await initPortal();
+
+        // gamesGrid のレンダリング結果を確認
+        const gamesGrid = document.getElementById('gamesGrid');
+        expect(gamesGrid.innerHTML).toContain(`style="--bg-image: url('https://t-i-oak.github.io/BurstCascade/assets/thumbnail.png')"`);
     });
 });
