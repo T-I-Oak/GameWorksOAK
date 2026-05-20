@@ -103,9 +103,9 @@ function renderProjects(projects) {
         let logoContentHtml = '';
         if (logo && logo.content) {
             const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
-            logoContentHtml = `<div class="game-logo-wrapper Logo${logoType}">${logo.content}</div>`;
+            logoContentHtml = `<div class="GameLogoWrapper Logo${logoType}">${logo.content}</div>`;
         } else {
-            logoContentHtml = `<div class="game-logo-wrapper LogoText"><h3>${project.title}</h3></div>`;
+            logoContentHtml = `<div class="GameLogoWrapper LogoText"><h3>${project.title}</h3></div>`;
         }
 
         // ボタンの無効化判定（pending または maintenance の場合はクリック不可にする）
@@ -114,26 +114,26 @@ function renderProjects(projects) {
         const buttonAttr = isPending ? 'onclick="return false;"' : '';
 
         return `
-        <div class="game-card ${isMaintenance ? 'state-maintenance' : ''} animate-fade" style="--delay: ${0.2 * (index + 1)}s">
-            <div class="game-img" style="--bg-image: url('${project.image}')">
-                <div class="game-title-overlay">
+        <div class="GameCard ${isMaintenance ? 'state-maintenance' : ''} animate-fade" style="--delay: ${0.2 * (index + 1)}s">
+            <div class="GameImg" style="--bg-image: url('${project.image}')">
+                <div class="GameTitleOverlay">
                     ${logoContentHtml}
                 </div>
                 <span class="badge texture-${badge.type}">${badge.content}</span>
             </div>
-            <div class="game-info">
+            <div class="GameInfo">
                 <div class="tags">
                     ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                 </div>
                 <p>${project.description}</p>
-                <div class="btn-group">
-                    <button class="history-link" 
+                <div class="BtnGroup">
+                    <button class="HistoryLink" 
                             data-project-id="${project.id}"
                             ${isMaintenance ? 'disabled' : ''}>
                         Update History
                     </button>
                     <a href="${buttonUrl}" 
-                       class="btn-more state-${button.type}" 
+                       class="BtnMore state-${button.type}" 
                        ${!isPending ? 'target="_blank" rel="noopener noreferrer"' : ''}
                        ${buttonAttr}>
                        ${button.content}
@@ -145,7 +145,7 @@ function renderProjects(projects) {
     }).join('');
 
     // イベントリスナーの付与
-    grid.querySelectorAll('.history-link').forEach(btn => {
+    grid.querySelectorAll('.HistoryLink').forEach(btn => {
         btn.addEventListener('click', () => showHistory(btn.dataset.projectId));
     });
 
@@ -174,7 +174,7 @@ export async function showHistory(projectId) {
     const modalBody = document.getElementById('modalBody');
 
     modalTitle.textContent = `Update History`; 
-    modalBody.innerHTML = '<div class="loading-spinner">Loading history...</div>';
+    modalBody.innerHTML = '<div class="LoadingSpinner">Loading history...</div>';
     modalOverlay.classList.add('active');
 
     try {
@@ -192,7 +192,7 @@ export async function showHistory(projectId) {
         renderHistory(history, modalBody);
     } catch (e) {
         modalBody.innerHTML = `
-            <div class="modal-placeholder">
+            <div class="ModalPlaceholder">
                 <p>- 準備中 -</p>
             </div>
         `;
@@ -214,15 +214,15 @@ function renderHistory(history, container) {
     };
 
     container.innerHTML = history.map(item => `
-        <div class="history-item">
-            <div class="history-header">
-                <span class="history-version">v${item.version}</span>
-                <span class="history-date">${item.date}</span>
+        <div class="HistoryItem">
+            <div class="HistoryHeader">
+                <span class="HistoryVersion">v${item.version}</span>
+                <span class="HistoryDate">${item.date}</span>
             </div>
-            <ul class="history-changes">
+            <ul class="HistoryChanges">
                 ${item.content.map(change => {
                     const label = typeLabels[change.type];
-                    return `<li><span class="history-tag tag-${change.type}">${label}</span>${change.text}</li>`;
+                    return `<li><span class="HistoryTag tag-${change.type}">${label}</span>${change.text}</li>`;
                 }).join('')}
             </ul>
         </div>

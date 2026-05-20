@@ -10,12 +10,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="Container">
         <h1>UI Components & States Test</h1>
 
         <div class="test-container">
             <span class="test-label">1. Game Card (Dynamic Style)</span>
-            <div class="games-grid" id="testGrid"></div>
+            <div class="GamesGrid" id="testGrid"></div>
         </div>
 
         <div class="test-container">
@@ -24,13 +24,12 @@
         </div>
     </div>
 
-    <!-- Modal Mock -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <button class="modal-close" onclick="document.getElementById('modalOverlay').classList.remove('active')">&times;</button>
-            <h2 class="modal-title">Test Modal</h2>
+    <div class="ModalOverlay" id="modalOverlay">
+        <div class="ModalContent">
+            <button class="ModalClose" onclick="document.getElementById('modalOverlay').classList.remove('active')">&times;</button>
+            <h2 class="ModalTitle">Test Modal</h2>
             <div id="modalBody">
-                <div class="loading-spinner">Loading spinner test...</div>
+                <div class="LoadingSpinner">Loading spinner test...</div>
             </div>
             <div style="margin-top: 2rem; display: flex; gap: 1rem;">
                 <button onclick="renderSampleHistory()">Render Sample History</button>
@@ -64,35 +63,35 @@
             const grid = document.getElementById('testGrid');
             grid.innerHTML = `
                 <!-- Normal Project -->
-                <div class="game-card visible">
-                    <div class="game-img" style="background-image: url('${SAMPLE_PROJECT.image}');">
+                <div class="GameCard visible">
+                    <div class="GameImg" style="background-image: url('${SAMPLE_PROJECT.image}');">
                         <span class="badge">RELEASED</span>
                     </div>
-                    <div class="game-info">
+                    <div class="GameInfo">
                         <h3>${SAMPLE_PROJECT.title} (Released)</h3>
                         <div class="tags">
                             ${SAMPLE_PROJECT.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>
                         <p>${SAMPLE_PROJECT.description}</p>
-                        <div class="btn-group">
-                            <a href="#" class="btn-more">PLAY</a>
+                        <div class="BtnGroup">
+                            <a href="#" class="BtnMore">PLAY</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Disabled Project -->
-                <div class="game-card visible">
-                    <div class="game-img" style="background-image: url('${SAMPLE_PROJECT.image}');">
+                <div class="GameCard visible">
+                    <div class="GameImg" style="background-image: url('${SAMPLE_PROJECT.image}');">
                         <span class="badge">COMING SOON</span>
                     </div>
-                    <div class="game-info">
+                    <div class="GameInfo">
                         <h3>${SAMPLE_PROJECT.title} (Coming Soon)</h3>
                         <div class="tags">
                             ${SAMPLE_PROJECT.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                         </div>
                         <p>${SAMPLE_PROJECT.description}</p>
-                        <div class="btn-group">
-                            <a href="javascript:void(0)" class="btn-more disabled" onclick="return false;">COMING SOON</a>
+                        <div class="BtnGroup">
+                            <a href="javascript:void(0)" class="BtnMore disabled" onclick="return false;">COMING SOON</a>
                         </div>
                     </div>
                 </div>
@@ -102,13 +101,13 @@
         function renderSampleHistory() {
             const body = document.getElementById('modalBody');
             body.innerHTML = SAMPLE_HISTORY.map(item => `
-                <div class="history-item">
-                    <div class="history-header">
-                        <span class="history-version">v${item.version}</span>
-                        <span class="history-date">${item.date}</span>
+                <div class="HistoryItem">
+                    <div class="HistoryHeader">
+                        <span class="HistoryVersion">v${item.version}</span>
+                        <span class="HistoryDate">${item.date}</span>
                     </div>
-                    <div class="history-title">${item.title}</div>
-                    <ul class="history-changes">
+                    <div class="HistoryTitle">${item.title}</div>
+                    <ul class="HistoryChanges">
                         ${item.changes.map(change => `<li>${change}</li>`).join('')}
                     </ul>
                 </div>

@@ -1,0 +1,203 @@
+/* Update History Modal Section Styles */
+
+.ModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(15px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.ModalOverlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ModalContent {
+    background: var(--bg-card);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* ヘッダーとボディの境界を角丸に合わせる */
+    transform: translateY(40px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+
+.ModalOverlay.active .ModalContent {
+    transform: translateY(0);
+}
+
+.ModalHeader {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.ModalTitle {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.ModalClose {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.ModalClose:hover {
+    color: var(--text-main);
+}
+
+.ModalBody {
+    padding: 2rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+@media (max-width: 600px) {
+    .ModalHeader {
+        padding: 1rem 1.5rem;
+    }
+    .ModalBody {
+        padding: 1.5rem;
+    }
+    .ModalTitle {
+        font-size: 1.2rem;
+    }
+}
+
+/* Timeline */
+.HistoryItem {
+    margin-bottom: 2.5rem;
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--primary);
+}
+
+.HistoryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.HistoryVersion {
+    color: var(--primary);
+    font-weight: 900;
+    font-family: var(--font-heading);
+}
+
+.HistoryDate {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.HistoryChanges {
+    list-style: none;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.HistoryChanges li {
+    margin-bottom: 0.3rem;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.HistoryChanges li::before {
+    display: none; /* ドットを非表示にしてタグを優先 */
+}
+
+.HistoryTag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    margin-right: 0.6rem;
+    white-space: nowrap;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    vertical-align: middle;
+    min-width: 3.5rem;
+}
+
+.HistoryTag.tag-new {
+    color: hsl(180, 100%, 60%);
+    background: hsla(180, 100%, 60%, 0.08);
+    box-shadow: 0 0 8px hsla(180, 100%, 60%, 0.12);
+}
+
+.HistoryTag.tag-imp {
+    color: hsl(285, 100%, 72%);
+    background: hsla(285, 100%, 72%, 0.08);
+    box-shadow: 0 0 8px hsla(285, 100%, 72%, 0.12);
+}
+
+.HistoryTag.tag-fix {
+    color: hsl(35, 100%, 60%);
+    background: hsla(35, 100%, 60%, 0.08);
+    box-shadow: 0 0 8px hsla(35, 100%, 60%, 0.12);
+}
+
+.HistoryTag.tag-etc {
+    color: hsl(0, 0%, 75%);
+    background: hsla(0, 0%, 75%, 0.06);
+}
+
+.ModalPlaceholder {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+}
+
+.ModalPlaceholder p {
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    margin: 0;
+}
+
+.LoadingSpinner {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+}
+
+@media (hover: hover) {
+    .ModalClose:hover {
+        color: var(--secondary);
+    }
+}
