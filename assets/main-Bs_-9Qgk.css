@@ -203,6 +203,11 @@ footer {
     font-size: 0.9rem;
 }
 
+.PortalVersion {
+    opacity: 0.5;
+    margin-left: 0.5rem;
+}
+
 /* Responsive Adjustments */
 
 @media (max-width: 768px) {
@@ -285,6 +290,13 @@ footer {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 2.5rem;
     margin-bottom: 100px;
+}
+
+.LoadingProjects {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
 }
 
 .GameCard {
@@ -597,12 +609,12 @@ footer {
 /* Maintenance Card Fallback Styles (State-based Unification) */
 
 .GameCard.state-maintenance {
-    border-color: rgba(255, 255, 255, 0.04) !important;
-    background: rgba(15, 15, 25, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.04);
+    background: rgba(15, 15, 25, 0.6);
 }
 
 .GameCard.state-maintenance .GameImg {
-    background: linear-gradient(135deg, rgba(25, 25, 45, 0.9) 0%, rgba(8, 8, 16, 0.95) 100%) !important;
+    background: linear-gradient(135deg, rgba(25, 25, 45, 0.9) 0%, rgba(8, 8, 16, 0.95) 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
@@ -651,17 +663,17 @@ footer {
 }
 
 .tag-maintenance {
-    color: var(--text-muted) !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* Disabled state inside maintenance cards */
 
 .GameCard.state-maintenance .HistoryLink {
-    cursor: not-allowed !important;
-    opacity: 0.25 !important;
-    pointer-events: none !important;
+    cursor: not-allowed;
+    opacity: 0.25;
+    pointer-events: none;
 }
 
 /* Calm opacity pulse for warning icons */
