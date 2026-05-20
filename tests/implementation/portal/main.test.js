@@ -159,4 +159,44 @@ describe('portal main.js - initPortal', () => {
         const gamesGrid = document.getElementById('gamesGrid');
         expect(gamesGrid.innerHTML).toContain(`style="--bg-image: url('https://t-i-oak.github.io/BurstCascade/assets/thumbnail.png')"`);
     });
+
+    it('should render png logo paths as image tags without fetching logo content', async () => {
+        const projectList = [
+            { id: 'MagicCrystal', title: 'Magic Crystal' }
+        ];
+
+        const projectInfo = {
+            title: 'Magic Crystal',
+            logo: {
+                path: 'assets/logo.png',
+                type: 'standard'
+            },
+            description: 'A magic adventure.',
+            tags: ['Action'],
+            badge: { content: '', type: 'none' },
+            image: 'assets/thumbnail.png',
+            button: { content: 'PLAY', url: 'https://t-i-oak.github.io/MagicCrystal/index.html', type: 'published' }
+        };
+
+        commonFetch.mockResolvedValueOnce(projectList);
+        global.fetch.mockImplementation((url) => {
+            if (url.includes('project_info.json')) {
+                return Promise.resolve({
+                    ok: true,
+                    json: () => Promise.resolve(projectInfo)
+                });
+            }
+
+            return Promise.resolve({
+                ok: true,
+                text: () => Promise.resolve('<svg></svg>')
+            });
+        });
+
+        await initPortal();
+
+        const gamesGrid = document.getElementById('gamesGrid');
+        expect(gamesGrid.innerHTML).toContain('<img class="GameLogoImg" src="https://t-i-oak.github.io/MagicCrystal/assets/logo.png" alt="Magic Crystal logo">');
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
 });

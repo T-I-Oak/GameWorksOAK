@@ -1,13 +1,5 @@
 # Backlog - GameWorks OAK
 
-## Portal Backlog
-
-- [ ] PNG/JPEG/WebP logo support for project cards
-    - Keep current fetch + inline behavior for SVG logo paths.
-    - Render `.png`, `.jpg`, `.jpeg`, and `.webp` logo paths as `<img class="GameLogoImg">`.
-    - Keep `assets/logo.svg` as the recommended common path, but allow bitmap logos for projects whose in-game visual identity is bitmap-first, such as MagicCrystal.
-    - Verify compatibility with `project_info.json`, `public/data/projects/*.json`, `resolveAbsoluteUrl`, `.GameLogoImg`, and `.GameLogoWrapper img`.
-
 ## 完結タスク（本プロジェクト内のみで実施可能）
 ポータルサイト自体の品質向上や共通基盤の構築など、他のリポジトリの変更を待たずに着手できるタスクです。
 

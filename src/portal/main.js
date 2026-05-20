@@ -17,7 +17,7 @@ export async function initPortal() {
 
 async function loadProjects() {
     const grid = document.getElementById('gamesGrid');
-    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--text-muted);">Loading projects...</div>';
+    grid.innerHTML = '<div class="LoadingProjects">Loading projects...</div>';
 
     // 1. プロジェクトリストを取得 (id, title のオブジェクト配列)
     const projects = await commonFetch('data/project_list.json');
@@ -78,9 +78,13 @@ async function loadProjects() {
             // ロゴのSVGをfetchしてinlining
             if (data.logo && data.logo.path) {
                 const absoluteLogoPath = resolveAbsoluteUrl(data.logo.path, baseUrl);
-                const logoRes = await fetch(absoluteLogoPath);
-                if (logoRes.ok) {
-                    data.logo.content = await logoRes.text();
+                data.logo.path = absoluteLogoPath;
+
+                if (isSvgLogoPath(absoluteLogoPath)) {
+                    const logoRes = await fetch(absoluteLogoPath);
+                    if (logoRes.ok) {
+                        data.logo.content = await logoRes.text();
+                    }
                 }
             }
         }
@@ -104,6 +108,9 @@ function renderProjects(projects) {
         if (logo && logo.content) {
             const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
             logoContentHtml = `<div class="GameLogoWrapper Logo${logoType}">${logo.content}</div>`;
+        } else if (logo && logo.path && isBitmapLogoPath(logo.path)) {
+            const logoType = logo.type ? logo.type.charAt(0).toUpperCase() + logo.type.slice(1) : 'Standard';
+            logoContentHtml = `<div class="GameLogoWrapper Logo${logoType}"><img class="GameLogoImg" src="${logo.path}" alt="${project.title} logo"></div>`;
         } else {
             logoContentHtml = `<div class="GameLogoWrapper LogoText"><h3>${project.title}</h3></div>`;
         }
@@ -307,4 +314,22 @@ export function resolveAbsoluteUrl(path, baseUrl) {
         // 解析エラー時のフォールバック
         return path;
     }
+}
+
+function getPathExtension(path) {
+    if (!path) return '';
+
+    try {
+        return new URL(path, 'https://example.invalid/').pathname.split('.').pop().toLowerCase();
+    } catch (e) {
+        return path.split(/[?#]/)[0].split('.').pop().toLowerCase();
+    }
+}
+
+function isSvgLogoPath(path) {
+    return getPathExtension(path) === 'svg';
+}
+
+function isBitmapLogoPath(path) {
+    return ['png', 'jpg', 'jpeg', 'webp'].includes(getPathExtension(path));
 }
