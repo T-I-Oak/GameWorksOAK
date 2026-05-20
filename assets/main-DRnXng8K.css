@@ -109,7 +109,7 @@ h1, h2, h3 {
 
 /* Layout */
 
-.container {
+.Container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
@@ -135,7 +135,7 @@ header.scrolled {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.header-inner {
+.HeaderInner {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -190,16 +190,104 @@ header.scrolled .logo-svg {
     margin: 0 auto 3rem;
 }
 
-/* Game Cards */
+/* Footer */
 
-.games-grid {
+footer {
+    padding: 60px 0;
+    border-top: 1px solid var(--glass-border);
+    text-align: center;
+}
+
+.copyright {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Responsive Adjustments */
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 80px 0 40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .logo {
+        font-size: 1.4rem;
+    }
+
+    header {
+        height: 80px;
+    }
+}
+
+/* Animations */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade {
+    opacity: 0;
+}
+
+.animate-fade.visible {
+    animation: fadeIn 1s ease var(--delay, 0s) forwards;
+}
+
+.delay-1 { animation-delay: 0.2s; }
+
+.delay-2 { animation-delay: 0.4s; }
+
+.delay-3 { animation-delay: 0.6s; }
+
+/* Premium Custom Scrollbar */
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(10, 10, 20, 0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
+}
+
+/* For Firefox */
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) rgba(10, 10, 20, 0.3);
+}
+
+/* Game Cards Section Styles */
+
+.GamesGrid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 2.5rem;
     margin-bottom: 100px;
 }
 
-.game-card {
+.GameCard {
     background: var(--bg-card);
     border-radius: 24px;
     border: 1px solid var(--glass-border);
@@ -210,7 +298,7 @@ header.scrolled .logo-svg {
     flex-direction: column;
 }
 
-.game-img {
+.GameImg {
     width: 100%;
     height: 220px;
     background-image: var(--bg-image);
@@ -250,14 +338,14 @@ header.scrolled .logo-svg {
     display: none;
 }
 
-.game-info {
+.GameInfo {
     padding: 2rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
-.game-info h3 {
+.GameInfo h3 {
     font-size: 1.6rem;
     color: var(--text-main);
 }
@@ -266,7 +354,7 @@ header.scrolled .logo-svg {
     display: none; /* 画像内に移動するため非表示 */
 }
 
-.game-title-overlay {
+.GameTitleOverlay {
     position: absolute;
     top: 1.5rem;
     left: 1.5rem;
@@ -281,7 +369,7 @@ header.scrolled .logo-svg {
         drop-shadow(0 0 20px rgba(0, 0, 0, 0.5));
 }
 
-.game-title-overlay h3 {
+.GameTitleOverlay h3 {
     transition: transform 0.3s ease-out;
 }
 
@@ -302,13 +390,13 @@ header.scrolled .logo-svg {
     font-weight: 600;
 }
 
-.game-info p {
+.GameInfo p {
     color: var(--text-muted);
     font-size: 1rem;
     margin-bottom: 1.5rem;
 }
 
-.btn-more {
+.BtnMore {
     text-decoration: none;
     width: 100%;
     padding: 0.8rem 1.5rem;
@@ -320,20 +408,20 @@ header.scrolled .logo-svg {
     border: 1px solid transparent;
 }
 
-.btn-more.state-published {
+.BtnMore.state-published {
     border-color: var(--primary);
     background: rgba(58, 134, 255, 0.1);
     color: var(--primary);
 }
 
-.btn-more.state-published:hover {
+.BtnMore.state-published:hover {
     background: var(--primary);
     color: white;
     box-shadow: 0 0 20px rgba(58, 134, 255, 0.4);
     transform: translateY(-2px);
 }
 
-.btn-more.state-pending {
+.BtnMore.state-pending {
     background: rgba(255, 255, 255, 0.05);
     border-color: var(--glass-border);
     color: var(--text-muted);
@@ -343,7 +431,7 @@ header.scrolled .logo-svg {
     pointer-events: none;
 }
 
-.history-link {
+.HistoryLink {
     background: transparent;
     border: none;
     color: var(--text-muted);
@@ -356,16 +444,18 @@ header.scrolled .logo-svg {
     opacity: 0.6;
     white-space: nowrap;
     flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 0.2rem;
 }
 
 /* Game Title Styles (Logos) */
 
-.title-burst-cascade {
+.GameCard .title-burst-cascade {
     font-family: 'Outfit', sans-serif;
     font-style: italic;
     font-weight: 900;
-    /* 余裕があるときは 2.8rem を維持し、狭くなると縮小を開始 */
-    font-size: clamp(1.5rem, 18cqw, 2.8rem) !important;
+    /* 親セレクターの追加により、!important を排除 */
+    font-size: clamp(1.5rem, 18cqw, 2.8rem);
     background: linear-gradient(to right, #ff006e, #3a86ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -373,7 +463,7 @@ header.scrolled .logo-svg {
     letter-spacing: -1px;
 }
 
-.title-magic-crystal {
+.GameCard .title-magic-crystal {
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
     color: #fff;
@@ -384,60 +474,7 @@ header.scrolled .logo-svg {
     font-size: clamp(1.2rem, 15cqw, 2.4rem);
 }
 
-/* 画像ロゴ用のスタイル（ユーザーが画像を用意した場合） */
-
-.game-logo-img {
-    height: auto; /* 高さを自動にして横幅を優先 */
-    max-height: var(--logo-height, 80px); /* 上限を 80px に引き上げ */
-    width: 100%;
-
-
-
-    object-fit: contain;
-    object-position: center; /* 中央寄せに変更 */
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
-}
-
-.game-logo-wrapper {
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    max-width: 100%;
-    pointer-events: none;
-    container-type: inline-size; /* 文字サイズの動的調整用 */
-}
-
-.game-logo-wrapper.LogoStandard {
-    width: 300px;
-    height: 140px;
-    max-width: 100%;
-    max-height: 140px;
-    margin: 0 auto;
-}
-
-.game-logo-wrapper.LogoText {
-    height: 60px; /* テキスト表示時のデフォルト高さ */
-}
-
-.game-logo-wrapper.LogoText h3 {
-    margin: 0;
-    font-size: clamp(1rem, 15cqw, 2.2rem);
-    white-space: nowrap; /* 折り返しを防止して縮小を優先 */
-}
-
-.game-logo-wrapper svg,
-.game-logo-wrapper img {
-    max-height: 100%;
-    max-width: 100%;
-    height: auto;
-    object-fit: scale-down;
-    object-position: center;
-    display: block;
-    overflow: visible;
-}
-
-.title-gravity-freight {
+.GameCard .title-gravity-freight {
     font-family: 'Outfit', sans-serif;
     font-weight: 900;
     color: var(--primary);
@@ -449,43 +486,73 @@ header.scrolled .logo-svg {
     font-size: clamp(1rem, 15cqw, 2.2rem);
 }
 
-.btn-group {
+/* 画像ロゴ用のスタイル（ユーザーが画像を用意した場合） */
+
+.GameLogoImg {
+    height: auto; /* 高さを自動にして横幅を優先 */
+    max-height: var(--logo-height, 80px); /* 上限を 80px に引き上げ */
+    width: 100%;
+    object-fit: contain;
+    object-position: center; /* 中央寄せに変更 */
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+}
+
+.GameLogoWrapper {
     display: flex;
-    gap: 0.8rem;
+    align-items: flex-start;
+    justify-content: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 100%;
+    pointer-events: none;
+    container-type: inline-size; /* 文字サイズの動的調整用 */
+}
+
+.GameLogoWrapper.LogoStandard {
+    width: 300px;
+    height: 140px;
+    max-width: 100%;
+    max-height: 140px;
+    margin: 0 auto;
+}
+
+.GameLogoWrapper.LogoText {
+    height: 60px; /* テキスト表示時のデフォルト高さ */
+}
+
+.GameLogoWrapper.LogoText h3 {
+    margin: 0;
+    font-size: clamp(1rem, 15cqw, 2.2rem);
+    white-space: nowrap; /* 折り返しを防止して縮小を優先 */
+}
+
+.GameLogoWrapper svg,
+.GameLogoWrapper img {
+    max-height: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: scale-down;
+    object-position: center;
+    display: block;
+    overflow: visible;
+}
+
+.BtnGroup {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
     margin-top: auto;
-}
-
-.btn-more:hover {
-    background: var(--primary);
-    color: white;
-}
-
-/* Footer */
-
-footer {
-    padding: 60px 0;
-    border-top: 1px solid var(--glass-border);
-    text-align: center;
-}
-
-.copyright {
-    color: var(--text-muted);
-    font-size: 0.9rem;
 }
 
 /* Responsive Adjustments */
 
 @media (max-width: 768px) {
-    .hero {
-        padding: 80px 0 40px;
-    }
-    
-    .games-grid {
+    .GamesGrid {
         grid-template-columns: 1fr; /* スマホでは1カラムに固定 */
         gap: 1.5rem;
     }
-
-    .game-info {
+ 
+    .GameInfo {
         padding: 1.5rem;
     }
 
@@ -496,294 +563,50 @@ footer {
         gap: 0.5rem;
     }
 
-    .history-link {
+    .HistoryLink {
         padding-left: 0;
-    }
-}
-
-@media (max-width: 480px) {
-    .hero h1 {
-        font-size: 2.5rem;
-    }
-    
-    .logo {
-        font-size: 1.4rem;
-    }
-
-    header {
-        height: 80px;
     }
 }
 
 /* Fix sticky hover on touch devices */
 
 @media (hover: hover) {
-    .game-card:hover {
+    .GameCard:hover {
         transform: translateY(-12px) scale(1.02);
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--neon-shadow);
         border-color: rgba(58, 134, 255, 0.5);
     }
 
-    .game-card:hover .game-logo-wrapper,
-    .game-card:hover .game-title-overlay h3 {
+    .GameCard:hover .GameLogoWrapper,
+    .GameCard:hover .GameTitleOverlay h3 {
         transform: scale(1.05);
     }
 
-    .btn-more.state-published:hover {
+    .BtnMore.state-published:hover {
         background: var(--primary);
         color: white;
         box-shadow: 0 0 15px var(--primary);
     }
     
-    .history-link:hover {
+    .HistoryLink:hover {
         opacity: 1;
         color: var(--primary);
     }
-
-    .modal-close:hover {
-        color: var(--secondary);
-    }
-}
-
-/* Animations */
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.animate-fade {
-    opacity: 0;
-}
-
-.animate-fade.visible {
-    animation: fadeIn 1s ease var(--delay, 0s) forwards;
-}
-
-.delay-1 { animation-delay: 0.2s; }
-
-.delay-2 { animation-delay: 0.4s; }
-
-.delay-3 { animation-delay: 0.6s; }
-
-/* Modal */
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(15px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.4s ease;
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal-content {
-    background: var(--bg-card);
-    width: 90%;
-    max-width: 700px;
-    max-height: 85vh;
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* ヘッダーとボディの境界を角丸に合わせる */
-    transform: translateY(40px);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-}
-
-.modal-overlay.active .modal-content {
-    transform: translateY(0);
-}
-
-.modal-header {
-    padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--glass-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.modal-title {
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: var(--text-main);
-    margin: 0;
-    letter-spacing: -0.01em;
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.modal-close:hover {
-    color: var(--text-main);
-}
-
-.modal-body {
-    padding: 2rem;
-    overflow-y: auto;
-    flex-grow: 1;
-}
-
-@media (max-width: 600px) {
-    .modal-header {
-        padding: 1rem 1.5rem;
-    }
-    .modal-body {
-        padding: 1.5rem;
-    }
-    .modal-title {
-        font-size: 1.2rem;
-    }
-}
-
-/* Timeline */
-
-.history-item {
-    margin-bottom: 2.5rem;
-    position: relative;
-    padding-left: 1.5rem;
-    border-left: 2px solid var(--primary);
-}
-
-.history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.history-version {
-    color: var(--primary);
-    font-weight: 900;
-    font-family: var(--font-heading);
-}
-
-.history-date {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.history-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.history-changes {
-    list-style: none;
-    font-size: 0.95rem;
-    color: var(--text-muted);
-}
-
-.history-changes li {
-    margin-bottom: 0.3rem;
-    position: relative;
-    padding-left: 1rem;
-}
-
-.history-changes li::before {
-    display: none; /* ドットを非表示にしてタグを優先 */
-}
-
-.history-tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 0.65rem;
-    letter-spacing: 0.05em;
-    padding: 2px 8px;
-    border-radius: 6px;
-    border: 1px solid currentColor;
-    margin-right: 0.6rem;
-    white-space: nowrap;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-    vertical-align: middle;
-    min-width: 3.5rem;
-}
-
-.history-tag.tag-new {
-    color: hsl(180, 100%, 60%);
-    background: hsla(180, 100%, 60%, 0.08);
-    box-shadow: 0 0 8px hsla(180, 100%, 60%, 0.12);
-}
-
-.history-tag.tag-imp {
-    color: hsl(285, 100%, 72%);
-    background: hsla(285, 100%, 72%, 0.08);
-    box-shadow: 0 0 8px hsla(285, 100%, 72%, 0.12);
-}
-
-.history-tag.tag-fix {
-    color: hsl(35, 100%, 60%);
-    background: hsla(35, 100%, 60%, 0.08);
-    box-shadow: 0 0 8px hsla(35, 100%, 60%, 0.12);
-}
-
-.history-tag.tag-etc {
-    color: hsl(0, 0%, 75%);
-    background: hsla(0, 0%, 75%, 0.06);
-}
-
-.modal-placeholder {
-    text-align: center;
-    padding: 4rem;
-    color: var(--text-muted);
-}
-
-.modal-placeholder p {
-    font-size: 1.1rem;
-    letter-spacing: 0.1em;
-    margin: 0;
-}
-
-.loading-spinner {
-    text-align: center;
-    padding: 3rem;
-    color: var(--text-muted);
 }
 
 /* Maintenance Card Fallback Styles (State-based Unification) */
 
-.game-card.state-maintenance {
+.GameCard.state-maintenance {
     border-color: rgba(255, 255, 255, 0.04) !important;
     background: rgba(15, 15, 25, 0.6) !important;
 }
 
-.game-card.state-maintenance .game-img {
+.GameCard.state-maintenance .GameImg {
     background: linear-gradient(135deg, rgba(25, 25, 45, 0.9) 0%, rgba(8, 8, 16, 0.95) 100%) !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.game-card.state-maintenance .game-title-overlay {
+.GameCard.state-maintenance .GameTitleOverlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -803,7 +626,7 @@ footer {
 
 /* Calm warn icon via CSS pseudo-element ::before */
 
-.game-card.state-maintenance .game-title-overlay::before {
+.GameCard.state-maintenance .GameTitleOverlay::before {
     content: "";
     width: 36px;
     height: 36px;
@@ -814,9 +637,9 @@ footer {
     animation: pulse 3s infinite ease-in-out;
 }
 
-/* Objective MAITENANCE text via CSS pseudo-element ::after */
+/* Objective MAINTENANCE text via CSS pseudo-element ::after */
 
-.game-card.state-maintenance .game-title-overlay::after {
+.GameCard.state-maintenance .GameTitleOverlay::after {
     content: "MAINTENANCE";
     font-family: var(--font-heading);
     font-size: 0.7rem;
@@ -831,6 +654,14 @@ footer {
     color: var(--text-muted) !important;
     background: rgba(255, 255, 255, 0.03) !important;
     border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Disabled state inside maintenance cards */
+
+.GameCard.state-maintenance .HistoryLink {
+    cursor: not-allowed !important;
+    opacity: 0.25 !important;
+    pointer-events: none !important;
 }
 
 /* Calm opacity pulse for warning icons */
@@ -850,74 +681,207 @@ footer {
     animation: pulse 3s infinite ease-in-out;
 }
 
-/* Button Alignment and History Link Styles (Separated from HTML Inline Styles) */
+/* Update History Modal Section Styles */
 
-.btn-group {
+.ModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(15px);
+    z-index: 1000;
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-    margin-top: auto;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
 }
 
-.history-link {
+.ModalOverlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ModalContent {
+    background: var(--bg-card);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* ヘッダーとボディの境界を角丸に合わせる */
+    transform: translateY(40px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+}
+
+.ModalOverlay.active .ModalContent {
+    transform: translateY(0);
+}
+
+.ModalHeader {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.ModalTitle {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.ModalClose {
     background: transparent;
     border: none;
     color: var(--text-muted);
-    font-size: 0.7rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    text-decoration: underline;
-    opacity: 0.6;
-    white-space: nowrap;
-    flex-shrink: 0;
-    align-self: flex-end;
-    margin-bottom: 0.2rem;
+    transition: color 0.2s ease;
 }
 
-.history-link:hover {
+.ModalClose:hover {
     color: var(--text-main);
-    opacity: 0.9;
 }
 
-/* Disabled state inside maintenance cards */
-
-.game-card.state-maintenance .history-link {
-    cursor: not-allowed !important;
-    opacity: 0.25 !important;
-    pointer-events: none !important;
+.ModalBody {
+    padding: 2rem;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
-/* Premium Custom Scrollbar */
-
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+@media (max-width: 600px) {
+    .ModalHeader {
+        padding: 1rem 1.5rem;
+    }
+    .ModalBody {
+        padding: 1.5rem;
+    }
+    .ModalTitle {
+        font-size: 1.2rem;
+    }
 }
 
-::-webkit-scrollbar-track {
-    background: rgba(10, 10, 20, 0.3);
-    border-radius: 10px;
+/* Timeline */
+
+.HistoryItem {
+    margin-bottom: 2.5rem;
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--primary);
 }
 
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    border: 1px solid transparent;
-    background-clip: padding-box;
-    transition: background 0.3s ease;
+.HistoryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary);
-    box-shadow: 0 0 8px var(--primary);
+.HistoryVersion {
+    color: var(--primary);
+    font-weight: 900;
+    font-family: var(--font-heading);
 }
 
-/* For Firefox */
+.HistoryDate {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
 
-* {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.12) rgba(10, 10, 20, 0.3);
+.HistoryChanges {
+    list-style: none;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.HistoryChanges li {
+    margin-bottom: 0.3rem;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.HistoryChanges li::before {
+    display: none; /* ドットを非表示にしてタグを優先 */
+}
+
+.HistoryTag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid currentColor;
+    margin-right: 0.6rem;
+    white-space: nowrap;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    vertical-align: middle;
+    min-width: 3.5rem;
+}
+
+.HistoryTag.tag-new {
+    color: hsl(180, 100%, 60%);
+    background: hsla(180, 100%, 60%, 0.08);
+    box-shadow: 0 0 8px hsla(180, 100%, 60%, 0.12);
+}
+
+.HistoryTag.tag-imp {
+    color: hsl(285, 100%, 72%);
+    background: hsla(285, 100%, 72%, 0.08);
+    box-shadow: 0 0 8px hsla(285, 100%, 72%, 0.12);
+}
+
+.HistoryTag.tag-fix {
+    color: hsl(35, 100%, 60%);
+    background: hsla(35, 100%, 60%, 0.08);
+    box-shadow: 0 0 8px hsla(35, 100%, 60%, 0.12);
+}
+
+.HistoryTag.tag-etc {
+    color: hsl(0, 0%, 75%);
+    background: hsla(0, 0%, 75%, 0.06);
+}
+
+.ModalPlaceholder {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+}
+
+.ModalPlaceholder p {
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    margin: 0;
+}
+
+.LoadingSpinner {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+}
+
+@media (hover: hover) {
+    .ModalClose:hover {
+        color: var(--secondary);
+    }
 }

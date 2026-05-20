@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.12",
+    "date": "2026-05-20",
+    "content": [
+      { "type": "fix", "text": "index.html の main 閉じタグの欠落を解消し、HTML マークアップのセマンティック構造を修正" },
+      { "type": "imp", "text": "スタイルガイドに厳密に準拠するため、レイアウトや形状を司る機能クラスをすべて UpperCamelCase に統一" },
+      { "type": "imp", "text": "CSS ファイルを base, card, modal にコンポーネント分割し、可読性とメンテナンス性を向上" },
+      { "type": "fix", "text": "スタイル詳細度の制御により、禁止事項である !important 指定を完全に排除" }
+    ]
+  },
+  {
     "version": "0.11",
     "date": "2026-05-19",
     "content": [
