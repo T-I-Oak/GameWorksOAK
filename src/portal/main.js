@@ -257,10 +257,10 @@ function initScrollEffects() {
         // Cog rotation
         const rotation = scrollY * 0.5;
         if (cog1) {
-            cog1.setAttribute('transform', `rotate(${rotation}, 110.72, 23.20)`);
+            cog1.setAttribute('transform', `rotate(${rotation}, 98.002383, 16.425182)`);
         }
         if (cog2) {
-            cog2.setAttribute('transform', `matrix(0.17386665, 0.04658743, -0.04658743, 0.17386665, 124.54416, 18.909185) rotate(${-rotation}, 100, 100)`);
+            cog2.setAttribute('transform', `rotate(${-rotation}, 124.554465, 34.179775)`);
         }
     });
 
