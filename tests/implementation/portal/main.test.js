@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { initPortal, showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
 
 // DOM のモック
@@ -198,5 +199,29 @@ describe('portal main.js - initPortal', () => {
         const gamesGrid = document.getElementById('gamesGrid');
         expect(gamesGrid.innerHTML).toContain('<img class="GameLogoImg" src="https://t-i-oak.github.io/MagicCrystal/assets/logo.png" alt="Magic Crystal logo">');
         expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should rotate normalized logo cogs around their real coordinates', async () => {
+        commonFetch.mockResolvedValueOnce([]);
+
+        await initPortal();
+
+        Object.defineProperty(window, 'scrollY', {
+            value: 120,
+            configurable: true
+        });
+        window.dispatchEvent(new Event('scroll'));
+
+        expect(document.getElementById('logo-cog-1').getAttribute('transform')).toBe('rotate(60, 98.002383, 16.425182)');
+        expect(document.getElementById('logo-cog-2').getAttribute('transform')).toBe('rotate(-60, 124.554465, 34.179775)');
+    });
+
+    it('should keep the header logo text vectorized and cogs addressable', () => {
+        const html = readFileSync('index.html', 'utf8');
+
+        expect(html).toContain('id="logo-cog-1"');
+        expect(html).toContain('id="logo-cog-2"');
+        expect(html).not.toContain('<text');
+        expect(html).not.toContain('matrix(0.17386665');
     });
 });
