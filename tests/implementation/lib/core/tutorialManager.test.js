@@ -157,14 +157,112 @@ describe('TutorialManager common module', () => {
         const resumed = new TutorialManager(mockScenarios, {
             ...options,
             initialScenarioIndex: 1,
-            defaultPadding: 12
+            defaultPadding: 12,
+            defaultRadius: 6
         });
 
         expect(resumed.currentScenarioIndex).toBe(1);
         expect(resumed.defaultPadding).toBe(12);
+        expect(resumed.defaultRadius).toBe(6);
 
         resumed.resetTutorial();
         expect(resumed.currentScenarioIndex).toBe(0);
         expect(options.onSaveIndex).toHaveBeenCalledWith(0);
+    });
+
+    test('uses display indexes for external progress and skips defaults records', () => {
+        const scenarios = [
+            { type: 'defaults', highlightDefaults: { shape: 'rect', padding: 4 } },
+            mockScenarios[0],
+            { type: 'defaults', highlightDefaults: { radius: 0 } },
+            mockScenarios[1]
+        ];
+        const resumed = new TutorialManager(scenarios, {
+            ...options,
+            initialScenarioIndex: 1
+        });
+
+        expect(resumed.currentScenarioIndex).toBe(3);
+        expect(resumed.willTrigger('afterAction', { allowedTriggers: ['afterAction'] })).toBe(true);
+
+        resumed.checkTrigger('afterAction', { allowedTriggers: ['afterAction'] });
+        resumed.advanceScenario();
+
+        expect(options.onSaveIndex).toHaveBeenCalledWith(2);
+    });
+
+    test('prefers scenario id for restore and saved progress', () => {
+        const scenarios = [
+            { id: 'intro', trigger: 'turnStart', title: 'Intro', pages: mockScenarios[0].pages },
+            { type: 'defaults', highlightDefaults: { padding: { x: 8, y: 2 } } },
+            { id: 'action', trigger: 'afterAction', title: 'Action', pages: mockScenarios[1].pages }
+        ];
+        const resumed = new TutorialManager(scenarios, {
+            ...options,
+            initialScenarioIndex: 'intro'
+        });
+
+        resumed.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
+        resumed.advanceScenario();
+        resumed.advanceScenario();
+
+        expect(options.onSaveIndex).toHaveBeenCalledWith('action');
+
+        resumed.resetTutorial();
+        expect(options.onSaveIndex).toHaveBeenCalledWith('intro');
+    });
+
+    test('applies defaults records before restored display scenarios', () => {
+        const scenarios = [
+            { type: 'defaults', highlightDefaults: { shape: 'rect', padding: { x: 10, y: 5 }, radius: 0 } },
+            mockScenarios[0],
+            { type: 'defaults', highlightDefaults: { radius: 3 } },
+            mockScenarios[1]
+        ];
+        const resumed = new TutorialManager(scenarios, {
+            ...options,
+            initialScenarioIndex: 1
+        });
+
+        const resolved = resumed.resolveHighlight({ targetType: 'piece' }, mockScenarios[1].pages[0]);
+        expect(resolved).toMatchObject({
+            shape: 'rect',
+            padding: { x: 10, y: 5 },
+            radius: 3
+        });
+    });
+
+    test('calculates padding, circle, ellipse, and clamped rect radius', () => {
+        const geometryManager = new TutorialManager(mockScenarios, {
+            ...options,
+            defaultPadding: { x: 4, y: 6 },
+            defaultRadius: 100
+        });
+        const rect = { top: 20, left: 10, width: 40, height: 12 };
+
+        expect(geometryManager.getHighlightBounds(rect, { shape: 'rect' })).toEqual({
+            type: 'rect',
+            left: 6,
+            top: 14,
+            width: 48,
+            height: 24,
+            radius: 12
+        });
+
+        expect(geometryManager.getHighlightBounds(rect, { shape: 'ellipse', padding: { x: 2, y: 8 } })).toMatchObject({
+            type: 'ellipse',
+            cx: 30,
+            cy: 26,
+            rx: 22,
+            ry: 14
+        });
+
+        expect(geometryManager.getHighlightBounds(rect, { shape: 'circle', padding: { x: 2, y: 8 } })).toMatchObject({
+            type: 'circle',
+            cx: 30,
+            cy: 26,
+            rx: 28,
+            ry: 28
+        });
     });
 });

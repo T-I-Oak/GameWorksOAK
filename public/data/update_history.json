@@ -3,6 +3,7 @@
     "version": "0.13",
     "date": "2026-05-21",
     "content": [
+      { "type": "new", "text": "共通チュートリアル管理で、JSON defaults、シナリオ id による再開、display index 保存、ハイライトの padding/radius/shape 拡張に対応" },
       { "type": "fix", "text": "index.html の main 閉じタグの欠落を解消し、HTML マークアップのセマンティック構造を修正" },
       { "type": "imp", "text": "スタイルガイドに厳密に準拠するため、レイアウトや形状を司る機能クラスをすべて UpperCamelCase に統一" },
       { "type": "imp", "text": "CSS ファイルを base, card, modal にコンポーネント分割し、可読性とメンテナンス性を向上" },
