@@ -6,7 +6,7 @@ const MAX_DEPTH = 10;
 
 /**
  * 言語設定を取得します。
- * @returns {string} 現在の言語コード (例: 'en', 'jp')
+ * @returns {string} 現在の言語コード (例: 'en', 'ja')
  */
 export function getLanguage() {
     try {
