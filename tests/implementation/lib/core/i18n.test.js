@@ -19,15 +19,16 @@ export const testI18n = () => {
     try {
         localStorage.clear();
 
-        // 1. デフォルト言語
-        results.push({ name: 'i18n: Default language is en', pass: getLanguage() === 'en' });
+        // 1. デフォルト言語の検証（未選択時は "ja" であること）
+        results.push({ name: 'i18n: Default initial language is ja', pass: getLanguage() === 'ja' });
 
         // 2. 言語設定の設定と取得
-        setLanguage('ja');
-        results.push({ name: 'i18n: setLanguage/getLanguage ja works', pass: getLanguage() === 'ja' });
-        results.push({ name: 'i18n: storage key is gameworks_portal_lang', pass: localStorage.getItem('gameworks_portal_lang') === 'ja' });
+        setLanguage('en');
+        results.push({ name: 'i18n: setLanguage/getLanguage en works', pass: getLanguage() === 'en' });
+        results.push({ name: 'i18n: storage key is gameworks_portal_lang', pass: localStorage.getItem('gameworks_portal_lang') === 'en' });
 
         // 3. 単純なオブジェクト展開
+        setLanguage('ja'); // 日本語に設定
         const simpleObj = {
             title: {
                 'lang-store': {
@@ -45,7 +46,7 @@ export const testI18n = () => {
         const expandedEn = expandLanguageResource(simpleObj);
         results.push({ name: 'i18n: expandLanguageResource simple replacement (en)', pass: expandedEn.title === 'Hello' });
 
-        // 4. フォールバックの検証
+        // 4. フォールバックの検証 (現在の選択言語 ja が定義されていないとき、en にフォールバックされること)
         setLanguage('ja'); // ja に設定
         const fallbackObj = {
             title: {

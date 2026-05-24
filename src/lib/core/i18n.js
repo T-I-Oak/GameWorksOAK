@@ -1,7 +1,8 @@
 import { commonFetch } from '../utils/fetch.js';
 
 const STORAGE_KEY = 'gameworks_portal_lang';
-const DEFAULT_LANG = 'en';
+const INITIAL_LANG = 'ja';  // 言語未選択時のデフォルト（初期言語）
+const FALLBACK_LANG = 'en'; // リソースフォールバック用のデフォルト
 const MAX_DEPTH = 10;
 
 /**
@@ -10,9 +11,9 @@ const MAX_DEPTH = 10;
  */
 export function getLanguage() {
     try {
-        return localStorage.getItem(STORAGE_KEY) || DEFAULT_LANG;
+        return localStorage.getItem(STORAGE_KEY) || INITIAL_LANG;
     } catch (e) {
-        return DEFAULT_LANG;
+        return INITIAL_LANG;
     }
 }
 
@@ -55,10 +56,11 @@ export function expandLanguageResource(val, depth = 0) {
         const store = val['lang-store'];
         if (store && typeof store === 'object') {
             const currentLang = getLanguage();
-            // 指定言語の設定がなければ "en"
+            // 1. まず現在の選択言語を試みる
             let selectedResource = store[currentLang];
+            // 2. 現在の選択言語が無ければ、フォールバック言語 (FALLBACK_LANG = 'en') を適用
             if (selectedResource === undefined) {
-                selectedResource = store[DEFAULT_LANG];
+                selectedResource = store[FALLBACK_LANG];
             }
             // 選択されたリソースに対しても再帰的に展開を適用する
             return expandLanguageResource(selectedResource, depth + 1);
