@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initPortal, showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
+import { initPortal, showHistory, resolveAbsoluteUrl, clearPortalCache } from '../../../src/portal/main.js';
 
 // localStorage の共通モック
 const mockStore = {};
@@ -45,6 +45,7 @@ describe('portal main.js - showHistory', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorage.clear();
+        clearPortalCache();
         // showHistory用の最小限のDOMを設定
         document.body.innerHTML = `
             <select id="language-selector">
@@ -116,6 +117,7 @@ describe('portal main.js - initPortal', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorage.clear();
+        clearPortalCache();
         // DOMの初期化
         document.body.innerHTML = `
             <header>

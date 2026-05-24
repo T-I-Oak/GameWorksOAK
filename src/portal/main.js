@@ -9,6 +9,24 @@ import portalLocRaw from './portal_loc.json';
 
 let portalDataManager;
 
+// 多言語展開前の生のデータをキャッシュする変数 (言語変更時の無駄な fetch を防止する共通キャッシュ仕様)
+let cachedRawProjectList = null;
+const cachedRawProjectInfos = {}; // projectId -> raw project_info
+const cachedRawHistories = {};    // projectId -> raw update_history
+
+/**
+ * キャッシュデータを完全にクリアします（テスト用・およびデータ強制更新用）
+ */
+export function clearPortalCache() {
+    cachedRawProjectList = null;
+    for (const key of Object.keys(cachedRawProjectInfos)) {
+        delete cachedRawProjectInfos[key];
+    }
+    for (const key of Object.keys(cachedRawHistories)) {
+        delete cachedRawHistories[key];
+    }
+}
+
 export async function initPortal() {
     // DataManagerの初期化 (Portal用)
     portalDataManager = new DataManager('portal');
@@ -58,9 +76,11 @@ async function loadProjects() {
     const loc = expandLanguageResource(portalLocRaw);
     grid.innerHTML = `<div class="LoadingProjects">${loc.loading}</div>`;
 
-    // 1. プロジェクトリストを取得 (多言語対応)
-    const rawProjects = await commonFetch('data/project_list.json');
-    const projects = expandLanguageResource(rawProjects);
+    // 1. プロジェクトリストを取得 (キャッシュがあれば再利用、多言語対応)
+    if (!cachedRawProjectList) {
+        cachedRawProjectList = await commonFetch('data/project_list.json');
+    }
+    const projects = expandLanguageResource(cachedRawProjectList);
 
     // 2. 各プロジェクトの詳細データを取得
     const projectData = await Promise.all(projects.map(async project => {
@@ -68,20 +88,27 @@ async function loadProjects() {
         const title = project.title;
         const baseUrl = `https://t-i-oak.github.io/${id}/`;
 
-        let data = null;
+        let rawData = cachedRawProjectInfos[id] || null;
 
-        // リモートの project_info.json からのロードを最優先で試みる
-        const remoteInfoUrl = resolveAbsoluteUrl('data/project_info.json', baseUrl);
-        try {
-            const infoRes = await fetch(remoteInfoUrl);
-            if (infoRes.ok) {
-                const rawData = await infoRes.json();
-                // 取得した詳細情報に多言語展開を適用
-                data = expandLanguageResource(rawData);
-                data.isMaintenance = false;
+        if (!rawData) {
+            // リモートの project_info.json からのロードを最優先で試みる
+            const remoteInfoUrl = resolveAbsoluteUrl('data/project_info.json', baseUrl);
+            try {
+                const infoRes = await fetch(remoteInfoUrl);
+                if (infoRes.ok) {
+                    rawData = await infoRes.json();
+                    cachedRawProjectInfos[id] = rawData; // キャッシュに格納
+                }
+            } catch (e) {
+                // ロード失敗時は catch して null のままとする
             }
-        } catch (e) {
-            // ロード失敗時は catch して null のままとする
+        }
+
+        let data = null;
+        if (rawData) {
+            // キャッシュされた生データを、現在の選択言語で展開
+            data = expandLanguageResource(rawData);
+            data.isMaintenance = false;
         }
 
         // ロードに失敗した（準備中やネットワークエラー等）場合は簡易表示モードにする
@@ -117,17 +144,29 @@ async function loadProjects() {
                 data.image = resolveAbsoluteUrl(data.image, baseUrl);
             }
 
-            // ロゴのSVGをfetchしてinlining
-            if (data.logo && data.logo.path) {
+            // ロゴのSVGをfetchしてinlining (SVG自体は多言語化されないアセットと仮定し、一度読み込んだら data.logo.content に記憶)
+            // もし data.logo.content がまだ fetch されていない場合のみ fetch する
+            if (data.logo && data.logo.path && !data.logo.content) {
                 const absoluteLogoPath = resolveAbsoluteUrl(data.logo.path, baseUrl);
                 data.logo.path = absoluteLogoPath;
 
                 if (isSvgLogoPath(absoluteLogoPath)) {
-                    const logoRes = await fetch(absoluteLogoPath);
-                    if (logoRes.ok) {
-                        data.logo.content = await logoRes.text();
+                    try {
+                        const logoRes = await fetch(absoluteLogoPath);
+                        if (logoRes.ok) {
+                            // 生データ側のロゴキャッシュにコンテンツを格納し、再読み込み時にも引き継げるようにする
+                            if (cachedRawProjectInfos[id] && cachedRawProjectInfos[id].logo) {
+                                cachedRawProjectInfos[id].logo.content = await logoRes.text();
+                            }
+                            data.logo.content = cachedRawProjectInfos[id].logo.content;
+                        }
+                    } catch (e) {
+                        // エラーハンドリング
                     }
                 }
+            } else if (data.logo && cachedRawProjectInfos[id] && cachedRawProjectInfos[id].logo) {
+                // キャッシュされているロゴSVGデータを適用
+                data.logo.content = cachedRawProjectInfos[id].logo.content;
             }
         }
 
@@ -231,17 +270,24 @@ export async function showHistory(projectId) {
 
     try {
         // マニフェストからタイトルを取得
-        const rawProjects = await commonFetch('data/project_list.json');
-        const projects = expandLanguageResource(rawProjects);
+        if (!cachedRawProjectList) {
+            cachedRawProjectList = await commonFetch('data/project_list.json');
+        }
+        const projects = expandLanguageResource(cachedRawProjectList);
         const project = projects.find(p => p.id === projectId);
         const title = project ? project.title : projectId;
 
         modalTitle.textContent = `${title} - ${loc.updateHistory}`;
 
-        const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
-        const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
-        
-        const rawHistory = await commonFetch(fetchUrl);
+        let rawHistory = cachedRawHistories[projectId] || null;
+
+        if (!rawHistory) {
+            const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
+            const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
+            rawHistory = await commonFetch(fetchUrl);
+            cachedRawHistories[projectId] = rawHistory; // キャッシュに格納
+        }
+
         // 履歴情報の多言語展開
         const history = expandLanguageResource(rawHistory);
         renderHistory(history, modalBody);
@@ -320,7 +366,7 @@ function initScrollEffects() {
 
 /**
  * ロゴSVGなどのパスを、プロジェクトのベースURLを基準とする動的絶対パスに変換する
- * @param {string} path 対象の相対パスまたは絶対パス
+ * @param {string} path 対象 of 相対パスまたは絶対パス
  * @param {string} baseUrl 基準とするベースURL
  * @returns {string} 解決された絶対パス
  */
