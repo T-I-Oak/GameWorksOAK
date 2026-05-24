@@ -283,6 +283,63 @@ footer {
     scrollbar-color: rgba(255, 255, 255, 0.12) rgba(10, 10, 20, 0.3);
 }
 
+/* Language Selector */
+
+.HeaderNav {
+    display: flex;
+    align-items: center;
+}
+
+.LanguageSelectorWrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.LanguageSelector {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    padding: 0.4rem 2rem 0.4rem 1rem;
+    font-size: 0.85rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.LanguageSelector:hover, .LanguageSelector:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(58, 134, 255, 0.2);
+    outline: none;
+}
+
+.LanguageSelectorWrapper::after {
+    content: "▼";
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+.LanguageSelectorWrapper:hover::after {
+    color: var(--primary);
+}
+
+.LanguageSelector option {
+    background: #0d0e15;
+    color: var(--text-main);
+}
+
 /* Game Cards Section Styles */
 
 .GamesGrid {

@@ -1,9 +1,41 @@
 [
   {
+    "version": "1.1",
+    "date": "2026-05-24",
+    "content": [
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "多言語対応（i18n）共通モジュールの追加とDataManagerの拡張",
+            "en": "Add multi-language (i18n) common module and DataManager extension"
+          }
+        }
+      },
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "ポータルサイトの多言語対応（日本語 / 英語の切り替えプルダウン実装）",
+            "en": "Multi-language support for portal site (implement language selector dropdown)"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.0",
     "date": "2026-05-22",
     "content": [
-      { "type": "new", "text": "初版リリース" }
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "初版リリース",
+            "en": "First release"
+          }
+        }
+      }
     ]
   }
 ]
