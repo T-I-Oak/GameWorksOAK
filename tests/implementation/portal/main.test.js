@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initPortal, showHistory, resolveAbsoluteUrl, clearPortalCache } from '../../../src/portal/main.js';
+import { initPortal, showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
+import { clearL10nCache } from '../../../src/lib/core/i18n.js';
 
 // localStorage の共通モック
 const mockStore = {};
@@ -45,7 +46,7 @@ describe('portal main.js - showHistory', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorage.clear();
-        clearPortalCache();
+        clearL10nCache();
         // showHistory用の最小限のDOMを設定
         document.body.innerHTML = `
             <select id="language-selector">
@@ -117,7 +118,7 @@ describe('portal main.js - initPortal', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         localStorage.clear();
-        clearPortalCache();
+        clearL10nCache();
         // DOMの初期化
         document.body.innerHTML = `
             <header>
@@ -141,7 +142,7 @@ describe('portal main.js - initPortal', () => {
         `;
         global.__APP_VERSION__ = '0.10.0';
         
-        // global.fetch のモック
+        // global.fetch のモック (ロゴSVGの fetch など)
         global.fetch = vi.fn();
 
         // IntersectionObserver のモック (JSDOM環境用)
@@ -167,22 +168,14 @@ describe('portal main.js - initPortal', () => {
             button: { content: 'PLAY', url: 'https://t-i-oak.github.io/BurstCascade/index.html', type: 'published' }
         };
 
-        // commonFetch のモック (project_list.json のロード)
+        // commonFetch で project_list.json と project_info.json を順番に解決
         commonFetch.mockResolvedValueOnce(projectList);
+        commonFetch.mockResolvedValueOnce(projectInfo);
 
-        // global.fetch のモック (project_info.json のロード用)
-        global.fetch.mockImplementation((url) => {
-            if (url.includes('project_info.json')) {
-                return Promise.resolve({
-                    ok: true,
-                    json: () => Promise.resolve(projectInfo)
-                });
-            }
-            // 他のfetch（ロゴなど）は空のレスポンス
-            return Promise.resolve({
-                ok: true,
-                text: () => Promise.resolve('<svg></svg>')
-            });
+        // ロゴやその他アセットの fetch 用のダミー
+        global.fetch.mockResolvedValue({
+            ok: true,
+            text: () => Promise.resolve('<svg></svg>')
         });
 
         await initPortal();
@@ -210,26 +203,17 @@ describe('portal main.js - initPortal', () => {
             button: { content: 'PLAY', url: 'https://t-i-oak.github.io/MagicCrystal/index.html', type: 'published' }
         };
 
+        // commonFetch で project_list.json と project_info.json を順番に解決
         commonFetch.mockResolvedValueOnce(projectList);
-        global.fetch.mockImplementation((url) => {
-            if (url.includes('project_info.json')) {
-                return Promise.resolve({
-                    ok: true,
-                    json: () => Promise.resolve(projectInfo)
-                });
-            }
-
-            return Promise.resolve({
-                ok: true,
-                text: () => Promise.resolve('<svg></svg>')
-            });
-        });
+        commonFetch.mockResolvedValueOnce(projectInfo);
 
         await initPortal();
 
         const gamesGrid = document.getElementById('gamesGrid');
         expect(gamesGrid.innerHTML).toContain('<img class="GameLogoImg" src="https://t-i-oak.github.io/MagicCrystal/assets/logo.png" alt="Magic Crystal logo">');
-        expect(global.fetch).toHaveBeenCalledTimes(1);
+        
+        // PNG画像ロゴの場合は SVG と違って fetch(path) は走らないこと
+        expect(global.fetch).not.toHaveBeenCalled();
     });
 
     it('should rotate normalized logo cogs around their real coordinates', async () => {

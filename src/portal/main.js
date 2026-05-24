@@ -1,5 +1,5 @@
 import { commonFetch } from '../lib/utils/fetch.js';
-import { getLanguage, setLanguage, expandLanguageResource } from '../lib/core/i18n.js';
+import { getLanguage, setLanguage, expandLanguageResource, loadJsonWithL10nCached, setupLanguageSelector } from '../lib/core/i18n.js';
 import { DataManager } from '../lib/core/dataManager.js';
 import portalLocRaw from './portal_loc.json';
 
@@ -9,41 +9,19 @@ import portalLocRaw from './portal_loc.json';
 
 let portalDataManager;
 
-// 多言語展開前の生のデータをキャッシュする変数 (言語変更時の無駄な fetch を防止する共通キャッシュ仕様)
-let cachedRawProjectList = null;
-const cachedRawProjectInfos = {}; // projectId -> raw project_info
-const cachedRawHistories = {};    // projectId -> raw update_history
-
-/**
- * キャッシュデータを完全にクリアします（テスト用・およびデータ強制更新用）
- */
-export function clearPortalCache() {
-    cachedRawProjectList = null;
-    for (const key of Object.keys(cachedRawProjectInfos)) {
-        delete cachedRawProjectInfos[key];
-    }
-    for (const key of Object.keys(cachedRawHistories)) {
-        delete cachedRawHistories[key];
-    }
-}
-
 export async function initPortal() {
     // DataManagerの初期化 (Portal用)
     portalDataManager = new DataManager('portal');
 
-    // 言語プルダウンの初期化
-    const selector = document.getElementById('language-selector');
-    if (selector) {
-        selector.value = getLanguage();
-        selector.addEventListener('change', (e) => {
-            setLanguage(e.target.value);
-            applyPortalLanguage();
-            loadProjects();
-        });
-    }
+    // 言語プルダウンの初期化 (共通UIバインドヘルパーを適用、サポート言語を必須指定)
+    setupLanguageSelector('#language-selector', ['ja', 'en'], () => {
+        applyPortalLanguage();
+        loadProjects();
+    });
 
     // ポータルの共通テキスト適用
     applyPortalLanguage();
+
 
     await loadProjects();
     initScrollEffects();
@@ -76,11 +54,8 @@ async function loadProjects() {
     const loc = expandLanguageResource(portalLocRaw);
     grid.innerHTML = `<div class="LoadingProjects">${loc.loading}</div>`;
 
-    // 1. プロジェクトリストを取得 (キャッシュがあれば再利用、多言語対応)
-    if (!cachedRawProjectList) {
-        cachedRawProjectList = await commonFetch('data/project_list.json');
-    }
-    const projects = expandLanguageResource(cachedRawProjectList);
+    // 1. プロジェクトリストを取得 (キャッシュ付き多言語ロード)
+    const projects = await loadJsonWithL10nCached('data/project_list.json');
 
     // 2. 各プロジェクトの詳細データを取得
     const projectData = await Promise.all(projects.map(async project => {
@@ -88,27 +63,15 @@ async function loadProjects() {
         const title = project.title;
         const baseUrl = `https://t-i-oak.github.io/${id}/`;
 
-        let rawData = cachedRawProjectInfos[id] || null;
-
-        if (!rawData) {
-            // リモートの project_info.json からのロードを最優先で試みる
-            const remoteInfoUrl = resolveAbsoluteUrl('data/project_info.json', baseUrl);
-            try {
-                const infoRes = await fetch(remoteInfoUrl);
-                if (infoRes.ok) {
-                    rawData = await infoRes.json();
-                    cachedRawProjectInfos[id] = rawData; // キャッシュに格納
-                }
-            } catch (e) {
-                // ロード失敗時は catch して null のままとする
-            }
-        }
-
         let data = null;
-        if (rawData) {
-            // キャッシュされた生データを、現在の選択言語で展開
-            data = expandLanguageResource(rawData);
+
+        // リモートの project_info.json からのロード (キャッシュ付き多言語ロード)
+        const remoteInfoUrl = resolveAbsoluteUrl('data/project_info.json', baseUrl);
+        try {
+            data = await loadJsonWithL10nCached(remoteInfoUrl);
             data.isMaintenance = false;
+        } catch (e) {
+            // ロード失敗時は catch して null のままとする
         }
 
         // ロードに失敗した（準備中やネットワークエラー等）場合は簡易表示モードにする
@@ -154,19 +117,12 @@ async function loadProjects() {
                     try {
                         const logoRes = await fetch(absoluteLogoPath);
                         if (logoRes.ok) {
-                            // 生データ側のロゴキャッシュにコンテンツを格納し、再読み込み時にも引き継げるようにする
-                            if (cachedRawProjectInfos[id] && cachedRawProjectInfos[id].logo) {
-                                cachedRawProjectInfos[id].logo.content = await logoRes.text();
-                            }
-                            data.logo.content = cachedRawProjectInfos[id].logo.content;
+                            data.logo.content = await logoRes.text();
                         }
                     } catch (e) {
                         // エラーハンドリング
                     }
                 }
-            } else if (data.logo && cachedRawProjectInfos[id] && cachedRawProjectInfos[id].logo) {
-                // キャッシュされているロゴSVGデータを適用
-                data.logo.content = cachedRawProjectInfos[id].logo.content;
             }
         }
 
@@ -234,7 +190,7 @@ function renderProjects(projects) {
         `;
     }).join('');
 
-    // イベントリスナーの付与
+    // イベントリスナー of 付与
     grid.querySelectorAll('.HistoryLink').forEach(btn => {
         btn.addEventListener('click', () => showHistory(btn.dataset.projectId));
     });
@@ -269,27 +225,18 @@ export async function showHistory(projectId) {
     modalOverlay.classList.add('active');
 
     try {
-        // マニフェストからタイトルを取得
-        if (!cachedRawProjectList) {
-            cachedRawProjectList = await commonFetch('data/project_list.json');
-        }
-        const projects = expandLanguageResource(cachedRawProjectList);
+        // マニフェストからタイトルを取得 (キャッシュ付き多言語ロード)
+        const projects = await loadJsonWithL10nCached('data/project_list.json');
         const project = projects.find(p => p.id === projectId);
         const title = project ? project.title : projectId;
 
         modalTitle.textContent = `${title} - ${loc.updateHistory}`;
 
-        let rawHistory = cachedRawHistories[projectId] || null;
-
-        if (!rawHistory) {
-            const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
-            const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
-            rawHistory = await commonFetch(fetchUrl);
-            cachedRawHistories[projectId] = rawHistory; // キャッシュに格納
-        }
-
-        // 履歴情報の多言語展開
-        const history = expandLanguageResource(rawHistory);
+        const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
+        const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
+        
+        // 更新履歴を取得 (キャッシュ付き多言語ロード)
+        const history = await loadJsonWithL10nCached(fetchUrl);
         renderHistory(history, modalBody);
     } catch (e) {
         modalBody.innerHTML = `

@@ -1,23 +1,31 @@
-import { it, expect, describe, vi } from 'vitest';
-import { getLanguage, setLanguage, expandLanguageResource, loadJsonWithL10n } from '../../../../src/lib/core/i18n.js';
+import { it, expect, describe, vi, beforeEach } from 'vitest';
+import { 
+    getLanguage, 
+    setLanguage, 
+    expandLanguageResource, 
+    loadJsonWithL10n, 
+    getActiveLanguage, 
+    onLanguageChange, 
+    setupLanguageSelector, 
+    clearL10nCache 
+} from '../../../../src/lib/core/i18n.js';
+
+// localStorage のファイルグローバルモック化
+const mockStore = {};
+const localStorageMock = {
+    getItem: vi.fn((key) => mockStore[key] || null),
+    setItem: vi.fn((key, value) => { mockStore[key] = String(value); }),
+    removeItem: vi.fn((key) => { delete mockStore[key]; }),
+    clear: vi.fn(() => { for (let key in mockStore) delete mockStore[key]; })
+};
+Object.defineProperty(window, 'localStorage', { value: localStorageMock, configurable: true, writable: true });
 
 export const testI18n = () => {
     const results = [];
 
-    // localStorage のモック化
-    const originalLocalStorage = window.localStorage;
-    const mockStore = {};
-    const localStorageMock = {
-        getItem: (key) => mockStore[key] || null,
-        setItem: (key, value) => { mockStore[key] = String(value); },
-        removeItem: (key) => { delete mockStore[key]; },
-        clear: () => { for (let key in mockStore) delete mockStore[key]; }
-    };
-
-    Object.defineProperty(window, 'localStorage', { value: localStorageMock, configurable: true });
-
     try {
         localStorage.clear();
+        clearL10nCache();
 
         // 1. デフォルト言語の検証（未選択時は "ja" であること）
         results.push({ name: 'i18n: Default initial language is ja', pass: getLanguage() === 'ja' });
@@ -101,15 +109,19 @@ export const testI18n = () => {
 
     } catch (e) {
         results.push({ name: 'i18n tests', pass: false, error: e.message });
-    } finally {
-        Object.defineProperty(window, 'localStorage', { value: originalLocalStorage });
     }
 
     return results;
 };
 
 describe('i18n', () => {
-    it('should pass all implementation tests', () => {
+    beforeEach(() => {
+        clearL10nCache();
+        localStorage.clear();
+        vi.clearAllMocks();
+    });
+
+    it('should pass all basic implementation tests', () => {
         const results = testI18n();
         results.forEach(res => {
             expect(res.pass, `${res.name}: ${res.error}`).toBe(true);
@@ -126,7 +138,6 @@ describe('i18n', () => {
             }
         };
 
-        // window.fetch をモック化
         const fetchSpy = vi.spyOn(window, 'fetch').mockImplementation(() => {
             return Promise.resolve({
                 ok: true,
@@ -134,7 +145,6 @@ describe('i18n', () => {
             });
         });
 
-        // 言語を 'en' にセット
         setLanguage('en');
         const res = await loadJsonWithL10n('http://example.com/data.json');
         
@@ -142,5 +152,148 @@ describe('i18n', () => {
         expect(fetchSpy).toHaveBeenCalledWith('http://example.com/data.json', {});
 
         fetchSpy.mockRestore();
+    });
+
+    // 8. getActiveLanguage の自動補正テスト
+    describe('getActiveLanguage (Active Language resolution)', () => {
+        it('should return global language if no supported list is set', () => {
+            setLanguage('zh');
+            expect(getActiveLanguage()).toBe('zh');
+        });
+
+        it('should return global language if it is included in supported list', () => {
+            const select = document.createElement('select');
+            setupLanguageSelector(select, ['ja', 'en']);
+            
+            setLanguage('ja');
+            expect(getActiveLanguage()).toBe('ja');
+        });
+
+        it('should fall back to en if global language is unsupported but en is available', () => {
+            const select = document.createElement('select');
+            setupLanguageSelector(select, ['ja', 'en']);
+            
+            setLanguage('zh'); // サポート外の言語
+            expect(getActiveLanguage()).toBe('en'); // en に自動補正されること
+            expect(getLanguage()).toBe('zh'); // localStorageの生設定は壊さず温存されていること
+        });
+
+        it('should fall back to the first language in the list if global is unsupported and en is not available', () => {
+            const select = document.createElement('select');
+            setupLanguageSelector(select, ['ko', 'zh']); // ja, en が含まれないリスト
+            
+            setLanguage('ja'); // サポート外の言語
+            expect(getActiveLanguage()).toBe('ko'); // リスト先頭の ko に補正されること
+        });
+    });
+
+    // 9. onLanguageChange イベント伝播テスト
+    describe('onLanguageChange (Event subscription)', () => {
+        it('should trigger callback on active language changes', () => {
+            const callback = vi.fn();
+            const unsubscribe = onLanguageChange(callback);
+
+            setLanguage('en');
+            expect(callback).toHaveBeenCalledWith('en');
+            expect(callback).toHaveBeenCalledTimes(1);
+
+            unsubscribe();
+        });
+
+        it('should not trigger callback after unsubscription', () => {
+            const callback = vi.fn();
+            const unsubscribe = onLanguageChange(callback);
+
+            unsubscribe();
+            setLanguage('en');
+            expect(callback).not.toHaveBeenCalled();
+        });
+
+        it('should not trigger redundant callbacks if active language remains same', () => {
+            const select = document.createElement('select');
+            setupLanguageSelector(select, ['ja', 'en']); // ja, en のみサポート
+
+            const callback = vi.fn();
+            onLanguageChange(callback);
+
+            // サポート外の言語に設定 ➔ アクティブ言語は en に解決される
+            setLanguage('zh'); 
+            expect(callback).toHaveBeenCalledWith('en');
+            expect(callback).toHaveBeenCalledTimes(1);
+
+            // 別のサポート外言語に設定 ➔ アクティブ言語は依然として en のままであるため、発火が抑制されること
+            setLanguage('ko'); 
+            expect(callback).toHaveBeenCalledTimes(1); 
+        });
+
+        it('should handle storage event simulation', () => {
+            const callback = vi.fn();
+            onLanguageChange(callback);
+
+            // storage イベントのシミュレーション
+            const storageEvent = new window.Event('storage');
+            Object.defineProperty(storageEvent, 'key', { value: 'gameworks_portal_lang' });
+            
+            setLanguage('en'); // localStorageを変更しておく
+            window.dispatchEvent(storageEvent);
+
+            expect(callback).toHaveBeenCalledWith('en');
+        });
+    });
+
+    // 10. setupLanguageSelector (UIバインド & <option> 自動展開) テスト
+    describe('setupLanguageSelector (UI Dual-binding)', () => {
+        it('should generate option elements and populate display names', () => {
+            const select = document.createElement('select');
+            setupLanguageSelector(select, ['ja', 'en', 'fr']);
+
+            expect(select.options.length).toBe(3);
+            
+            expect(select.options[0].value).toBe('ja');
+            expect(select.options[0].textContent).toBe('日本語');
+            
+            expect(select.options[1].value).toBe('en');
+            expect(select.options[1].textContent).toBe('English');
+
+            // 規格外（fr）はコードがそのまま表示名になること
+            expect(select.options[2].value).toBe('fr');
+            expect(select.options[2].textContent).toBe('fr');
+        });
+
+        it('should synchronize value bidirectionally (UI change triggers setLanguage)', () => {
+            const select = document.createElement('select');
+            setupLanguageSelector(select, ['ja', 'en']);
+
+            expect(select.value).toBe('ja'); // 初期値
+
+            // UI操作のシミュレーション
+            select.value = 'en';
+            select.dispatchEvent(new window.Event('change'));
+
+            expect(getLanguage()).toBe('en'); // 設定が同期していること
+        });
+
+        it('should trigger custom onChangeCallback on changes', () => {
+            const select = document.createElement('select');
+            const callback = vi.fn();
+            setupLanguageSelector(select, ['ja', 'en'], callback);
+
+            select.value = 'en';
+            select.dispatchEvent(new window.Event('change'));
+
+            expect(callback).toHaveBeenCalledWith('en');
+        });
+
+        it('should synchronize dropdown visually when external setting changes', () => {
+            const select = document.createElement('select');
+            setupLanguageSelector(select, ['ja', 'en']);
+
+            expect(select.value).toBe('ja');
+
+            // 外部での言語設定変更
+            setLanguage('en');
+
+            expect(select.value).toBe('en'); // プルダウンの見た目も en に同期されていること
+        });
     });
 });
