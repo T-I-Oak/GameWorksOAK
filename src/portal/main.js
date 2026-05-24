@@ -1,70 +1,13 @@
 import { commonFetch } from '../lib/utils/fetch.js';
 import { getLanguage, setLanguage, expandLanguageResource } from '../lib/core/i18n.js';
 import { DataManager } from '../lib/core/dataManager.js';
+import portalLocRaw from './portal_loc.json';
 
 /**
  * GameWorks OAK Portal Main Logic
  */
 
 let portalDataManager;
-
-// ポータル固有のローカライズリソース辞書
-const PORTAL_LOC = {
-    heroSub: {
-        'lang-store': {
-            jp: 'T.I.OAKが贈る、独自の世界観と革新的なゲームプレイ。',
-            en: 'Unique worldviews and innovative gameplay presented by T.I.OAK.'
-        }
-    },
-    loading: {
-        'lang-store': {
-            jp: 'プロジェクトを読み込み中...',
-            en: 'Loading projects...'
-        }
-    },
-    maintenanceTags: {
-        'lang-store': {
-            jp: ['データ取得不可'],
-            en: ['Unavailable']
-        }
-    },
-    maintenanceDesc: {
-        'lang-store': {
-            jp: 'プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。',
-            en: 'Failed to retrieve project information. The project may be under temporary maintenance, or there may be network issues.'
-        }
-    },
-    updateHistory: {
-        'lang-store': {
-            jp: '更新履歴',
-            en: 'Update History'
-        }
-    },
-    noHistory: {
-        'lang-store': {
-            jp: '履歴はありません。',
-            en: 'No history available.'
-        }
-    },
-    loadingHistory: {
-        'lang-store': {
-            jp: '履歴を読み込み中...',
-            en: 'Loading history...'
-        }
-    },
-    historyFallback: {
-        'lang-store': {
-            jp: '準備中',
-            en: 'Coming Soon'
-        }
-    },
-    typeLabels: {
-        'lang-store': {
-            jp: { new: '新機能', imp: '改善', fix: '修正', etc: 'その他' },
-            en: { new: 'New', imp: 'Imp', fix: 'Fix', etc: 'Other' }
-        }
-    }
-};
 
 export async function initPortal() {
     // DataManagerの初期化 (Portal用)
@@ -89,7 +32,7 @@ export async function initPortal() {
 }
 
 function applyPortalLanguage() {
-    const loc = expandLanguageResource(PORTAL_LOC);
+    const loc = expandLanguageResource(portalLocRaw);
 
     // バージョン表示の設定
     const versionEl = document.getElementById('portal-version');
@@ -112,7 +55,7 @@ function applyPortalLanguage() {
 
 async function loadProjects() {
     const grid = document.getElementById('gamesGrid');
-    const loc = expandLanguageResource(PORTAL_LOC);
+    const loc = expandLanguageResource(portalLocRaw);
     grid.innerHTML = `<div class="LoadingProjects">${loc.loading}</div>`;
 
     // 1. プロジェクトリストを取得 (多言語対応)
@@ -196,7 +139,7 @@ async function loadProjects() {
 
 function renderProjects(projects) {
     const grid = document.getElementById('gamesGrid');
-    const loc = expandLanguageResource(PORTAL_LOC);
+    const loc = expandLanguageResource(portalLocRaw);
 
     grid.innerHTML = projects.map((project, index) => {
         const logo = project.logo;
@@ -280,7 +223,7 @@ export async function showHistory(projectId) {
     const modalOverlay = document.getElementById('modalOverlay');
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
-    const loc = expandLanguageResource(PORTAL_LOC);
+    const loc = expandLanguageResource(portalLocRaw);
 
     modalTitle.textContent = loc.updateHistory; 
     modalBody.innerHTML = `<div class="LoadingSpinner">${loc.loadingHistory}</div>`;
@@ -313,7 +256,7 @@ export async function showHistory(projectId) {
 }
 
 function renderHistory(history, container) {
-    const loc = expandLanguageResource(PORTAL_LOC);
+    const loc = expandLanguageResource(portalLocRaw);
     if (!history || history.length === 0) {
         container.innerHTML = `<p>${loc.noHistory}</p>`;
         return;

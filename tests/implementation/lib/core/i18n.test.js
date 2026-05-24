@@ -23,22 +23,22 @@ export const testI18n = () => {
         results.push({ name: 'i18n: Default language is en', pass: getLanguage() === 'en' });
 
         // 2. 言語設定の設定と取得
-        setLanguage('jp');
-        results.push({ name: 'i18n: setLanguage/getLanguage jp works', pass: getLanguage() === 'jp' });
-        results.push({ name: 'i18n: storage key is gameworks_portal_lang', pass: localStorage.getItem('gameworks_portal_lang') === 'jp' });
+        setLanguage('ja');
+        results.push({ name: 'i18n: setLanguage/getLanguage ja works', pass: getLanguage() === 'ja' });
+        results.push({ name: 'i18n: storage key is gameworks_portal_lang', pass: localStorage.getItem('gameworks_portal_lang') === 'ja' });
 
         // 3. 単純なオブジェクト展開
         const simpleObj = {
             title: {
                 'lang-store': {
-                    jp: 'こんにちは',
+                    ja: 'こんにちは',
                     en: 'Hello'
                 }
             },
             normalKey: 'no-change'
         };
         const expanded1 = expandLanguageResource(simpleObj);
-        results.push({ name: 'i18n: expandLanguageResource simple replacement (jp)', pass: expanded1.title === 'こんにちは' && expanded1.normalKey === 'no-change' });
+        results.push({ name: 'i18n: expandLanguageResource simple replacement (ja)', pass: expanded1.title === 'こんにちは' && expanded1.normalKey === 'no-change' });
 
         // English に切り替えた場合の展開
         setLanguage('en');
@@ -46,11 +46,11 @@ export const testI18n = () => {
         results.push({ name: 'i18n: expandLanguageResource simple replacement (en)', pass: expandedEn.title === 'Hello' });
 
         // 4. フォールバックの検証
-        setLanguage('jp'); // jp に設定
+        setLanguage('ja'); // ja に設定
         const fallbackObj = {
             title: {
                 'lang-store': {
-                    en: 'Hello (Default)' // jp は定義されていない
+                    en: 'Hello (Default)' // ja は定義されていない
                 }
             }
         };
@@ -63,7 +63,7 @@ export const testI18n = () => {
                 {
                     name: {
                         'lang-store': {
-                            jp: 'ゲームA',
+                            ja: 'ゲームA',
                             en: 'Game A'
                         }
                     }
@@ -86,7 +86,7 @@ export const testI18n = () => {
         results.push({ name: 'i18n: circular reference / depth limit throws error', pass: didThrow });
 
         // ネストが11段の場合の例外検証
-        let deepObj = { 'lang-store': { jp: 'end', en: 'end' } };
+        let deepObj = { 'lang-store': { ja: 'end', en: 'end' } };
         for (let i = 0; i < 11; i++) {
             deepObj = { nested: deepObj };
         }

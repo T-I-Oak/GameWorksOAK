@@ -1,0 +1,66 @@
+{
+  "heroSub": {
+    "lang-store": {
+      "ja": "T.I.OAKが贈る、独自の世界観と革新的なゲームプレイ。",
+      "en": "Unique worldviews and innovative gameplay presented by T.I.OAK."
+    }
+  },
+  "loading": {
+    "lang-store": {
+      "ja": "プロジェクトを読み込み中...",
+      "en": "Loading projects..."
+    }
+  },
+  "maintenanceTags": {
+    "lang-store": {
+      "ja": ["データ取得不可"],
+      "en": ["Unavailable"]
+    }
+  },
+  "maintenanceDesc": {
+    "lang-store": {
+      "ja": "プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。",
+      "en": "Failed to retrieve project information. The project may be under temporary maintenance, or there may be network issues."
+    }
+  },
+  "updateHistory": {
+    "lang-store": {
+      "ja": "更新履歴",
+      "en": "Update History"
+    }
+  },
+  "noHistory": {
+    "lang-store": {
+      "ja": "履歴はありません。",
+      "en": "No history available."
+    }
+  },
+  "loadingHistory": {
+    "lang-store": {
+      "ja": "履歴を読み込み中...",
+      "en": "Loading history..."
+    }
+  },
+  "historyFallback": {
+    "lang-store": {
+      "ja": "準備中",
+      "en": "Coming Soon"
+    }
+  },
+  "typeLabels": {
+    "lang-store": {
+      "ja": {
+        "new": "新機能",
+        "imp": "改善",
+        "fix": "修正",
+        "etc": "その他"
+      },
+      "en": {
+        "new": "New",
+        "imp": "Imp",
+        "fix": "Fix",
+        "etc": "Other"
+      }
+    }
+  }
+}
