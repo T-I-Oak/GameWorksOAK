@@ -1,26 +1,123 @@
 import { commonFetch } from '../lib/utils/fetch.js';
+import { getLanguage, setLanguage, expandLanguageResource } from '../lib/core/i18n.js';
+import { DataManager } from '../lib/core/dataManager.js';
 
 /**
  * GameWorks OAK Portal Main Logic
  */
 
+let portalDataManager;
+
+// ポータル固有のローカライズリソース辞書
+const PORTAL_LOC = {
+    heroSub: {
+        'lang-store': {
+            jp: 'T.I.OAKが贈る、独自の世界観と革新的なゲームプレイ。',
+            en: 'Unique worldviews and innovative gameplay presented by T.I.OAK.'
+        }
+    },
+    loading: {
+        'lang-store': {
+            jp: 'プロジェクトを読み込み中...',
+            en: 'Loading projects...'
+        }
+    },
+    maintenanceTags: {
+        'lang-store': {
+            jp: ['データ取得不可'],
+            en: ['Unavailable']
+        }
+    },
+    maintenanceDesc: {
+        'lang-store': {
+            jp: 'プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。',
+            en: 'Failed to retrieve project information. The project may be under temporary maintenance, or there may be network issues.'
+        }
+    },
+    updateHistory: {
+        'lang-store': {
+            jp: '更新履歴',
+            en: 'Update History'
+        }
+    },
+    noHistory: {
+        'lang-store': {
+            jp: '履歴はありません。',
+            en: 'No history available.'
+        }
+    },
+    loadingHistory: {
+        'lang-store': {
+            jp: '履歴を読み込み中...',
+            en: 'Loading history...'
+        }
+    },
+    historyFallback: {
+        'lang-store': {
+            jp: '準備中',
+            en: 'Coming Soon'
+        }
+    },
+    typeLabels: {
+        'lang-store': {
+            jp: { new: '新機能', imp: '改善', fix: '修正', etc: 'その他' },
+            en: { new: 'New', imp: 'Imp', fix: 'Fix', etc: 'Other' }
+        }
+    }
+};
+
 export async function initPortal() {
+    // DataManagerの初期化 (Portal用)
+    portalDataManager = new DataManager('portal');
+
+    // 言語プルダウンの初期化
+    const selector = document.getElementById('language-selector');
+    if (selector) {
+        selector.value = getLanguage();
+        selector.addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+            applyPortalLanguage();
+            loadProjects();
+        });
+    }
+
+    // ポータルの共通テキスト適用
+    applyPortalLanguage();
+
+    await loadProjects();
+    initScrollEffects();
+}
+
+function applyPortalLanguage() {
+    const loc = expandLanguageResource(PORTAL_LOC);
+
     // バージョン表示の設定
     const versionEl = document.getElementById('portal-version');
     if (versionEl) {
         versionEl.textContent = `v${__APP_VERSION__}`;
     }
 
-    await loadProjects();
-    initScrollEffects();
+    // ヒーローサブタイトル
+    const heroEl = document.querySelector('.hero p');
+    if (heroEl) {
+        heroEl.textContent = loc.heroSub;
+    }
+
+    // モーダルのデフォルトタイトルも更新
+    const modalTitle = document.getElementById('modalTitle');
+    if (modalTitle && !modalTitle.textContent.includes('-')) {
+        modalTitle.textContent = loc.updateHistory;
+    }
 }
 
 async function loadProjects() {
     const grid = document.getElementById('gamesGrid');
-    grid.innerHTML = '<div class="LoadingProjects">Loading projects...</div>';
+    const loc = expandLanguageResource(PORTAL_LOC);
+    grid.innerHTML = `<div class="LoadingProjects">${loc.loading}</div>`;
 
-    // 1. プロジェクトリストを取得 (id, title のオブジェクト配列)
-    const projects = await commonFetch('data/project_list.json');
+    // 1. プロジェクトリストを取得 (多言語対応)
+    const rawProjects = await commonFetch('data/project_list.json');
+    const projects = expandLanguageResource(rawProjects);
 
     // 2. 各プロジェクトの詳細データを取得
     const projectData = await Promise.all(projects.map(async project => {
@@ -35,7 +132,9 @@ async function loadProjects() {
         try {
             const infoRes = await fetch(remoteInfoUrl);
             if (infoRes.ok) {
-                data = await infoRes.json();
+                const rawData = await infoRes.json();
+                // 取得した詳細情報に多言語展開を適用
+                data = expandLanguageResource(rawData);
                 data.isMaintenance = false;
             }
         } catch (e) {
@@ -53,8 +152,8 @@ async function loadProjects() {
                     content: '',
                     type: 'none'
                 },
-                tags: ['データ取得不可'],
-                description: 'プロジェクト情報の取得に失敗しました。一時的なメンテナンス中か、ネットワーク環境に問題がある可能性があります。',
+                tags: loc.maintenanceTags,
+                description: loc.maintenanceDesc,
                 button: {
                     content: 'UNAVAILABLE',
                     url: 'javascript:void(0)',
@@ -97,6 +196,8 @@ async function loadProjects() {
 
 function renderProjects(projects) {
     const grid = document.getElementById('gamesGrid');
+    const loc = expandLanguageResource(PORTAL_LOC);
+
     grid.innerHTML = projects.map((project, index) => {
         const logo = project.logo;
         const badge = project.badge;
@@ -137,7 +238,7 @@ function renderProjects(projects) {
                     <button class="HistoryLink" 
                             data-project-id="${project.id}"
                             ${isMaintenance ? 'disabled' : ''}>
-                        Update History
+                        ${loc.updateHistory}
                     </button>
                     <a href="${buttonUrl}" 
                        class="BtnMore state-${button.type}" 
@@ -179,28 +280,32 @@ export async function showHistory(projectId) {
     const modalOverlay = document.getElementById('modalOverlay');
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
+    const loc = expandLanguageResource(PORTAL_LOC);
 
-    modalTitle.textContent = `Update History`; 
-    modalBody.innerHTML = '<div class="LoadingSpinner">Loading history...</div>';
+    modalTitle.textContent = loc.updateHistory; 
+    modalBody.innerHTML = `<div class="LoadingSpinner">${loc.loadingHistory}</div>`;
     modalOverlay.classList.add('active');
 
     try {
         // マニフェストからタイトルを取得
-        const projects = await commonFetch('data/project_list.json');
+        const rawProjects = await commonFetch('data/project_list.json');
+        const projects = expandLanguageResource(rawProjects);
         const project = projects.find(p => p.id === projectId);
         const title = project ? project.title : projectId;
 
-        modalTitle.textContent = `${title} - Update History`;
+        modalTitle.textContent = `${title} - ${loc.updateHistory}`;
 
         const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
         const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
         
-        const history = await commonFetch(fetchUrl);
+        const rawHistory = await commonFetch(fetchUrl);
+        // 履歴情報の多言語展開
+        const history = expandLanguageResource(rawHistory);
         renderHistory(history, modalBody);
     } catch (e) {
         modalBody.innerHTML = `
             <div class="ModalPlaceholder">
-                <p>- 準備中 -</p>
+                <p>- ${loc.historyFallback} -</p>
             </div>
         `;
         throw e; // 規約に基づき、開発者が気づけるようコンソールにもエラーを出す
@@ -208,17 +313,13 @@ export async function showHistory(projectId) {
 }
 
 function renderHistory(history, container) {
+    const loc = expandLanguageResource(PORTAL_LOC);
     if (!history || history.length === 0) {
-        container.innerHTML = '<p>No history available.</p>';
+        container.innerHTML = `<p>${loc.noHistory}</p>`;
         return;
     }
 
-    const typeLabels = {
-        new: '新機能',
-        imp: '改善',
-        fix: '修正',
-        etc: 'その他'
-    };
+    const typeLabels = loc.typeLabels;
 
     container.innerHTML = history.map(item => `
         <div class="HistoryItem">
@@ -228,7 +329,7 @@ function renderHistory(history, container) {
             </div>
             <ul class="HistoryChanges">
                 ${item.content.map(change => {
-                    const label = typeLabels[change.type];
+                    const label = typeLabels[change.type] || change.type;
                     return `<li><span class="HistoryTag tag-${change.type}">${label}</span>${change.text}</li>`;
                 }).join('')}
             </ul>

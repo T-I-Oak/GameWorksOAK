@@ -2,9 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { initPortal, showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
 
+// localStorage の共通モック
+const mockStore = {};
+const localStorageMock = {
+    getItem: vi.fn((key) => mockStore[key] || null),
+    setItem: vi.fn((key, value) => { mockStore[key] = String(value); }),
+    removeItem: vi.fn((key) => { delete mockStore[key]; }),
+    clear: vi.fn(() => { for (let key in mockStore) delete mockStore[key]; })
+};
+Object.defineProperty(window, 'localStorage', { value: localStorageMock, configurable: true, writable: true });
+
 // DOM のモック
 document.body.innerHTML = `
-    <header></header>
+    <header>
+        <select id="language-selector">
+            <option value="ja">日本語</option>
+            <option value="en">English</option>
+        </select>
+    </header>
     <div id="portal-version"></div>
     <div id="gamesGrid"></div>
     <svg>
@@ -16,6 +31,7 @@ document.body.innerHTML = `
         <div id="modalBody"></div>
         <button id="modalClose"></button>
     </div>
+    <main class="Container"><p></p></main>
 `;
 
 // commonFetch のモックが必要だが、main.js で import されているので vi.mock を使う
@@ -28,13 +44,19 @@ import { commonFetch } from '../../../src/lib/utils/fetch.js';
 describe('portal main.js - showHistory', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        localStorage.clear();
         // showHistory用の最小限のDOMを設定
         document.body.innerHTML = `
+            <select id="language-selector">
+                <option value="ja">日本語</option>
+                <option value="en">English</option>
+            </select>
             <div id="modalOverlay">
                 <div id="modalTitle"></div>
                 <div id="modalBody"></div>
                 <button id="modalClose"></button>
             </div>
+            <main class="Container"><p></p></main>
         `;
     });
 
@@ -93,9 +115,15 @@ describe('portal main.js - resolveAbsoluteUrl', () => {
 describe('portal main.js - initPortal', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        localStorage.clear();
         // DOMの初期化
         document.body.innerHTML = `
-            <header></header>
+            <header>
+                <select id="language-selector">
+                    <option value="ja">日本語</option>
+                    <option value="en">English</option>
+                </select>
+            </header>
             <div id="portal-version"></div>
             <div id="gamesGrid"></div>
             <svg>
@@ -107,6 +135,7 @@ describe('portal main.js - initPortal', () => {
                 <div id="modalBody"></div>
                 <button id="modalClose"></button>
             </div>
+            <main class="Container"><p></p></main>
         `;
         global.__APP_VERSION__ = '0.10.0';
         
