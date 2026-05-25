@@ -7,6 +7,15 @@
         "type": "new",
         "text": {
           "lang-store": {
+            "ja": "i18n共通モジュールにHTMLテンプレート描画機能を追加",
+            "en": "Add HTML template rendering helpers to the i18n common module"
+          }
+        }
+      },
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
             "ja": "多言語対応（i18n）共通モジュールの追加とDataManagerの拡張",
             "en": "Add multi-language (i18n) common module and DataManager extension"
           }
