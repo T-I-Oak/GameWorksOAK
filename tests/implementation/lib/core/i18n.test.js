@@ -7,7 +7,10 @@ import {
     getActiveLanguage, 
     onLanguageChange, 
     setupLanguageSelector, 
-    clearL10nCache 
+    clearL10nCache,
+    renderI18nTemplate,
+    applyI18nTemplate,
+    bindI18nTemplate
 } from '../../../../src/lib/core/i18n.js';
 
 // localStorage のファイルグローバルモック化
@@ -294,6 +297,121 @@ describe('i18n', () => {
             setLanguage('en');
 
             expect(select.value).toBe('en'); // プルダウンの見た目も en に同期されていること
+        });
+    });
+
+    describe('i18n HTML template rendering', () => {
+        const template = `
+            <section>
+                <h3>{help.objective.title}</h3>
+                <p>{help.objective.body}</p>
+                <span>{help.count}</span>
+            </section>
+        `;
+        const resource = {
+            help: {
+                objective: {
+                    title: {
+                        'lang-store': {
+                            ja: 'JP Objective',
+                            en: 'Objective'
+                        }
+                    },
+                    body: {
+                        'lang-store': {
+                            ja: '<strong>JP Body</strong>',
+                            en: 'Disable every enemy Core.'
+                        }
+                    }
+                },
+                count: 3,
+                rawHtml: {
+                    'lang-store': {
+                        ja: '<em>raw jp</em>',
+                        en: '<em>raw en</em>'
+                    }
+                }
+            }
+        };
+
+        it('should render placeholders with expanded language resources and escape HTML by default', () => {
+            setLanguage('ja');
+
+            const html = renderI18nTemplate(template, resource);
+
+            expect(html).toContain('<h3>JP Objective</h3>');
+            expect(html).toContain('&lt;strong&gt;JP Body&lt;/strong&gt;');
+            expect(html).toContain('<span>3</span>');
+        });
+
+        it('should support raw placeholders and escape false option', () => {
+            setLanguage('en');
+
+            expect(renderI18nTemplate('{raw:help.rawHtml}', resource)).toBe('<em>raw en</em>');
+            expect(renderI18nTemplate('{help.rawHtml}', resource, { escape: false })).toBe('<em>raw en</em>');
+        });
+
+        it('should keep missing placeholders and warn by default', () => {
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+            const html = renderI18nTemplate('<p>{help.missing}</p>', resource);
+
+            expect(html).toBe('<p>{help.missing}</p>');
+            expect(warnSpy).toHaveBeenCalledWith('i18n: missing template value for "help.missing".');
+
+            warnSpy.mockRestore();
+        });
+
+        it('should apply rendered HTML to a container and call afterRender', () => {
+            document.body.innerHTML = '<div id="help"></div>';
+            const afterRender = vi.fn();
+
+            const container = applyI18nTemplate('#help', '<p>{help.objective.title}</p>', resource, {
+                afterRender
+            });
+
+            expect(container).toBe(document.getElementById('help'));
+            expect(container.innerHTML).toBe('<p>JP Objective</p>');
+            expect(afterRender).toHaveBeenCalledWith(container);
+        });
+
+        it('should warn and no-op when a container is missing', () => {
+            document.body.innerHTML = '';
+            const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+            const afterRender = vi.fn();
+
+            const container = applyI18nTemplate('#missing', template, resource, { afterRender });
+            const unbind = bindI18nTemplate('#missing', template, resource, { afterRender });
+
+            expect(container).toBeNull();
+            expect(typeof unbind).toBe('function');
+            expect(afterRender).not.toHaveBeenCalled();
+            expect(warnSpy).toHaveBeenCalledWith('i18n: template container was not found.');
+
+            warnSpy.mockRestore();
+        });
+
+        it('should bind template rendering to language changes and unsubscribe', () => {
+            document.body.innerHTML = '<div id="help"></div>';
+            setLanguage('ja');
+            const afterRender = vi.fn();
+
+            const unbind = bindI18nTemplate('#help', '<p>{help.objective.title}</p>', resource, {
+                afterRender
+            });
+            const container = document.getElementById('help');
+
+            expect(container.innerHTML).toBe('<p>JP Objective</p>');
+            expect(afterRender).toHaveBeenCalledTimes(1);
+
+            setLanguage('en');
+            expect(container.innerHTML).toBe('<p>Objective</p>');
+            expect(afterRender).toHaveBeenCalledTimes(2);
+
+            unbind();
+            setLanguage('ja');
+            expect(container.innerHTML).toBe('<p>Objective</p>');
+            expect(afterRender).toHaveBeenCalledTimes(2);
         });
     });
 });

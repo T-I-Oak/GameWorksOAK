@@ -253,6 +253,84 @@ export function expandLanguageResource(val, depth = 0) {
     return expandedObj;
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function getValueByPath(resource, path) {
+    return path.split('.').reduce((current, key) => {
+        if (current === null || current === undefined || typeof current !== 'object') {
+            return undefined;
+        }
+        return current[key];
+    }, resource);
+}
+
+function resolveTemplateContainer(containerOrSelector, warnOnMissing = true) {
+    if (typeof document === 'undefined') {
+        if (warnOnMissing) console.warn('i18n: document is not available.');
+        return null;
+    }
+
+    const container = typeof containerOrSelector === 'string'
+        ? document.querySelector(containerOrSelector)
+        : containerOrSelector;
+
+    if (!container) {
+        if (warnOnMissing) console.warn('i18n: template container was not found.');
+        return null;
+    }
+
+    return container;
+}
+
+export function renderI18nTemplate(template, resource, options = {}) {
+    const escape = options.escape !== false;
+    const warnOnMissing = options.warnOnMissing !== false;
+    const expandedResource = expandLanguageResource(resource);
+    const tokenPattern = /\{(raw:)?([A-Za-z0-9_$-]+(?:\.[A-Za-z0-9_$-]+)*)\}/g;
+
+    return String(template).replace(tokenPattern, (match, rawPrefix, path) => {
+        const value = getValueByPath(expandedResource, path);
+        if (typeof value !== 'string' && typeof value !== 'number') {
+            if (warnOnMissing) console.warn(`i18n: missing template value for "${path}".`);
+            return match;
+        }
+
+        const stringValue = String(value);
+        return rawPrefix || !escape ? stringValue : escapeHtml(stringValue);
+    });
+}
+
+export function applyI18nTemplate(containerOrSelector, template, resource, options = {}) {
+    const container = resolveTemplateContainer(containerOrSelector, options.warnOnMissing !== false);
+    if (!container) return null;
+
+    container.innerHTML = renderI18nTemplate(template, resource, options);
+    if (typeof options.afterRender === 'function') {
+        options.afterRender(container);
+    }
+
+    return container;
+}
+
+export function bindI18nTemplate(containerOrSelector, template, resource, options = {}) {
+    const container = resolveTemplateContainer(containerOrSelector, options.warnOnMissing !== false);
+    if (!container) return () => {};
+
+    const render = () => {
+        applyI18nTemplate(container, template, resource, options);
+    };
+
+    render();
+    return onLanguageChange(render);
+}
+
 /**
  * JSONファイルを非同期で読み込み、言語リソースを展開して返します。
  * @param {string} url - 読み込み先URL
