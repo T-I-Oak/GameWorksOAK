@@ -138,7 +138,7 @@ function renderProjects(projects) {
 
     grid.innerHTML = projects.map((project, index) => {
         const logo = project.logo;
-        const badge = project.badge;
+        const badge = project.badge || { content: '', type: 'none' };
         const button = project.button;
         const isMaintenance = project.isMaintenance;
 
@@ -165,7 +165,7 @@ function renderProjects(projects) {
                 <div class="GameTitleOverlay">
                     ${logoContentHtml}
                 </div>
-                <span class="badge texture-${badge.type}">${badge.content}</span>
+                <span class="${getBadgeClassName(badge)}">${badge.content}</span>
             </div>
             <div class="GameInfo">
                 <div class="tags">
@@ -196,6 +196,56 @@ function renderProjects(projects) {
     });
 
     initObserver();
+}
+
+export function getBadgeClassName(badge, today = getTodayDateString()) {
+    const type = badge?.type || 'none';
+
+    if (type === 'none') {
+        return 'badge none';
+    }
+
+    const classes = ['badge', `texture-${type}`];
+    if (type === 'info' && isBadgeFeatured(badge, today)) {
+        classes.push('is-featured');
+    }
+
+    return classes.join(' ');
+}
+
+export function isBadgeFeatured(badge, today = getTodayDateString()) {
+    const featuredUntil = badge?.featuredUntil;
+
+    return badge?.type === 'info'
+        && isValidDateString(featuredUntil)
+        && isValidDateString(today)
+        && today <= featuredUntil;
+}
+
+function getTodayDateString(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+function isValidDateString(value) {
+    if (typeof value !== 'string') {
+        return false;
+    }
+
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!match) {
+        return false;
+    }
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const lastDay = new Date(year, month, 0).getDate();
+
+    return month >= 1 && month <= 12 && day >= 1 && day <= lastDay;
 }
 
 function initObserver() {

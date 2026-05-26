@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initPortal, showHistory, resolveAbsoluteUrl } from '../../../src/portal/main.js';
+import { initPortal, showHistory, resolveAbsoluteUrl, getBadgeClassName, isBadgeFeatured } from '../../../src/portal/main.js';
 import { clearL10nCache } from '../../../src/lib/core/i18n.js';
 
 // localStorage の共通モック
@@ -114,6 +114,32 @@ describe('portal main.js - resolveAbsoluteUrl', () => {
     });
 });
 
+describe('portal main.js - badge featuredUntil', () => {
+    it('should mark info badge as featured through featuredUntil date', () => {
+        const badge = { content: 'v1.0 Release', type: 'info', featuredUntil: '2026-06-02' };
+
+        expect(isBadgeFeatured(badge, '2026-06-02')).toBe(true);
+        expect(getBadgeClassName(badge, '2026-06-02')).toBe('badge texture-info is-featured');
+    });
+
+    it('should not mark info badge as featured after featuredUntil date', () => {
+        const badge = { content: 'v1.0 Release', type: 'info', featuredUntil: '2026-06-02' };
+
+        expect(isBadgeFeatured(badge, '2026-06-03')).toBe(false);
+        expect(getBadgeClassName(badge, '2026-06-03')).toBe('badge texture-info');
+    });
+
+    it('should not mark badge as featured when featuredUntil is missing or invalid', () => {
+        expect(isBadgeFeatured({ content: 'v1.0 Release', type: 'info' }, '2026-06-02')).toBe(false);
+        expect(isBadgeFeatured({ content: 'v1.0 Release', type: 'info', featuredUntil: '2026-99-99' }, '2026-06-02')).toBe(false);
+        expect(isBadgeFeatured({ content: 'v1.0 Release', type: 'info', featuredUntil: '2026/06/02' }, '2026-06-02')).toBe(false);
+    });
+
+    it('should render none badge with hidden class', () => {
+        expect(getBadgeClassName({ content: '', type: 'none' }, '2026-06-02')).toBe('badge none');
+    });
+});
+
 describe('portal main.js - initPortal', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -163,7 +189,7 @@ describe('portal main.js - initPortal', () => {
             title: 'Burst Cascade',
             description: 'A cascade of bursts.',
             tags: ['Puzzle'],
-            badge: { content: 'NEW', type: 'hot' },
+            badge: { content: 'NEW', type: 'info' },
             image: 'assets/thumbnail.png',
             button: { content: 'PLAY', url: 'https://t-i-oak.github.io/BurstCascade/index.html', type: 'published' }
         };
@@ -183,6 +209,29 @@ describe('portal main.js - initPortal', () => {
         // gamesGrid のレンダリング結果を確認
         const gamesGrid = document.getElementById('gamesGrid');
         expect(gamesGrid.innerHTML).toContain(`style="--bg-image: url('https://t-i-oak.github.io/BurstCascade/assets/thumbnail.png')"`);
+    });
+
+    it('should render featured info badge class during featuredUntil period', async () => {
+        const projectList = [
+            { id: 'BurstCascade', title: 'Burst Cascade' }
+        ];
+
+        const projectInfo = {
+            title: 'Burst Cascade',
+            description: 'A cascade of bursts.',
+            tags: ['Puzzle'],
+            badge: { content: 'v1.0 Release', type: 'info', featuredUntil: '2999-12-31' },
+            image: 'assets/thumbnail.png',
+            button: { content: 'PLAY', url: 'https://t-i-oak.github.io/BurstCascade/index.html', type: 'published' }
+        };
+
+        commonFetch.mockResolvedValueOnce(projectList);
+        commonFetch.mockResolvedValueOnce(projectInfo);
+
+        await initPortal();
+
+        const badge = document.querySelector('.badge');
+        expect(badge.className).toBe('badge texture-info is-featured');
     });
 
     it('should render png logo paths as image tags without fetching logo content', async () => {
