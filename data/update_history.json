@@ -1,8 +1,17 @@
 [
   {
     "version": "1.1",
-    "date": "2026-05-24",
+    "date": "2026-05-26",
     "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "ポータルカードのバッジに期間限定の注目表示を追加",
+            "en": "Add time-limited featured display for portal card badges"
+          }
+        }
+      },
       {
         "type": "new",
         "text": {

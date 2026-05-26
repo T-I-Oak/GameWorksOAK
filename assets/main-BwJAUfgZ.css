@@ -389,13 +389,6 @@ footer {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.badge.texture-hot {
-    background: #b0003a;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 10px rgba(255, 0, 110, 0.4);
-}
-
 .badge.texture-info {
     background: #000000;
     color: var(--accent);
@@ -403,8 +396,57 @@ footer {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
+.badge.texture-info.is-featured {
+    overflow: hidden;
+    background: linear-gradient(180deg, #f0a13a 0%, #b95324 100%);
+    color: #1a0c04;
+    border-color: #ffd074;
+    box-shadow:
+        0 0 0 1px #321107,
+        0 0 14px rgba(240, 125, 42, 0.48),
+        inset 0 1px 0 #ffe0a2;
+    text-shadow: 0 1px 0 rgba(255, 226, 164, 0.55);
+}
+
+.badge.texture-info.is-featured::after {
+    content: "";
+    position: absolute;
+    inset: -40% -30%;
+    background: linear-gradient(
+        115deg,
+        transparent 0%,
+        transparent 42%,
+        rgba(255, 255, 255, 0.68) 48%,
+        rgba(255, 242, 190, 0.92) 50%,
+        rgba(255, 255, 255, 0.42) 54%,
+        transparent 62%,
+        transparent 100%
+    );
+    transform: translateX(-125%) skewX(-18deg);
+    animation: BadgeFeaturedShine 6.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
 .badge.none {
     display: none;
+}
+
+@keyframes BadgeFeaturedShine {
+    0%,
+    58% {
+        transform: translateX(-125%) skewX(-18deg);
+    }
+    86%,
+    100% {
+        transform: translateX(125%) skewX(-18deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .badge.texture-info.is-featured::after {
+        animation: none;
+        display: none;
+    }
 }
 
 .GameInfo {
