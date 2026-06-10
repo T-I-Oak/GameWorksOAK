@@ -26,3 +26,4 @@
     - [x] `<option>`要素自動展開・双方向バインド・自動同期UIヘルパー（`setupLanguageSelector`）の実装
     - [x] ポータル全体の多言語対応と UI リファクタリング（言語切り替えDropdownの追加）
     - [x] DataManager のカプセル化・ネストデータマイグレーション機能の拡張
+- [x] プロジェクトの表示順を featuredUntil の降順にソートする処理の追加 v1.2.0

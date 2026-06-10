@@ -129,7 +129,19 @@ async function loadProjects() {
         return data;
     }));
 
-    renderProjects(projectData.filter(p => p !== null));
+    const filteredProjects = projectData.filter(p => p !== null);
+
+    // `featuredUntil` の降順でソート (同値または未定義時は元の順番を維持)
+    filteredProjects.sort((a, b) => {
+        const aDate = a.badge?.featuredUntil || '';
+        const bDate = b.badge?.featuredUntil || '';
+        
+        if (aDate > bDate) return -1;
+        if (aDate < bDate) return 1;
+        return 0;
+    });
+
+    renderProjects(filteredProjects);
 }
 
 function renderProjects(projects) {
