@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.2",
+    "date": "2026-06-10",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "プロジェクトの表示順を featuredUntil の新しいものから優先して表示するよう変更",
+            "en": "Change the project display order to sort by featuredUntil descending"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.1",
     "date": "2026-05-26",
     "content": [
