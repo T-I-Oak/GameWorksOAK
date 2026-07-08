@@ -16,14 +16,16 @@ export class TutorialManager {
     constructor(scenarios = [], options = {}) {
         this.scenarios = scenarios;
         this.displayScenarioRawIndexes = this.buildDisplayScenarioRawIndexes();
-        this.currentScenarioIndex = this.resolveInitialScenarioIndex(options.initialScenarioIndex);
+        this.state = this.normalizeState(options.initialState);
+        this.currentScenarioIndex = null;
         this.currentPageIndex = 0;
+        this.currentHighlightDefaults = {};
         this.isShowing = false;
 
         this.onTriggerCondition = options.onTriggerCondition || (() => true);
         this.onCalculateRect = options.onCalculateRect || (() => null);
         this.onActionResume = options.onActionResume || (() => {});
-        this.onSaveIndex = options.onSaveIndex || (() => {});
+        this.onSaveState = options.onSaveState || (() => {});
         this.defaultPadding = options.defaultPadding !== undefined ? options.defaultPadding : 0;
         this.defaultRadius = options.defaultRadius !== undefined ? options.defaultRadius : 24;
     }
@@ -39,58 +41,110 @@ export class TutorialManager {
         return scenario && scenario.type !== 'defaults';
     }
 
-    resolveInitialScenarioIndex(initialScenarioIndex) {
-        if (typeof initialScenarioIndex === 'string') {
-            const rawIndex = this.scenarios.findIndex(
-                scenario => this.isDisplayScenario(scenario) && scenario.id === initialScenarioIndex
-            );
-            return rawIndex >= 0 ? rawIndex : this.scenarios.length;
+    normalizeState(initialState) {
+        if (!initialState || typeof initialState !== 'object' || !Array.isArray(initialState.completed)) {
+            return { completed: [] };
         }
 
-        const displayIndex = initialScenarioIndex !== undefined ? initialScenarioIndex : 0;
-        return this.displayScenarioRawIndexes[displayIndex] ?? this.scenarios.length;
+        return {
+            ...initialState,
+            completed: this.uniqueValues(initialState.completed)
+        };
     }
 
     getDisplayIndex(rawIndex) {
         return this.displayScenarioRawIndexes.indexOf(rawIndex);
     }
 
-    findNextDisplayScenarioIndex(startRawIndex) {
-        return this.displayScenarioRawIndexes.find(rawIndex => rawIndex >= startRawIndex) ?? this.scenarios.length;
+    uniqueValues(values) {
+        return [...new Set(values)];
     }
 
-    getProgressValueForRawIndex(rawIndex) {
-        if (rawIndex >= this.scenarios.length) {
-            return this.displayScenarioRawIndexes.length;
-        }
-
+    getScenarioIdentifier(rawIndex) {
         const scenario = this.scenarios[rawIndex];
         if (scenario && scenario.id) {
             return scenario.id;
         }
 
         const displayIndex = this.getDisplayIndex(rawIndex);
-        return displayIndex >= 0 ? displayIndex : this.displayScenarioRawIndexes.length;
+        return displayIndex >= 0 ? displayIndex : rawIndex;
+    }
+
+    getPreviousDisplayScenarioIdentifier(rawIndex) {
+        const previousRawIndex = [...this.displayScenarioRawIndexes]
+            .reverse()
+            .find(index => index < rawIndex);
+
+        return previousRawIndex !== undefined ? this.getScenarioIdentifier(previousRawIndex) : null;
+    }
+
+    getScenarioRequires(rawIndex) {
+        const scenario = this.scenarios[rawIndex];
+        if (!scenario || !this.isDisplayScenario(scenario)) {
+            return [];
+        }
+
+        if (Array.isArray(scenario.requires)) {
+            return scenario.requires;
+        }
+
+        if (scenario.requires === null) {
+            return [];
+        }
+
+        const previousIdentifier = this.getPreviousDisplayScenarioIdentifier(rawIndex);
+        return previousIdentifier !== null ? [previousIdentifier] : [];
+    }
+
+    isScenarioCompleted(rawIndex) {
+        return this.state.completed.includes(this.getScenarioIdentifier(rawIndex));
+    }
+
+    areRequiresMet(rawIndex) {
+        const completed = new Set(this.state.completed);
+        return this.getScenarioRequires(rawIndex).every(identifier => completed.has(identifier));
     }
 
     getCurrentStep() {
         return this.scenarios[this.currentScenarioIndex];
     }
 
-    getHighlightDefaultsForRawIndex(rawIndex) {
-        const defaults = {};
-        for (let index = 0; index < rawIndex; index++) {
-            const scenario = this.scenarios[index];
-            if (scenario && scenario.type === 'defaults' && scenario.highlightDefaults) {
-                Object.assign(defaults, scenario.highlightDefaults);
+    applyDefaultsPatch(defaults, highlightDefaults) {
+        if (highlightDefaults === null) {
+            return {};
+        }
+
+        if (!highlightDefaults || typeof highlightDefaults !== 'object') {
+            return defaults;
+        }
+
+        const nextDefaults = { ...defaults };
+        for (const [key, value] of Object.entries(highlightDefaults)) {
+            if (value === null) {
+                delete nextDefaults[key];
+            } else {
+                nextDefaults[key] = value;
             }
         }
-        return defaults;
+
+        return nextDefaults;
+    }
+
+    getHighlightDefaultsForRawIndex(rawIndex) {
+        const defaults = {};
+        let activeDefaults = defaults;
+        for (let index = 0; index < rawIndex; index++) {
+            const scenario = this.scenarios[index];
+            if (scenario && scenario.type === 'defaults') {
+                activeDefaults = this.applyDefaultsPatch(activeDefaults, scenario.highlightDefaults);
+            }
+        }
+        return activeDefaults;
     }
 
     resolveHighlight(highlight, page = {}, scenario = this.getCurrentStep()) {
         return {
-            ...this.getHighlightDefaultsForRawIndex(this.currentScenarioIndex),
+            ...this.currentHighlightDefaults,
             ...(scenario && scenario.highlightDefaults ? scenario.highlightDefaults : {}),
             ...(page.highlightDefaults || {}),
             ...highlight
@@ -182,16 +236,11 @@ export class TutorialManager {
      * @returns {boolean} True when the tutorial would start.
      */
     willTrigger(triggerName, context) {
-        if (this.isShowing || this.currentScenarioIndex >= this.scenarios.length) {
+        if (this.isShowing) {
             return false;
         }
 
-        const currentStep = this.getCurrentStep();
-        if (currentStep.trigger !== triggerName) {
-            return false;
-        }
-
-        return this.onTriggerCondition(triggerName, context);
+        return this.findTriggeredScenario(triggerName, context) !== null;
     }
 
     /**
@@ -201,20 +250,18 @@ export class TutorialManager {
      * @returns {boolean} True when the tutorial UI was shown.
      */
     checkTrigger(triggerName, context) {
-        if (this.isShowing || this.currentScenarioIndex >= this.scenarios.length) {
+        if (this.isShowing) {
             return false;
         }
 
-        const currentStep = this.getCurrentStep();
-        if (currentStep.trigger !== triggerName) {
-            return false;
-        }
+        const triggeredScenario = this.findTriggeredScenario(triggerName, context);
 
-        const isConditionMet = this.onTriggerCondition(triggerName, context);
-
-        if (isConditionMet) {
+        if (triggeredScenario) {
+            this.currentScenarioIndex = triggeredScenario.rawIndex;
+            this.currentHighlightDefaults = triggeredScenario.highlightDefaults;
             this.isShowing = true;
             this.currentPageIndex = 0;
+            const currentStep = this.getCurrentStep();
             this.showTooltip(currentStep.pages[0]);
 
             const maskCanvas = document.getElementById('tutorial-mask-canvas');
@@ -226,6 +273,33 @@ export class TutorialManager {
         }
 
         return false;
+    }
+
+    findTriggeredScenario(triggerName, context) {
+        let activeDefaults = {};
+
+        for (let rawIndex = 0; rawIndex < this.scenarios.length; rawIndex++) {
+            const scenario = this.scenarios[rawIndex];
+            if (!scenario) continue;
+
+            if (scenario.type === 'defaults') {
+                activeDefaults = this.applyDefaultsPatch(activeDefaults, scenario.highlightDefaults);
+                continue;
+            }
+
+            if (!this.isDisplayScenario(scenario)) continue;
+            if (this.isScenarioCompleted(rawIndex)) continue;
+            if (scenario.trigger !== triggerName) continue;
+            if (!this.areRequiresMet(rawIndex)) continue;
+            if (!this.onTriggerCondition(triggerName, context)) continue;
+
+            return {
+                rawIndex,
+                highlightDefaults: { ...activeDefaults }
+            };
+        }
+
+        return null;
     }
 
     /**
@@ -435,9 +509,10 @@ export class TutorialManager {
             this.showTooltip(currentStep.pages[this.currentPageIndex]);
         } else {
             this.currentPageIndex = 0;
-            this.currentScenarioIndex = this.findNextDisplayScenarioIndex(this.currentScenarioIndex + 1);
-            this.onSaveIndex(this.getProgressValueForRawIndex(this.currentScenarioIndex));
+            this.completeCurrentScenario();
             this.isShowing = false;
+            this.currentScenarioIndex = null;
+            this.currentHighlightDefaults = {};
 
             const tooltipEl = document.getElementById('tutorial-tooltip');
             if (tooltipEl) tooltipEl.classList.add('hidden');
@@ -449,13 +524,35 @@ export class TutorialManager {
         }
     }
 
+    completeCurrentScenario() {
+        if (this.currentScenarioIndex === null) return;
+
+        this.state = {
+            ...this.state,
+            completed: this.uniqueValues([
+                ...this.state.completed,
+                this.getScenarioIdentifier(this.currentScenarioIndex)
+            ])
+        };
+        this.onSaveState(this.getState());
+    }
+
+    getState() {
+        return {
+            ...this.state,
+            completed: [...this.state.completed]
+        };
+    }
+
     /**
-     * Resets tutorial state to the first display scenario.
+     * Resets tutorial state to the initial empty completed list.
      */
     resetTutorial() {
-        this.currentScenarioIndex = this.findNextDisplayScenarioIndex(0);
-        this.onSaveIndex(this.getProgressValueForRawIndex(this.currentScenarioIndex));
+        this.state = { completed: [] };
+        this.onSaveState(this.getState());
+        this.currentScenarioIndex = null;
         this.currentPageIndex = 0;
+        this.currentHighlightDefaults = {};
         this.isShowing = false;
 
         const tooltipEl = document.getElementById('tutorial-tooltip');
