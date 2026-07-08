@@ -14,7 +14,8 @@ const manager = new TutorialManager(scenarios, {
     onTriggerCondition: (triggerName, context) => true,
     onCalculateRect: (highlight) => ({ top: 0, left: 0, width: 0, height: 0 }),
     onActionResume: () => {},
-    onSaveIndex: (index) => {}
+    initialState: loadTutorialState(),
+    onSaveState: (state) => saveTutorialState(state)
 });
 ```
 
@@ -47,27 +48,106 @@ const manager = new TutorialManager(scenarios, {
 ]
 ```
 
-## 進行位置
-TutorialManager の外部 interface では、シナリオ配列上の raw index を使用しません。
+## 進行状態
+TutorialManager の外部 interface では、シナリオ配列上の raw index や次回開始 index を使用しません。
+進行状態は、完了済みシナリオ id を持つ state として保存・復元します。
 
 - raw index: `scenarios` 配列上の位置です。`type: "defaults"` などの非表示レコードも含み、manager 内部でのみ使用します。
 - display index: 実際に表示されるシナリオだけを数えた位置です。`type: "defaults"` は含みません。
+- completed: 完了済みの表示シナリオ id の配列です。
 
-`initialScenarioIndex` は以下のように解決されます。
+`initialState` は任意です。未指定、`null`、または不正な形式の場合、manager は初期状態として扱います。
 
-- `number`: display index として扱います。
-- `string`: 表示シナリオの `id` として扱い、一致するシナリオの raw index に変換します。
+```json
+{
+  "completed": ["turn-start"]
+}
+```
 
-`onSaveIndex(value)` には、次に開始する表示シナリオの識別子を渡します。
+`onSaveState(state)` には、正規化済みの state を渡します。利用側はこの state をそのまま保存し、再開時に `initialState` として渡します。
 
-- 次の表示シナリオに `id` がある場合は、その `id` を渡します。
-- `id` がない場合は、その表示シナリオの display index を渡します。
-- 次の表示シナリオがない場合は、表示シナリオ数を渡します。
+```javascript
+const manager = new TutorialManager(scenarios, {
+    initialState: savedState,
+    onSaveState: (state) => {
+        savedState = state;
+    }
+});
+```
+
+## 表示条件と requires
+`checkTrigger(triggerName, context)` または `willTrigger(triggerName, context)` を呼ぶと、manager はシナリオ配列を先頭から順に走査します。
+以下をすべて満たす最初の表示シナリオだけが発火候補になります。
+
+1. `type: "defaults"` ではない
+2. `completed` に含まれていない
+3. `trigger` が `triggerName` と一致する
+4. `requires` が満たされている
+5. `onTriggerCondition(triggerName, context)` が `true` を返す
+
+`requires` は、そのシナリオを表示するために完了している必要があるシナリオ id の配列です。
+
+```json
+{
+  "id": "joined",
+  "trigger": "afterBoth",
+  "requires": ["branch-a-end", "branch-b-end"]
+}
+```
+
+`requires` の扱いは以下です。
+
+- 未指定: 直前の表示シナリオを要求します。先頭の表示シナリオでは `[]` と同じ扱いです。
+- `[]`: 依存なし。未完了で trigger が一致すれば発火候補になります。
+- `["id-a", "id-b"]`: 指定されたすべてのシナリオが completed に含まれると発火候補になります。
+
+`type: "defaults"` は、暗黙 `requires` の「直前の表示シナリオ」には含みません。
+
+### 分岐と合流の例
+
+```json
+[
+  { "id": "scenario-1", "trigger": "start" },
+  { "id": "scenario-A2", "trigger": "screenA", "requires": ["scenario-1"] },
+  { "id": "scenario-A3", "trigger": "screenADetail" },
+  { "id": "scenario-B2", "trigger": "screenB", "requires": ["scenario-1"] },
+  { "id": "scenario-B3", "trigger": "screenBDetail" },
+  {
+    "id": "scenario-4",
+    "trigger": "afterBoth",
+    "requires": ["scenario-A3", "scenario-B3"]
+  }
+]
+```
+
+この場合、`scenario-1` 完了後は `scenario-A2` と `scenario-B2` が順不同で発火可能になります。
+`scenario-A3` と `scenario-B3` が両方完了すると、`scenario-4` が発火可能になります。
 
 ## defaults レコード
-`type: "defaults"` のレコードは、表示対象にはなりません。指定された表示シナリオを開始する際、その raw index より前にある defaults レコードの `highlightDefaults` をすべて適用します。
+`type: "defaults"` のレコードは、表示対象にはなりません。進行状態にも含まれず、`trigger` 判定や `requires` 判定の対象にもなりません。
 
-保存された位置から再開する場合も、先頭から再開位置の手前までを確認し、それ以前の defaults を適用します。
+manager は `checkTrigger()` / `willTrigger()` の走査中に、配列順で defaults を蓄積します。発火した表示シナリオには、その時点までに蓄積された `highlightDefaults` を適用します。
+これは進行順ではなく、シナリオ定義上の位置に基づく設定スコープです。
+
+`highlightDefaults` 内の個別キーに `null` を指定した場合、そのキーを蓄積中の defaults から削除します。
+
+```json
+{
+  "type": "defaults",
+  "highlightDefaults": {
+    "padding": null
+  }
+}
+```
+
+`highlightDefaults: null` を指定した場合、蓄積中の defaults 全体をクリアします。
+
+```json
+{
+  "type": "defaults",
+  "highlightDefaults": null
+}
+```
 
 ハイライト設定は以下の順で解決します。後の値が前の値を上書きします。
 
@@ -116,8 +196,8 @@ min(radius, width / 2, height / 2)
 - `onTriggerCondition(triggerName, context)`: トリガー条件を判定します。
 - `onCalculateRect(highlight)`: ゲーム内オブジェクトなどの座標矩形を計算します。
 - `onActionResume()`: チュートリアル完了後のゲーム再開処理を実行します。
-- `onSaveIndex(index)`: 進捗保存を行います。
-- `initialScenarioIndex`: 再開時の表示シナリオ位置またはシナリオ id を指定します。
+- `initialState`: 再開時の進行状態を指定します。
+- `onSaveState(state)`: 進行状態の保存を行います。
 - `defaultPadding`: ハイライト余白の既定値を指定します。
 - `defaultRadius`: `rect` ハイライトの角丸半径の既定値を指定します。
 

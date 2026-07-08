@@ -3,6 +3,7 @@ import { TutorialManager } from '../../../../src/lib/core/tutorialManager.js';
 
 const mockScenarios = [
     {
+        id: 'welcome',
         trigger: 'turnStart',
         title: 'Welcome',
         pages: [
@@ -21,6 +22,7 @@ const mockScenarios = [
         ]
     },
     {
+        id: 'next',
         trigger: 'afterAction',
         title: 'Next',
         pages: [
@@ -91,7 +93,7 @@ describe('TutorialManager common module', () => {
             onTriggerCondition: vi.fn((triggerName, context) => context.allowedTriggers.includes(triggerName)),
             onCalculateRect: vi.fn(() => ({ top: 10, left: 20, width: 200, height: 120 })),
             onActionResume: vi.fn(),
-            onSaveIndex: vi.fn()
+            onSaveState: vi.fn()
         };
 
         manager = new TutorialManager(mockScenarios, options);
@@ -138,11 +140,12 @@ describe('TutorialManager common module', () => {
         expect(document.getElementById('tutorial-message').textContent).toBe('Second page');
 
         manager.advanceScenario();
-        expect(manager.currentScenarioIndex).toBe(1);
+        expect(manager.currentScenarioIndex).toBe(null);
         expect(manager.currentPageIndex).toBe(0);
         expect(manager.isShowing).toBe(false);
-        expect(options.onSaveIndex).toHaveBeenCalledWith(1);
+        expect(options.onSaveState).toHaveBeenCalledWith({ completed: ['welcome'] });
         expect(options.onActionResume).toHaveBeenCalledTimes(1);
+        expect(manager.willTrigger('afterAction', { allowedTriggers: ['afterAction'] })).toBe(true);
     });
 
     test('draws mask highlights with CSS custom properties', () => {
@@ -153,24 +156,24 @@ describe('TutorialManager common module', () => {
         expect(mockCtx.quadraticCurveTo).toHaveBeenCalled();
     });
 
-    test('supports initialScenarioIndex and reset persistence', () => {
+    test('supports initialState and reset persistence', () => {
         const resumed = new TutorialManager(mockScenarios, {
             ...options,
-            initialScenarioIndex: 1,
+            initialState: { completed: ['welcome'] },
             defaultPadding: 12,
             defaultRadius: 6
         });
 
-        expect(resumed.currentScenarioIndex).toBe(1);
+        expect(resumed.willTrigger('afterAction', { allowedTriggers: ['afterAction'] })).toBe(true);
         expect(resumed.defaultPadding).toBe(12);
         expect(resumed.defaultRadius).toBe(6);
 
         resumed.resetTutorial();
-        expect(resumed.currentScenarioIndex).toBe(0);
-        expect(options.onSaveIndex).toHaveBeenCalledWith(0);
+        expect(resumed.getState()).toEqual({ completed: [] });
+        expect(options.onSaveState).toHaveBeenCalledWith({ completed: [] });
     });
 
-    test('uses display indexes for external progress and skips defaults records', () => {
+    test('uses completed state and implicit requires while skipping defaults records', () => {
         const scenarios = [
             { type: 'defaults', highlightDefaults: { shape: 'rect', padding: 4 } },
             mockScenarios[0],
@@ -179,57 +182,97 @@ describe('TutorialManager common module', () => {
         ];
         const resumed = new TutorialManager(scenarios, {
             ...options,
-            initialScenarioIndex: 1
+            initialState: { completed: ['welcome'] }
         });
 
-        expect(resumed.currentScenarioIndex).toBe(3);
         expect(resumed.willTrigger('afterAction', { allowedTriggers: ['afterAction'] })).toBe(true);
 
         resumed.checkTrigger('afterAction', { allowedTriggers: ['afterAction'] });
         resumed.advanceScenario();
 
-        expect(options.onSaveIndex).toHaveBeenCalledWith(2);
+        expect(options.onSaveState).toHaveBeenCalledWith({ completed: ['welcome', 'next'] });
     });
 
-    test('prefers scenario id for restore and saved progress', () => {
-        const scenarios = [
-            { id: 'intro', trigger: 'turnStart', title: 'Intro', pages: mockScenarios[0].pages },
-            { type: 'defaults', highlightDefaults: { padding: { x: 8, y: 2 } } },
-            { id: 'action', trigger: 'afterAction', title: 'Action', pages: mockScenarios[1].pages }
-        ];
-        const resumed = new TutorialManager(scenarios, {
+    test('starts from the first scenario when initialState is omitted or invalid', () => {
+        const invalidStateManager = new TutorialManager(mockScenarios, {
             ...options,
-            initialScenarioIndex: 'intro'
+            initialState: { completed: 'welcome' }
         });
 
-        resumed.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
-        resumed.advanceScenario();
-        resumed.advanceScenario();
-
-        expect(options.onSaveIndex).toHaveBeenCalledWith('action');
-
-        resumed.resetTutorial();
-        expect(options.onSaveIndex).toHaveBeenCalledWith('intro');
+        expect(invalidStateManager.getState()).toEqual({ completed: [] });
+        expect(invalidStateManager.willTrigger('turnStart', { allowedTriggers: ['turnStart'] })).toBe(true);
     });
 
-    test('applies defaults records before restored display scenarios', () => {
+    test('supports branching and joins through requires', () => {
+        const scenarios = [
+            { id: 'scenario-1', trigger: 'start', title: 'Start', pages: mockScenarios[1].pages },
+            { id: 'scenario-a2', trigger: 'screenA', title: 'A2', requires: ['scenario-1'], pages: mockScenarios[1].pages },
+            { id: 'scenario-a3', trigger: 'screenADetail', title: 'A3', pages: mockScenarios[1].pages },
+            { id: 'scenario-b2', trigger: 'screenB', title: 'B2', requires: ['scenario-1'], pages: mockScenarios[1].pages },
+            { id: 'scenario-b3', trigger: 'screenBDetail', title: 'B3', pages: mockScenarios[1].pages },
+            { id: 'scenario-4', trigger: 'joined', title: 'Joined', requires: ['scenario-a3', 'scenario-b3'], pages: mockScenarios[1].pages }
+        ];
+        const branched = new TutorialManager(scenarios, options);
+
+        expect(branched.checkTrigger('screenA', { allowedTriggers: ['screenA'] })).toBe(false);
+
+        expect(branched.checkTrigger('start', { allowedTriggers: ['start'] })).toBe(true);
+        branched.advanceScenario();
+        expect(options.onSaveState).toHaveBeenLastCalledWith({ completed: ['scenario-1'] });
+
+        expect(branched.checkTrigger('screenB', { allowedTriggers: ['screenB'] })).toBe(true);
+        branched.advanceScenario();
+        expect(options.onSaveState).toHaveBeenLastCalledWith({ completed: ['scenario-1', 'scenario-b2'] });
+
+        expect(branched.checkTrigger('screenA', { allowedTriggers: ['screenA'] })).toBe(true);
+        branched.advanceScenario();
+        expect(options.onSaveState).toHaveBeenLastCalledWith({ completed: ['scenario-1', 'scenario-b2', 'scenario-a2'] });
+
+        expect(branched.checkTrigger('screenADetail', { allowedTriggers: ['screenADetail'] })).toBe(true);
+        branched.advanceScenario();
+        expect(branched.checkTrigger('joined', { allowedTriggers: ['joined'] })).toBe(false);
+
+        expect(branched.checkTrigger('screenBDetail', { allowedTriggers: ['screenBDetail'] })).toBe(true);
+        branched.advanceScenario();
+        expect(branched.checkTrigger('joined', { allowedTriggers: ['joined'] })).toBe(true);
+    });
+
+    test('applies defaults records in definition order and supports clearing defaults', () => {
         const scenarios = [
             { type: 'defaults', highlightDefaults: { shape: 'rect', padding: { x: 10, y: 5 }, radius: 0 } },
             mockScenarios[0],
-            { type: 'defaults', highlightDefaults: { radius: 3 } },
+            { type: 'defaults', highlightDefaults: { radius: 3, padding: null } },
             mockScenarios[1]
         ];
         const resumed = new TutorialManager(scenarios, {
             ...options,
-            initialScenarioIndex: 1
+            initialState: { completed: ['welcome'] }
         });
 
+        resumed.checkTrigger('afterAction', { allowedTriggers: ['afterAction'] });
         const resolved = resumed.resolveHighlight({ targetType: 'piece' }, mockScenarios[1].pages[0]);
         expect(resolved).toMatchObject({
             shape: 'rect',
-            padding: { x: 10, y: 5 },
             radius: 3
         });
+        expect(resolved).not.toHaveProperty('padding');
+    });
+
+    test('supports clearing all accumulated defaults with highlightDefaults null', () => {
+        const scenarios = [
+            { type: 'defaults', highlightDefaults: { shape: 'rect', padding: { x: 10, y: 5 }, radius: 0 } },
+            mockScenarios[0],
+            { type: 'defaults', highlightDefaults: null },
+            mockScenarios[1]
+        ];
+        const resumed = new TutorialManager(scenarios, {
+            ...options,
+            initialState: { completed: ['welcome'] }
+        });
+
+        resumed.checkTrigger('afterAction', { allowedTriggers: ['afterAction'] });
+        const resolved = resumed.resolveHighlight({ targetType: 'piece' }, mockScenarios[1].pages[0]);
+        expect(resolved).toEqual({ targetType: 'piece' });
     });
 
     test('calculates padding, circle, ellipse, and clamped rect radius', () => {

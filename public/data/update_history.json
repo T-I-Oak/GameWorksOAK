@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.3",
+    "date": "2026-07-08",
+    "content": [
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアルを状況に応じた順番で表示できるよう改善",
+            "en": "Improve tutorials so they can appear in an order that matches the situation"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.2",
     "date": "2026-06-10",
     "content": [
