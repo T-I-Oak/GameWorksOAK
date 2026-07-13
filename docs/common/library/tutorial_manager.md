@@ -15,7 +15,8 @@ const manager = new TutorialManager(scenarios, {
     onCalculateRect: (highlight) => ({ top: 0, left: 0, width: 0, height: 0 }),
     onActionResume: () => {},
     initialState: loadTutorialState(),
-    onSaveState: (state) => saveTutorialState(state)
+    onSaveState: (state) => saveTutorialState(state),
+    nextButtonSelector: '#tutorial-next-btn'
 });
 ```
 
@@ -198,6 +199,12 @@ min(radius, width / 2, height / 2)
 - `onActionResume()`: チュートリアル完了後のゲーム再開処理を実行します。
 - `initialState`: 再開時の進行状態を指定します。
 - `onSaveState(state)`: 進行状態の保存を行います。
+- `nextButtonSelector`: Next / OK ボタンを TutorialManager に管理させる場合の selector を指定します。
+- `onBeforeShowPage(context)`: ページ表示前の処理を実行します。Promise を返した場合は解決後に表示します。
+- `onAfterShowPage(context)`: ページ表示後の処理を実行します。
+- `onBeforeHideScenario(context)`: シナリオ終了などで tutorial UI を閉じる前の処理を実行します。
+- `onBeforeAdvance(context)`: Next / OK 進行前の処理を実行します。
+- `onAfterAdvance(context)`: Next / OK 進行後の処理を実行します。
 - `defaultPadding`: ハイライト余白の既定値を指定します。
 - `defaultRadius`: `rect` ハイライトの角丸半径の既定値を指定します。
 
@@ -208,6 +215,75 @@ min(radius, width / 2, height / 2)
 - `#tutorial-tooltip`
 - `#tutorial-title`
 - `#tutorial-message`
+
+Next / OK ボタンの制御を TutorialManager に委譲する場合は、`nextButtonSelector` で指定するボタンも用意します。
+
+```html
+<button id="tutorial-next-btn">Next</button>
+```
+
+## 制御モード
+移行期間中は、`nextButtonSelector` の有無で制御モードを切り替えます。
+
+### 手動制御モード
+`nextButtonSelector` 未指定時は、従来互換の手動制御モードです。
+
+- 利用側アプリが Next / OK ボタンの click handler を登録します。
+- 利用側アプリが `advanceScenario()` を直接呼びます。
+- lifecycle hook の実行は保証しません。
+- 既存アプリはコード変更なしで従来通り動作します。
+
+### 管理制御モード
+`nextButtonSelector` 指定時は、TutorialManager が Next / OK ボタンを管理します。
+
+- TutorialManager が対象ボタンに click handler を1回登録します。
+- 登録 handler は TutorialManager 内部の進行処理を呼びます。
+- 非同期進行中は二重クリック防止のため進行中フラグを立て、対象ボタンを一時的に `disabled` にします。
+- 利用側アプリは `advanceScenario()` を直接呼びません。
+- 管理制御モード中に外部から `advanceScenario()` が呼ばれた場合は、二重進行を避けるため例外にします。
+- lifecycle hook は管理制御モードでのみ保証します。
+
+全アプリが管理制御モードへ移行した後は、`nextButtonSelector` 未指定時にデフォルト selector を使用する仕様へ整理する予定です。
+
+## lifecycle hook
+管理制御モードでは、ページ表示とシナリオ終了の前後に hook を指定できます。
+hook は `await Promise.resolve(hook(context))` 相当で扱い、同期 / 非同期の違いを TutorialManager 側で吸収します。
+hook 内で例外が発生した場合は隠蔽しません。
+
+```javascript
+const manager = new TutorialManager(scenarios, {
+    nextButtonSelector: '#tutorial-next-btn',
+    onBeforeShowPage: async (context) => {},
+    onAfterShowPage: (context) => {},
+    onBeforeHideScenario: async (context) => {},
+    onBeforeAdvance: async (context) => {},
+    onAfterAdvance: async (context) => {}
+});
+```
+
+`context` は以下を持ちます。
+
+```javascript
+{
+    scenario,
+    page,
+    scenarioIndex,
+    pageIndex,
+    highlights
+}
+```
+
+- `scenario`: 表示中のシナリオオブジェクトです。
+- `page`: 表示対象または進行元のページオブジェクトです。
+- `scenarioIndex`: 表示シナリオだけを数えた display index です。
+- `pageIndex`: シナリオ内のページ index です。
+- `highlights`: defaults、シナリオ、ページ、個別 highlight を解決したハイライト配列です。
+
+hook の実行順は以下です。
+
+- ページ表示時: `onBeforeShowPage` → mask / tooltip 表示 → `onAfterShowPage`
+- Next / OK 進行時: `onBeforeAdvance` → 次ページ表示またはシナリオ終了処理 → `onAfterAdvance`
+- シナリオ終了時または `resetTutorial()` 時: UI を閉じる前に `onBeforeHideScenario`
 
 ## スタイル
 マスクとハイライトの見た目は CSS カスタムプロパティで指定できます。

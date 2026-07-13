@@ -21,13 +21,26 @@ export class TutorialManager {
         this.currentPageIndex = 0;
         this.currentHighlightDefaults = {};
         this.isShowing = false;
+        this.isAdvancing = false;
 
         this.onTriggerCondition = options.onTriggerCondition || (() => true);
         this.onCalculateRect = options.onCalculateRect || (() => null);
         this.onActionResume = options.onActionResume || (() => {});
         this.onSaveState = options.onSaveState || (() => {});
+        this.onBeforeShowPage = options.onBeforeShowPage || null;
+        this.onAfterShowPage = options.onAfterShowPage || null;
+        this.onBeforeHideScenario = options.onBeforeHideScenario || null;
+        this.onBeforeAdvance = options.onBeforeAdvance || null;
+        this.onAfterAdvance = options.onAfterAdvance || null;
+        this.nextButtonSelector = options.nextButtonSelector;
+        this.nextButtonElement = null;
+        this.boundNextButtonHandler = null;
         this.defaultPadding = options.defaultPadding !== undefined ? options.defaultPadding : 0;
         this.defaultRadius = options.defaultRadius !== undefined ? options.defaultRadius : 24;
+
+        if (this.nextButtonSelector) {
+            this.bindNextButton();
+        }
     }
 
     buildDisplayScenarioRawIndexes() {
@@ -107,6 +120,53 @@ export class TutorialManager {
 
     getCurrentStep() {
         return this.scenarios[this.currentScenarioIndex];
+    }
+
+    isManagedControlMode() {
+        return Boolean(this.nextButtonSelector);
+    }
+
+    bindNextButton() {
+        if (typeof document === 'undefined') return;
+
+        const button = document.querySelector(this.nextButtonSelector);
+        if (!button) return;
+
+        this.nextButtonElement = button;
+        this.boundNextButtonHandler = () => {
+            this.handleNextButtonClick();
+        };
+        button.addEventListener('click', this.boundNextButtonHandler);
+    }
+
+    handleNextButtonClick() {
+        if (this.isAdvancing) return;
+
+        this.advanceScenarioAsync().catch(error => {
+            setTimeout(() => {
+                throw error;
+            }, 0);
+        });
+    }
+
+    setAdvancing(isAdvancing) {
+        this.isAdvancing = isAdvancing;
+        if (this.nextButtonElement) {
+            this.nextButtonElement.disabled = isAdvancing;
+        }
+    }
+
+    getLifecycleContext(page = this.getCurrentStep()?.pages?.[this.currentPageIndex]) {
+        const scenario = this.getCurrentStep();
+        return {
+            scenario,
+            page,
+            scenarioIndex: this.getDisplayIndex(this.currentScenarioIndex),
+            pageIndex: this.currentPageIndex,
+            highlights: page && Array.isArray(page.highlight)
+                ? page.highlight.map(highlight => this.resolveHighlight(highlight, page, scenario))
+                : []
+        };
     }
 
     applyDefaultsPatch(defaults, highlightDefaults) {
@@ -262,12 +322,15 @@ export class TutorialManager {
             this.isShowing = true;
             this.currentPageIndex = 0;
             const currentStep = this.getCurrentStep();
-            this.showTooltip(currentStep.pages[0]);
 
-            const maskCanvas = document.getElementById('tutorial-mask-canvas');
-            if (maskCanvas) {
-                maskCanvas.classList.remove('hidden');
-                this.resizeMask();
+            if (this.isManagedControlMode()) {
+                this.showPageAsync(currentStep.pages[0]).catch(error => {
+                    setTimeout(() => {
+                        throw error;
+                    }, 0);
+                });
+            } else {
+                this.showPage(currentStep.pages[0]);
             }
             return true;
         }
@@ -324,6 +387,42 @@ export class TutorialManager {
                 this.positionTooltip(page);
             });
         });
+    }
+
+    showMask() {
+        const maskCanvas = document.getElementById('tutorial-mask-canvas');
+        if (maskCanvas) {
+            maskCanvas.classList.remove('hidden');
+            this.resizeMask();
+        }
+    }
+
+    showPage(page) {
+        this.showTooltip(page);
+        this.showMask();
+    }
+
+    async showPageAsync(page, options = {}) {
+        const shouldControlProgress = options.controlProgress !== false;
+        if (shouldControlProgress) {
+            this.setAdvancing(true);
+        }
+        try {
+            const context = this.getLifecycleContext(page);
+            if (this.onBeforeShowPage) {
+                await Promise.resolve(this.onBeforeShowPage(context));
+            }
+
+            this.showPage(page);
+
+            if (this.onAfterShowPage) {
+                this.onAfterShowPage(context);
+            }
+        } finally {
+            if (shouldControlProgress) {
+                this.setAdvancing(false);
+            }
+        }
     }
 
     /**
@@ -500,6 +599,10 @@ export class TutorialManager {
      * Advances the current tutorial page, or completes the current scenario.
      */
     advanceScenario() {
+        if (this.isManagedControlMode()) {
+            throw new Error('TutorialManager: advanceScenario() cannot be called when nextButtonSelector is used.');
+        }
+
         if (!this.isShowing) return;
 
         const currentStep = this.getCurrentStep();
@@ -521,6 +624,42 @@ export class TutorialManager {
             if (maskCanvas) maskCanvas.classList.add('hidden');
 
             this.onActionResume();
+        }
+    }
+
+    async advanceScenarioAsync() {
+        if (!this.isShowing || this.isAdvancing) return;
+
+        this.setAdvancing(true);
+        const context = this.getLifecycleContext();
+        try {
+            if (this.onBeforeAdvance) {
+                await Promise.resolve(this.onBeforeAdvance(context));
+            }
+
+            const currentStep = this.getCurrentStep();
+            if (this.currentPageIndex < currentStep.pages.length - 1) {
+                this.currentPageIndex++;
+                await this.showPageAsync(currentStep.pages[this.currentPageIndex], { controlProgress: false });
+            } else {
+                if (this.onBeforeHideScenario) {
+                    await Promise.resolve(this.onBeforeHideScenario(context));
+                }
+                this.currentPageIndex = 0;
+                this.completeCurrentScenario();
+                this.isShowing = false;
+                this.currentScenarioIndex = null;
+                this.currentHighlightDefaults = {};
+
+                this.hideTutorialUi();
+                this.onActionResume();
+            }
+
+            if (this.onAfterAdvance) {
+                await Promise.resolve(this.onAfterAdvance(context));
+            }
+        } finally {
+            this.setAdvancing(false);
         }
     }
 
@@ -548,6 +687,33 @@ export class TutorialManager {
      * Resets tutorial state to the initial empty completed list.
      */
     resetTutorial() {
+        if (this.isManagedControlMode()) {
+            this.resetTutorialAsync().catch(error => {
+                setTimeout(() => {
+                    throw error;
+                }, 0);
+            });
+            return;
+        }
+
+        this.resetTutorialStateAndHide();
+    }
+
+    async resetTutorialAsync() {
+        if (this.isAdvancing) return;
+
+        this.setAdvancing(true);
+        try {
+            if (this.isShowing && this.onBeforeHideScenario) {
+                await Promise.resolve(this.onBeforeHideScenario(this.getLifecycleContext()));
+            }
+            this.resetTutorialStateAndHide();
+        } finally {
+            this.setAdvancing(false);
+        }
+    }
+
+    resetTutorialStateAndHide() {
         this.state = { completed: [] };
         this.onSaveState(this.getState());
         this.currentScenarioIndex = null;
@@ -555,12 +721,15 @@ export class TutorialManager {
         this.currentHighlightDefaults = {};
         this.isShowing = false;
 
+        this.hideTutorialUi();
+        this.onActionResume();
+    }
+
+    hideTutorialUi() {
         const tooltipEl = document.getElementById('tutorial-tooltip');
         if (tooltipEl) tooltipEl.classList.add('hidden');
 
         const maskCanvas = document.getElementById('tutorial-mask-canvas');
         if (maskCanvas) maskCanvas.classList.add('hidden');
-
-        this.onActionResume();
     }
 }
