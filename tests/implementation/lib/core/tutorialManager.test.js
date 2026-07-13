@@ -36,6 +36,20 @@ const mockScenarios = [
     }
 ];
 
+function createDeferred() {
+    let resolve;
+    const promise = new Promise(resolvePromise => {
+        resolve = resolvePromise;
+    });
+
+    return { promise, resolve };
+}
+
+async function flushPromises() {
+    await Promise.resolve();
+    await Promise.resolve();
+}
+
 describe('TutorialManager common module', () => {
     let manager;
     let options;
@@ -74,6 +88,7 @@ describe('TutorialManager common module', () => {
 
         document.body.innerHTML = `
             <button id="help-button">Help</button>
+            <button id="tutorial-next-btn">Next</button>
             <canvas id="tutorial-mask-canvas" class="hidden"></canvas>
             <div id="tutorial-tooltip" class="hidden">
                 <div class="tooltip-arrow"></div>
@@ -273,6 +288,137 @@ describe('TutorialManager common module', () => {
         resumed.checkTrigger('afterAction', { allowedTriggers: ['afterAction'] });
         const resolved = resumed.resolveHighlight({ targetType: 'piece' }, mockScenarios[1].pages[0]);
         expect(resolved).toEqual({ targetType: 'piece' });
+    });
+
+    test('managed control mode waits for before-show hook before showing UI', async () => {
+        const beforeShow = createDeferred();
+        const onAfterShowPage = vi.fn();
+        const managed = new TutorialManager(mockScenarios, {
+            ...options,
+            nextButtonSelector: '#tutorial-next-btn',
+            onBeforeShowPage: vi.fn(() => beforeShow.promise),
+            onAfterShowPage
+        });
+        const button = document.getElementById('tutorial-next-btn');
+
+        const triggered = managed.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
+
+        expect(triggered).toBe(true);
+        expect(button.disabled).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+
+        beforeShow.resolve();
+        await flushPromises();
+
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+        expect(document.getElementById('tutorial-message').textContent).toBe('First page');
+        expect(onAfterShowPage).toHaveBeenCalledWith(expect.objectContaining({
+            scenario: mockScenarios[0],
+            page: mockScenarios[0].pages[0],
+            scenarioIndex: 0,
+            pageIndex: 0,
+            highlights: [expect.objectContaining({ targetType: 'board', shape: 'rect' })]
+        }));
+        expect(button.disabled).toBe(false);
+    });
+
+    test('managed control mode advances from the next button and prevents direct advanceScenario calls', async () => {
+        const beforeAdvance = createDeferred();
+        const onBeforeAdvance = vi.fn(() => beforeAdvance.promise);
+        const onAfterAdvance = vi.fn();
+        const managed = new TutorialManager(mockScenarios, {
+            ...options,
+            nextButtonSelector: '#tutorial-next-btn',
+            onBeforeAdvance,
+            onAfterAdvance
+        });
+        const button = document.getElementById('tutorial-next-btn');
+
+        managed.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
+        await flushPromises();
+
+        expect(() => managed.advanceScenario()).toThrow('nextButtonSelector');
+
+        button.click();
+        expect(button.disabled).toBe(true);
+        expect(onBeforeAdvance).toHaveBeenCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[0],
+            pageIndex: 0
+        }));
+        expect(document.getElementById('tutorial-message').textContent).toBe('First page');
+
+        beforeAdvance.resolve();
+        await flushPromises();
+
+        expect(document.getElementById('tutorial-message').textContent).toBe('Second page');
+        expect(onAfterAdvance).toHaveBeenCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[0],
+            pageIndex: 0
+        }));
+        expect(button.disabled).toBe(false);
+    });
+
+    test('managed control mode runs before-hide hook before completing a scenario', async () => {
+        const beforeHide = createDeferred();
+        const onBeforeHideScenario = vi.fn(() => beforeHide.promise);
+        const managed = new TutorialManager(mockScenarios, {
+            ...options,
+            nextButtonSelector: '#tutorial-next-btn',
+            onBeforeHideScenario
+        });
+        const button = document.getElementById('tutorial-next-btn');
+
+        managed.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
+        await flushPromises();
+
+        button.click();
+        await flushPromises();
+        expect(document.getElementById('tutorial-message').textContent).toBe('Second page');
+
+        button.click();
+        expect(button.disabled).toBe(true);
+        expect(onBeforeHideScenario).toHaveBeenCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[1],
+            pageIndex: 1
+        }));
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+
+        beforeHide.resolve();
+        await flushPromises();
+
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(options.onSaveState).toHaveBeenCalledWith({ completed: ['welcome'] });
+        expect(button.disabled).toBe(false);
+    });
+
+    test('managed control mode waits for before-hide hook before reset hides UI', async () => {
+        const beforeHide = createDeferred();
+        const onBeforeHideScenario = vi.fn(() => beforeHide.promise);
+        const managed = new TutorialManager(mockScenarios, {
+            ...options,
+            nextButtonSelector: '#tutorial-next-btn',
+            onBeforeHideScenario
+        });
+        const button = document.getElementById('tutorial-next-btn');
+
+        managed.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
+        await flushPromises();
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+
+        managed.resetTutorial();
+        expect(button.disabled).toBe(true);
+        expect(onBeforeHideScenario).toHaveBeenCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[0],
+            pageIndex: 0
+        }));
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+
+        beforeHide.resolve();
+        await flushPromises();
+
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(options.onSaveState).toHaveBeenCalledWith({ completed: [] });
+        expect(button.disabled).toBe(false);
     });
 
     test('calculates padding, circle, ellipse, and clamped rect radius', () => {
