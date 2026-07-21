@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.5",
+    "date": "2026-07-13",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアルのページ表示・非表示に合わせて、ゲームごとの演出をより細かく組み込めるように改善",
+            "en": "Improve tutorials so each game can attach presentation steps more precisely to page show and hide timing"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.4",
     "date": "2026-07-13",
     "content": [

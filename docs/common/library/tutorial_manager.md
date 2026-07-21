@@ -200,11 +200,12 @@ min(radius, width / 2, height / 2)
 - `initialState`: 再開時の進行状態を指定します。
 - `onSaveState(state)`: 進行状態の保存を行います。
 - `nextButtonSelector`: Next / OK ボタンを TutorialManager に管理させる場合の selector を指定します。
+- `onBeforeScenario(context)`: シナリオ開始時、最初のページを表示する前の処理を実行します。
 - `onBeforeShowPage(context)`: ページ表示前の処理を実行します。Promise を返した場合は解決後に表示します。
 - `onAfterShowPage(context)`: ページ表示後の処理を実行します。
-- `onBeforeHideScenario(context)`: シナリオ終了などで tutorial UI を閉じる前の処理を実行します。
-- `onBeforeAdvance(context)`: Next / OK 進行前の処理を実行します。
-- `onAfterAdvance(context)`: Next / OK 進行後の処理を実行します。
+- `onBeforeHidePage(context)`: ページ非表示前の処理を実行します。
+- `onAfterHidePage(context)`: ページ非表示後の処理を実行します。
+- `onAfterScenario(context)`: シナリオ終了後の処理を実行します。
 - `defaultPadding`: ハイライト余白の既定値を指定します。
 - `defaultRadius`: `rect` ハイライトの角丸半径の既定値を指定します。
 
@@ -253,11 +254,12 @@ hook 内で例外が発生した場合は隠蔽しません。
 ```javascript
 const manager = new TutorialManager(scenarios, {
     nextButtonSelector: '#tutorial-next-btn',
+    onBeforeScenario: async (context) => {},
     onBeforeShowPage: async (context) => {},
     onAfterShowPage: (context) => {},
-    onBeforeHideScenario: async (context) => {},
-    onBeforeAdvance: async (context) => {},
-    onAfterAdvance: async (context) => {}
+    onBeforeHidePage: async (context) => {},
+    onAfterHidePage: async (context) => {},
+    onAfterScenario: async (context) => {}
 });
 ```
 
@@ -281,9 +283,20 @@ const manager = new TutorialManager(scenarios, {
 
 hook の実行順は以下です。
 
-- ページ表示時: `onBeforeShowPage` → mask / tooltip 表示 → `onAfterShowPage`
-- Next / OK 進行時: `onBeforeAdvance` → 次ページ表示またはシナリオ終了処理 → `onAfterAdvance`
-- シナリオ終了時または `resetTutorial()` 時: UI を閉じる前に `onBeforeHideScenario`
+1. `onBeforeScenario`
+2. `onBeforeShowPage`
+3. mask / tooltip 表示
+4. `onAfterShowPage`
+5. OK / Next ボタンクリック
+6. `onBeforeHidePage`
+7. mask / tooltip 削除
+8. `onAfterHidePage`
+9. 次ページがある場合は `onBeforeShowPage` へ進む
+10. シナリオが完了した場合は `onAfterScenario`
+
+`onBeforeScenario` と `onAfterScenario` は、1つの表示シナリオにつき1回だけ呼ばれます。
+ページ切り替え時は、現在ページの `onBeforeHidePage` / `onAfterHidePage` を実行してから、次ページの `onBeforeShowPage` / `onAfterShowPage` を実行します。
+`resetTutorial()` で表示中の tutorial UI を閉じる場合は、現在ページの `onBeforeHidePage` / `onAfterHidePage` を実行します。
 
 ## スタイル
 マスクとハイライトの見た目は CSS カスタムプロパティで指定できます。

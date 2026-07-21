@@ -46,8 +46,9 @@ function createDeferred() {
 }
 
 async function flushPromises() {
-    await Promise.resolve();
-    await Promise.resolve();
+    for (let index = 0; index < 5; index++) {
+        await Promise.resolve();
+    }
 }
 
 describe('TutorialManager common module', () => {
@@ -290,13 +291,17 @@ describe('TutorialManager common module', () => {
         expect(resolved).toEqual({ targetType: 'piece' });
     });
 
-    test('managed control mode waits for before-show hook before showing UI', async () => {
+    test('managed control mode waits for scenario and before-show hooks before showing UI', async () => {
+        const beforeScenario = createDeferred();
         const beforeShow = createDeferred();
+        const onBeforeScenario = vi.fn(() => beforeScenario.promise);
+        const onBeforeShowPage = vi.fn(() => beforeShow.promise);
         const onAfterShowPage = vi.fn();
         const managed = new TutorialManager(mockScenarios, {
             ...options,
             nextButtonSelector: '#tutorial-next-btn',
-            onBeforeShowPage: vi.fn(() => beforeShow.promise),
+            onBeforeScenario,
+            onBeforeShowPage,
             onAfterShowPage
         });
         const button = document.getElementById('tutorial-next-btn');
@@ -305,6 +310,23 @@ describe('TutorialManager common module', () => {
 
         expect(triggered).toBe(true);
         expect(button.disabled).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(onBeforeScenario).toHaveBeenCalledWith(expect.objectContaining({
+            scenario: mockScenarios[0],
+            page: mockScenarios[0].pages[0],
+            scenarioIndex: 0,
+            pageIndex: 0
+        }));
+        expect(onBeforeShowPage).not.toHaveBeenCalled();
+
+        beforeScenario.resolve();
+        await flushPromises();
+        expect(onBeforeShowPage).toHaveBeenCalledWith(expect.objectContaining({
+            scenario: mockScenarios[0],
+            page: mockScenarios[0].pages[0],
+            scenarioIndex: 0,
+            pageIndex: 0
+        }));
         expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
 
         beforeShow.resolve();
@@ -322,15 +344,19 @@ describe('TutorialManager common module', () => {
         expect(button.disabled).toBe(false);
     });
 
-    test('managed control mode advances from the next button and prevents direct advanceScenario calls', async () => {
-        const beforeAdvance = createDeferred();
-        const onBeforeAdvance = vi.fn(() => beforeAdvance.promise);
-        const onAfterAdvance = vi.fn();
+    test('managed control mode hides the current page before showing the next page', async () => {
+        const beforeHide = createDeferred();
+        const onBeforeHidePage = vi.fn(() => beforeHide.promise);
+        const onAfterHidePage = vi.fn();
+        const onBeforeShowPage = vi.fn();
+        const onAfterShowPage = vi.fn();
         const managed = new TutorialManager(mockScenarios, {
             ...options,
             nextButtonSelector: '#tutorial-next-btn',
-            onBeforeAdvance,
-            onAfterAdvance
+            onBeforeHidePage,
+            onAfterHidePage,
+            onBeforeShowPage,
+            onAfterShowPage
         });
         const button = document.getElementById('tutorial-next-btn');
 
@@ -341,30 +367,44 @@ describe('TutorialManager common module', () => {
 
         button.click();
         expect(button.disabled).toBe(true);
-        expect(onBeforeAdvance).toHaveBeenCalledWith(expect.objectContaining({
+        expect(onBeforeHidePage).toHaveBeenCalledWith(expect.objectContaining({
             page: mockScenarios[0].pages[0],
             pageIndex: 0
         }));
         expect(document.getElementById('tutorial-message').textContent).toBe('First page');
 
-        beforeAdvance.resolve();
+        beforeHide.resolve();
         await flushPromises();
 
-        expect(document.getElementById('tutorial-message').textContent).toBe('Second page');
-        expect(onAfterAdvance).toHaveBeenCalledWith(expect.objectContaining({
+        expect(onAfterHidePage).toHaveBeenCalledWith(expect.objectContaining({
             page: mockScenarios[0].pages[0],
             pageIndex: 0
+        }));
+        expect(onBeforeShowPage).toHaveBeenLastCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[1],
+            pageIndex: 1
+        }));
+        expect(document.getElementById('tutorial-message').textContent).toBe('Second page');
+        expect(onAfterShowPage).toHaveBeenLastCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[1],
+            pageIndex: 1
         }));
         expect(button.disabled).toBe(false);
     });
 
-    test('managed control mode runs before-hide hook before completing a scenario', async () => {
+    test('managed control mode runs page hide and scenario hooks before completing a scenario', async () => {
         const beforeHide = createDeferred();
-        const onBeforeHideScenario = vi.fn(() => beforeHide.promise);
+        const onBeforeHidePage = vi.fn(context => (
+            context.pageIndex === 1 ? beforeHide.promise : undefined
+        ));
+        const onAfterHidePage = vi.fn();
+        const onAfterScenario = vi.fn();
         const managed = new TutorialManager(mockScenarios, {
             ...options,
             nextButtonSelector: '#tutorial-next-btn',
-            onBeforeHideScenario
+            onBeforeHidePage,
+            onAfterHidePage,
+            onAfterScenario
         });
         const button = document.getElementById('tutorial-next-btn');
 
@@ -377,7 +417,7 @@ describe('TutorialManager common module', () => {
 
         button.click();
         expect(button.disabled).toBe(true);
-        expect(onBeforeHideScenario).toHaveBeenCalledWith(expect.objectContaining({
+        expect(onBeforeHidePage).toHaveBeenLastCalledWith(expect.objectContaining({
             page: mockScenarios[0].pages[1],
             pageIndex: 1
         }));
@@ -387,17 +427,29 @@ describe('TutorialManager common module', () => {
         await flushPromises();
 
         expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(onAfterHidePage).toHaveBeenLastCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[1],
+            pageIndex: 1
+        }));
+        expect(onAfterScenario).toHaveBeenCalledWith(expect.objectContaining({
+            scenario: mockScenarios[0],
+            page: mockScenarios[0].pages[1],
+            scenarioIndex: 0,
+            pageIndex: 1
+        }));
         expect(options.onSaveState).toHaveBeenCalledWith({ completed: ['welcome'] });
         expect(button.disabled).toBe(false);
     });
 
-    test('managed control mode waits for before-hide hook before reset hides UI', async () => {
+    test('managed control mode waits for page hide hook before reset hides UI', async () => {
         const beforeHide = createDeferred();
-        const onBeforeHideScenario = vi.fn(() => beforeHide.promise);
+        const onBeforeHidePage = vi.fn(() => beforeHide.promise);
+        const onAfterHidePage = vi.fn();
         const managed = new TutorialManager(mockScenarios, {
             ...options,
             nextButtonSelector: '#tutorial-next-btn',
-            onBeforeHideScenario
+            onBeforeHidePage,
+            onAfterHidePage
         });
         const button = document.getElementById('tutorial-next-btn');
 
@@ -407,7 +459,7 @@ describe('TutorialManager common module', () => {
 
         managed.resetTutorial();
         expect(button.disabled).toBe(true);
-        expect(onBeforeHideScenario).toHaveBeenCalledWith(expect.objectContaining({
+        expect(onBeforeHidePage).toHaveBeenCalledWith(expect.objectContaining({
             page: mockScenarios[0].pages[0],
             pageIndex: 0
         }));
@@ -417,6 +469,10 @@ describe('TutorialManager common module', () => {
         await flushPromises();
 
         expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(onAfterHidePage).toHaveBeenCalledWith(expect.objectContaining({
+            page: mockScenarios[0].pages[0],
+            pageIndex: 0
+        }));
         expect(options.onSaveState).toHaveBeenCalledWith({ completed: [] });
         expect(button.disabled).toBe(false);
     });
