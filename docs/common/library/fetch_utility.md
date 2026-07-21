@@ -12,7 +12,7 @@
 
 ## 使用例
 ```javascript
-import { commonFetch } from 'https://t-i-oak.github.io/GameWorksOAK/lib/utils/fetch.js';
+import { commonFetch } from '../../../GameWorksOAK/src/lib/utils/fetch.js';
 
 const config = await commonFetch('data/config.json');
 ```

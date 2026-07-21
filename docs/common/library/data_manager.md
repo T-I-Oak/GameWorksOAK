@@ -78,7 +78,7 @@ GameWorks OAK プロジェクトにおけるデータの永続化と取得を抽
 
 ### インスタンス化して使用する場合（推奨）
 ```javascript
-import { DataManager } from 'https://t-i-oak.github.io/GameWorksOAK/lib/core/dataManager.js';
+import { DataManager } from '../../../GameWorksOAK/src/lib/core/dataManager.js';
 
 // インスタンスの生成 (gameId = 'gameA')
 const manager = new DataManager('gameA');

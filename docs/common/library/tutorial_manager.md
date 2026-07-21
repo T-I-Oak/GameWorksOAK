@@ -5,10 +5,10 @@
 ゲーム固有の状態判定、ハイライト座標計算、再開処理をコールバックへ委譲し、共通側ではシナリオ進行、ツールチップ表示、暗幕マスク描画を担当します。
 
 ## 導入
-共通ライブラリを直接参照して使用します。
+各ゲームプロジェクトから、ローカルの GameWorks OAK リポジトリにある共通ライブラリを相対 import して使用します。
 
 ```javascript
-import { TutorialManager } from 'https://t-i-oak.github.io/GameWorksOAK/lib/core/tutorialManager.js';
+import { TutorialManager } from '../../../GameWorksOAK/src/lib/core/tutorialManager.js';
 
 const manager = new TutorialManager(scenarios, {
     onTriggerCondition: (triggerName, context) => true,

@@ -23,7 +23,7 @@
 
 ## 使用例
 ```javascript
-import { setAppVersion, getAppVersion, getMajorVersion } from 'https://t-i-oak.github.io/GameWorksOAK/lib/utils/env.js';
+import { setAppVersion, getAppVersion, getMajorVersion } from '../../../GameWorksOAK/src/lib/utils/env.js';
 
 // 初期化時にアプリケーション側で定義されているバージョンを注入
 setAppVersion('1.2.3');
