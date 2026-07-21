@@ -27,11 +27,12 @@ export class TutorialManager {
         this.onCalculateRect = options.onCalculateRect || (() => null);
         this.onActionResume = options.onActionResume || (() => {});
         this.onSaveState = options.onSaveState || (() => {});
+        this.onBeforeScenario = options.onBeforeScenario || null;
         this.onBeforeShowPage = options.onBeforeShowPage || null;
         this.onAfterShowPage = options.onAfterShowPage || null;
-        this.onBeforeHideScenario = options.onBeforeHideScenario || null;
-        this.onBeforeAdvance = options.onBeforeAdvance || null;
-        this.onAfterAdvance = options.onAfterAdvance || null;
+        this.onBeforeHidePage = options.onBeforeHidePage || null;
+        this.onAfterHidePage = options.onAfterHidePage || null;
+        this.onAfterScenario = options.onAfterScenario || null;
         this.nextButtonSelector = options.nextButtonSelector;
         this.nextButtonElement = null;
         this.boundNextButtonHandler = null;
@@ -324,7 +325,7 @@ export class TutorialManager {
             const currentStep = this.getCurrentStep();
 
             if (this.isManagedControlMode()) {
-                this.showPageAsync(currentStep.pages[0]).catch(error => {
+                this.startScenarioAsync(currentStep.pages[0]).catch(error => {
                     setTimeout(() => {
                         throw error;
                     }, 0);
@@ -402,6 +403,19 @@ export class TutorialManager {
         this.showMask();
     }
 
+    async startScenarioAsync(page) {
+        this.setAdvancing(true);
+        try {
+            const context = this.getLifecycleContext(page);
+            if (this.onBeforeScenario) {
+                await Promise.resolve(this.onBeforeScenario(context));
+            }
+            await this.showPageAsync(page, { controlProgress: false });
+        } finally {
+            this.setAdvancing(false);
+        }
+    }
+
     async showPageAsync(page, options = {}) {
         const shouldControlProgress = options.controlProgress !== false;
         if (shouldControlProgress) {
@@ -416,8 +430,32 @@ export class TutorialManager {
             this.showPage(page);
 
             if (this.onAfterShowPage) {
-                this.onAfterShowPage(context);
+                await Promise.resolve(this.onAfterShowPage(context));
             }
+        } finally {
+            if (shouldControlProgress) {
+                this.setAdvancing(false);
+            }
+        }
+    }
+
+    async hidePageAsync(page = this.getCurrentStep()?.pages?.[this.currentPageIndex], options = {}) {
+        const shouldControlProgress = options.controlProgress !== false;
+        if (shouldControlProgress) {
+            this.setAdvancing(true);
+        }
+        try {
+            const context = this.getLifecycleContext(page);
+            if (this.onBeforeHidePage) {
+                await Promise.resolve(this.onBeforeHidePage(context));
+            }
+
+            this.hideTutorialUi();
+
+            if (this.onAfterHidePage) {
+                await Promise.resolve(this.onAfterHidePage(context));
+            }
+            return context;
         } finally {
             if (shouldControlProgress) {
                 this.setAdvancing(false);
@@ -631,32 +669,26 @@ export class TutorialManager {
         if (!this.isShowing || this.isAdvancing) return;
 
         this.setAdvancing(true);
-        const context = this.getLifecycleContext();
         try {
-            if (this.onBeforeAdvance) {
-                await Promise.resolve(this.onBeforeAdvance(context));
-            }
-
             const currentStep = this.getCurrentStep();
+            const currentPage = currentStep.pages[this.currentPageIndex];
+            const context = await this.hidePageAsync(currentPage, { controlProgress: false });
+
             if (this.currentPageIndex < currentStep.pages.length - 1) {
                 this.currentPageIndex++;
                 await this.showPageAsync(currentStep.pages[this.currentPageIndex], { controlProgress: false });
             } else {
-                if (this.onBeforeHideScenario) {
-                    await Promise.resolve(this.onBeforeHideScenario(context));
-                }
                 this.currentPageIndex = 0;
                 this.completeCurrentScenario();
+
+                if (this.onAfterScenario) {
+                    await Promise.resolve(this.onAfterScenario(context));
+                }
+
                 this.isShowing = false;
                 this.currentScenarioIndex = null;
                 this.currentHighlightDefaults = {};
-
-                this.hideTutorialUi();
                 this.onActionResume();
-            }
-
-            if (this.onAfterAdvance) {
-                await Promise.resolve(this.onAfterAdvance(context));
             }
         } finally {
             this.setAdvancing(false);
@@ -704,8 +736,8 @@ export class TutorialManager {
 
         this.setAdvancing(true);
         try {
-            if (this.isShowing && this.onBeforeHideScenario) {
-                await Promise.resolve(this.onBeforeHideScenario(this.getLifecycleContext()));
+            if (this.isShowing) {
+                await this.hidePageAsync(undefined, { controlProgress: false });
             }
             this.resetTutorialStateAndHide();
         } finally {
