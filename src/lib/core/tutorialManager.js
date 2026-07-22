@@ -38,6 +38,7 @@ export class TutorialManager {
         this.boundNextButtonHandler = null;
         this.defaultPadding = options.defaultPadding !== undefined ? options.defaultPadding : 0;
         this.defaultRadius = options.defaultRadius !== undefined ? options.defaultRadius : 24;
+        this.elementScrollDelayMs = options.elementScrollDelayMs !== undefined ? options.elementScrollDelayMs : 350;
 
         if (this.nextButtonSelector) {
             this.bindNextButton();
@@ -331,7 +332,11 @@ export class TutorialManager {
                     }, 0);
                 });
             } else {
-                this.showPage(currentStep.pages[0]);
+                this.showPage(currentStep.pages[0]).catch(error => {
+                    setTimeout(() => {
+                        throw error;
+                    }, 0);
+                });
             }
             return true;
         }
@@ -398,9 +403,44 @@ export class TutorialManager {
         }
     }
 
-    showPage(page) {
+    renderPage(page) {
         this.showTooltip(page);
         this.showMask();
+    }
+
+    async showPage(page) {
+        const didScroll = this.scrollElementHighlightsIntoView(page);
+        if (didScroll && this.elementScrollDelayMs > 0) {
+            await this.wait(this.elementScrollDelayMs);
+        }
+        this.renderPage(page);
+    }
+
+    wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    scrollElementHighlightsIntoView(page) {
+        if (!page || !Array.isArray(page.highlight)) return false;
+
+        let didScroll = false;
+        page.highlight
+            .map(highlight => this.resolveHighlight(highlight, page))
+            .filter(highlight => highlight.elementId && (!highlight.targetType || highlight.targetType === 'element-only'))
+            .reverse()
+            .forEach(highlight => {
+                const element = document.getElementById(highlight.elementId);
+                if (!element || typeof element.scrollIntoView !== 'function') return;
+
+                element.scrollIntoView({
+                    block: 'center',
+                    inline: 'nearest',
+                    behavior: 'smooth'
+                });
+                didScroll = true;
+            });
+
+        return didScroll;
     }
 
     async startScenarioAsync(page) {
@@ -427,7 +467,7 @@ export class TutorialManager {
                 await Promise.resolve(this.onBeforeShowPage(context));
             }
 
-            this.showPage(page);
+            await this.showPage(page);
 
             if (this.onAfterShowPage) {
                 await Promise.resolve(this.onAfterShowPage(context));
@@ -657,7 +697,11 @@ export class TutorialManager {
 
         if (this.currentPageIndex < currentStep.pages.length - 1) {
             this.currentPageIndex++;
-            this.showTooltip(currentStep.pages[this.currentPageIndex]);
+            this.showPage(currentStep.pages[this.currentPageIndex]).catch(error => {
+                setTimeout(() => {
+                    throw error;
+                }, 0);
+            });
         } else {
             this.currentPageIndex = 0;
             this.completeCurrentScenario();

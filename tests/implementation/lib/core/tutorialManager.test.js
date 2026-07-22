@@ -89,6 +89,9 @@ describe('TutorialManager common module', () => {
 
         document.body.innerHTML = `
             <button id="help-button">Help</button>
+            <button id="primary-target">Primary</button>
+            <button id="secondary-target">Secondary</button>
+            <button id="canvas-owned-target">Canvas Owned</button>
             <button id="tutorial-next-btn">Next</button>
             <canvas id="tutorial-mask-canvas" class="hidden"></canvas>
             <div id="tutorial-tooltip" class="hidden">
@@ -109,7 +112,8 @@ describe('TutorialManager common module', () => {
             onTriggerCondition: vi.fn((triggerName, context) => context.allowedTriggers.includes(triggerName)),
             onCalculateRect: vi.fn(() => ({ top: 10, left: 20, width: 200, height: 120 })),
             onActionResume: vi.fn(),
-            onSaveState: vi.fn()
+            onSaveState: vi.fn(),
+            elementScrollDelayMs: 0
         };
 
         manager = new TutorialManager(mockScenarios, options);
@@ -389,6 +393,7 @@ describe('TutorialManager common module', () => {
             page: mockScenarios[0].pages[1],
             pageIndex: 1
         }));
+        await flushPromises();
         expect(button.disabled).toBe(false);
     });
 
@@ -509,6 +514,56 @@ describe('TutorialManager common module', () => {
             rx: 28,
             ry: 28
         });
+    });
+
+    test('scrolls DOM element highlights in reverse order before showing the page', () => {
+        const scrollOrder = [];
+        document.getElementById('primary-target').scrollIntoView = vi.fn(() => scrollOrder.push('primary'));
+        document.getElementById('secondary-target').scrollIntoView = vi.fn(() => scrollOrder.push('secondary'));
+        document.getElementById('canvas-owned-target').scrollIntoView = vi.fn(() => scrollOrder.push('canvas-owned'));
+
+        manager.scrollElementHighlightsIntoView({
+            message: 'Scroll targets',
+            highlight: [
+                { elementId: 'primary-target' },
+                { elementId: 'canvas-owned-target', targetType: 'canvas-target' },
+                { elementId: 'secondary-target' }
+            ]
+        });
+
+        expect(scrollOrder).toEqual(['secondary', 'primary']);
+        expect(document.getElementById('primary-target').scrollIntoView).toHaveBeenCalledWith({
+            block: 'center',
+            inline: 'nearest',
+            behavior: 'smooth'
+        });
+        expect(document.getElementById('canvas-owned-target').scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    test('waits briefly after smooth element scrolling before rendering the page', async () => {
+        vi.useFakeTimers();
+        const delayedManager = new TutorialManager(mockScenarios, {
+            ...options,
+            elementScrollDelayMs: 350
+        });
+        delayedManager.currentScenarioIndex = 0;
+        document.getElementById('primary-target').scrollIntoView = vi.fn();
+
+        const showing = delayedManager.showPage({
+            message: 'Delayed scroll',
+            highlight: [
+                { elementId: 'primary-target' }
+            ]
+        });
+
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        await vi.advanceTimersByTimeAsync(349);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        await vi.advanceTimersByTimeAsync(1);
+        await showing;
+
+        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+        vi.useRealTimers();
     });
 
     test('keeps tooltip inside viewport and points arrow at the highlight center after horizontal clamp', () => {
