@@ -166,6 +166,14 @@ manager は `checkTrigger()` / `willTrigger()` の走査中に、配列順で de
 - `circle`: 対象矩形の大きい辺を直径とする真円として描画します。
 - 未指定: `ellipse` と同じ扱いです。
 
+## DOM element の自動スクロール
+`elementId` を持つ DOM element ハイライトは、ページ表示前に自動で表示範囲へスクロールします。
+スクロールは `scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" })` で行い、短い待ち時間の後に mask / tooltip を表示します。
+
+複数の DOM element ハイライトがある場合は、`highlight` 配列の逆順でスクロールします。
+同じスクロール範囲に複数の対象がある場合、最後にスクロールされる配列先頭の対象が優先されます。
+`targetType` を持つゲーム内座標ハイライトは、DOM element の自動スクロール対象にはなりません。
+
 ## padding
 `padding` と `defaultPadding` は、数値または `{ "x": number, "y": number }` で指定できます。
 

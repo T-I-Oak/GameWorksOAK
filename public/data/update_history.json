@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.7",
+    "date": "2026-07-22",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアル対象が画面外にある場合でも、自動で表示範囲へ移動してから案内されるように改善",
+            "en": "Improve tutorials so off-screen targets are automatically brought into view before guidance is shown"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.6",
     "date": "2026-07-22",
     "content": [
