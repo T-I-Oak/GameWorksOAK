@@ -489,8 +489,9 @@ export class TutorialManager {
         const borderTop = bounds.type === 'rect' ? bounds.top : cy - bounds.ry;
         const borderBottom = bounds.type === 'rect' ? bounds.top + bounds.height : cy + bounds.ry;
 
+        const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 768;
         const spaceAbove = borderTop;
-        const spaceBelow = typeof window !== 'undefined' ? (window.innerHeight - borderBottom) : 500;
+        const spaceBelow = viewportHeight - borderBottom;
         const placeBelow = spaceBelow > spaceAbove;
 
         let topPos;
@@ -504,9 +505,18 @@ export class TutorialManager {
 
         const leftPos = cx - tooltipWidth / 2;
         const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1024;
+        const clampedTop = Math.max(10, Math.min(viewportHeight - tooltipHeight - 10, topPos));
+        const clampedLeft = Math.max(10, Math.min(viewportWidth - tooltipWidth - 10, leftPos));
 
-        tooltipEl.style.top = `${topPos}px`;
-        tooltipEl.style.left = `${Math.max(10, Math.min(viewportWidth - tooltipWidth - 10, leftPos))}px`;
+        tooltipEl.style.top = `${clampedTop}px`;
+        tooltipEl.style.left = `${clampedLeft}px`;
+
+        if (arrowEl) {
+            const arrowOffset = cx - clampedLeft;
+            const arrowHalfWidth = (arrowEl.offsetWidth || 0) / 2;
+            const arrowLeft = arrowOffset - arrowHalfWidth;
+            arrowEl.style.left = `${Math.max(16, Math.min(tooltipWidth - 16, arrowLeft))}px`;
+        }
     }
 
     /**

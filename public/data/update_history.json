@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.6",
+    "date": "2026-07-22",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアルの吹き出しが画面端でも見切れにくく、対象を指す位置が自然になるよう改善",
+            "en": "Improve tutorial tooltips so they stay visible near screen edges and point to targets more naturally"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.5",
     "date": "2026-07-13",
     "content": [
