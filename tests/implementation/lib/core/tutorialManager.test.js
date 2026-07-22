@@ -510,4 +510,28 @@ describe('TutorialManager common module', () => {
             ry: 28
         });
     });
+
+    test('keeps tooltip inside viewport and points arrow at the highlight center after horizontal clamp', () => {
+        const tooltipEl = document.getElementById('tutorial-tooltip');
+        const arrowEl = tooltipEl.querySelector('.tooltip-arrow');
+        const positionedManager = new TutorialManager(mockScenarios, {
+            ...options,
+            onCalculateRect: vi.fn(() => ({ top: 10, left: 220, width: 80, height: 120 }))
+        });
+        Object.defineProperty(window, 'innerWidth', { configurable: true, value: 300 });
+        Object.defineProperty(window, 'innerHeight', { configurable: true, value: 160 });
+        Object.defineProperty(tooltipEl, 'offsetWidth', { configurable: true, value: 180 });
+        Object.defineProperty(tooltipEl, 'offsetHeight', { configurable: true, value: 90 });
+        Object.defineProperty(arrowEl, 'offsetWidth', { configurable: true, value: 16 });
+
+        positionedManager.positionTooltip({
+            highlight: [
+                { targetType: 'board', shape: 'rect' }
+            ]
+        });
+
+        expect(tooltipEl.style.left).toBe('110px');
+        expect(tooltipEl.style.top).toBe('60px');
+        expect(arrowEl.style.left).toBe('142px');
+    });
 });
