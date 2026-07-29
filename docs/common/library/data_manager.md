@@ -4,25 +4,13 @@
 GameWorks OAK プロジェクトにおけるデータの永続化と取得を抽象化します。
 内部で `localStorage` を使用していることを隠蔽し、メタ情報（バージョン等）と実データを分離して管理します。
 
-本ライブラリは、静的な直接保存方式（従来のグローバル保存）に加え、各ゲーム固有の ID を使ってデータを 1 つの JSON にパッケージングして保存する「インスタンス化（名前空間）保存方式」の双方をサポートします。
+本ライブラリは、各ゲーム固有の ID を使ってデータを 1 つの JSON にパッケージングして保存する「インスタンス化（名前空間）保存方式」をサポートします。
 
 ---
 
 ## 永続化データ構造（内部）
 
-### 1. 静的メソッド保存（従来のグローバル保存）
-`localStorage` のルートに指定の `key` で直接保存されます。
-```json
-// キー: "user_profile"
-{
-  "v": 1,  // dataVersion (メジャーバージョン)
-  "d": {   // data本体
-    "score": 100
-  }
-}
-```
-
-### 2. インスタンス保存（推奨：ゲームID名前空間）
+### インスタンス保存（ゲームID名前空間）
 `localStorage` のルートには `gameId` のみが保存され、その中に各ゲームデータが JSON オブジェクトとしてカプセル化されます。
 ```json
 // キー: "gameA"
@@ -41,7 +29,7 @@ GameWorks OAK プロジェクトにおけるデータの永続化と取得を抽
 
 ## API
 
-### インスタンス化 (推奨)
+### インスタンス化
 
 #### `new DataManager(gameId: string)`
 *   **詳細**: 指定された `gameId`（例: `'portal'`, `'gameA'`）でインスタンスを作成します。起動時に `localStorage` から `gameId` キーのデータをすべてロードし、内部にキャッシュします。
@@ -55,28 +43,16 @@ GameWorks OAK プロジェクトにおけるデータの永続化と取得を抽
 #### `getSavedData(key: string, migrationMap: object): object`
 *   **詳細**: キャッシュ内から指定された `key` のデータを取得し、内部構造からデータ本体 (`d`) のみを抽出してマイグレーションを適用し返します。
 *   **移行処理**: キャッシュ内に保存されているバージョン (`v`) と現在のメジャーバージョンを比較し、`migrationMap` に定義された移行関数を順次適用します。
+*   **保存タイミング**: データ不在時や保存構造が不正な場合は初期化結果を保存します。既存データを通常読み込みするだけの場合は保存しません。マイグレーションが実際に適用された場合のみ、変換後データを保存します。
 
 #### `setSavedData(key: string, data: object): void`
 *   **詳細**: データを `{ v: [メジャーバージョン], d: [データ本体] }` の構造でラップしてキャッシュに保存し、`localStorage` 全体を即座に永続化保存します。
 
 ---
 
-### 静的メソッド (後方互換性維持用)
-
-#### `DataManager.getSavedData(key: string, migrationMap: object): object`
-*   **詳細**: `localStorage` から直接 `key` を取得し、マイグレーションを適用したデータ本体を返します。
-
-#### `DataManager.setSavedData(key: string, data: object): void`
-*   **詳細**: データをラップし、`localStorage` に直接 `key` を保存します。
-
-#### `DataManager.fetchGameData(path: string): Promise<object>`
-*   **詳細**: プロジェクトの `data/` 配下からJSONデータを取得します（非同期）。
-
----
-
 ## 使用例
 
-### インスタンス化して使用する場合（推奨）
+### インスタンス化して使用する場合
 ```javascript
 import { DataManager } from '../../../GameWorksOAK/src/lib/core/dataManager.js';
 
