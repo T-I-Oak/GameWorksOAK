@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.9",
+    "date": "2026-09-02",
+    "content": [
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "ポータルに Can We Become Heroes? を追加",
+            "en": "Add Can We Become Heroes? to the portal"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.8",
     "date": "2026-07-29",
     "content": [
