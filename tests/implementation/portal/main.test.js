@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initPortal, showHistory, resolveAbsoluteUrl, getBadgeClassName, isBadgeFeatured } from '../../../src/portal/main.js';
+import { initPortal, showHistory, resolveAbsoluteUrl, getBadgeClassName, isBadgeFeatured, getCardAnimationDelay } from '../../../src/portal/main.js';
 import { clearL10nCache } from '../../../src/lib/core/i18n.js';
 
 // localStorage の共通モック
@@ -137,6 +137,21 @@ describe('portal main.js - badge featuredUntil', () => {
 
     it('should render none badge with hidden class', () => {
         expect(getBadgeClassName({ content: '', type: 'none' }, '2026-06-02')).toBe('badge none');
+    });
+});
+
+describe('portal main.js - card animation delay', () => {
+    it('should restart reveal delay from the first column on wrapped rows', () => {
+        expect(getCardAnimationDelay(0, 3)).toBe('0.2s');
+        expect(getCardAnimationDelay(1, 3)).toBe('0.4s');
+        expect(getCardAnimationDelay(2, 3)).toBe('0.6s');
+        expect(getCardAnimationDelay(3, 3)).toBe('0.2s');
+    });
+
+    it('should keep every card delay short in a single-column responsive layout', () => {
+        expect(getCardAnimationDelay(0, 1)).toBe('0.2s');
+        expect(getCardAnimationDelay(1, 1)).toBe('0.2s');
+        expect(getCardAnimationDelay(2, 1)).toBe('0.2s');
     });
 });
 

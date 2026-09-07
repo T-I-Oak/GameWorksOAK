@@ -172,7 +172,7 @@ function renderProjects(projects) {
         const buttonAttr = isPending ? 'onclick="return false;"' : '';
 
         return `
-        <div class="GameCard ${isMaintenance ? 'state-maintenance' : ''} animate-fade" style="--delay: ${0.2 * (index + 1)}s">
+        <div class="GameCard ${isMaintenance ? 'state-maintenance' : ''} animate-fade">
             <div class="GameImg" style="--bg-image: url('${project.image}')">
                 <div class="GameTitleOverlay">
                     ${logoContentHtml}
@@ -201,6 +201,8 @@ function renderProjects(projects) {
         </div>
         `;
     }).join('');
+
+    setCardAnimationDelays(grid);
 
     // イベントリスナー of 付与
     grid.querySelectorAll('.HistoryLink').forEach(btn => {
@@ -261,7 +263,10 @@ function isValidDateString(value) {
 }
 
 function initObserver() {
-    const observerOptions = { threshold: 0.1 };
+    const observerOptions = {
+        rootMargin: '0px 0px 160px 0px',
+        threshold: 0.01
+    };
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -272,6 +277,21 @@ function initObserver() {
 
     document.querySelectorAll('.animate-fade').forEach(el => {
         observer.observe(el);
+    });
+}
+
+export function getCardAnimationDelay(index, columnCount) {
+    const safeColumnCount = Math.max(1, Number(columnCount) || 1);
+    return `${(0.2 * ((index % safeColumnCount) + 1)).toFixed(1)}s`;
+}
+
+function setCardAnimationDelays(grid) {
+    const columns = getComputedStyle(grid).gridTemplateColumns
+        .split(' ')
+        .filter(Boolean).length || 1;
+
+    grid.querySelectorAll('.GameCard').forEach((card, index) => {
+        card.style.setProperty('--delay', getCardAnimationDelay(index, columns));
     });
 }
 
