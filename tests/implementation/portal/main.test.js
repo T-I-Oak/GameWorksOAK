@@ -119,7 +119,7 @@ describe('portal main.js - badge featuredUntil', () => {
         const badge = { content: 'v1.0 Release', type: 'info', featuredUntil: '2026-06-02' };
 
         expect(isBadgeFeatured(badge, '2026-06-02')).toBe(true);
-        expect(getBadgeClassName(badge, '2026-06-02')).toBe('badge texture-info is-featured');
+        expect(getBadgeClassName(badge, '2026-06-02')).toBe('badge texture-info state-featured');
     });
 
     it('should not mark info badge as featured after featuredUntil date', () => {
@@ -136,7 +136,7 @@ describe('portal main.js - badge featuredUntil', () => {
     });
 
     it('should render none badge with hidden class', () => {
-        expect(getBadgeClassName({ content: '', type: 'none' }, '2026-06-02')).toBe('badge none');
+        expect(getBadgeClassName({ content: '', type: 'none' }, '2026-06-02')).toBe('badge state-hidden');
     });
 });
 
@@ -223,7 +223,8 @@ describe('portal main.js - initPortal', () => {
 
         // gamesGrid のレンダリング結果を確認
         const gamesGrid = document.getElementById('gamesGrid');
-        expect(gamesGrid.innerHTML).toContain(`style="--bg-image: url('https://t-i-oak.github.io/BurstCascade/assets/thumbnail.png')"`);
+        expect(gamesGrid.querySelector('.GameCardImage').src).toBe('https://t-i-oak.github.io/BurstCascade/assets/thumbnail.png');
+        expect(gamesGrid.querySelector('.GameImg').hasAttribute('style')).toBe(false);
     });
 
     it('should render featured info badge class during featuredUntil period', async () => {
@@ -246,7 +247,7 @@ describe('portal main.js - initPortal', () => {
         await initPortal();
 
         const badge = document.querySelector('.badge');
-        expect(badge.className).toBe('badge texture-info is-featured');
+        expect(badge.className).toBe('badge texture-info state-featured');
     });
 
     it('should render png logo paths as image tags without fetching logo content', async () => {

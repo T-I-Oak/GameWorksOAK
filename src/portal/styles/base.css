@@ -75,7 +75,7 @@ header {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-header.scrolled {
+header.state-scrolled {
     height: 70px;
     background: rgba(5, 5, 10, 0.8);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -101,7 +101,7 @@ header.scrolled {
     transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-header.scrolled .logo-svg {
+header.state-scrolled .logo-svg {
     height: 55px;
 }
 
@@ -182,7 +182,7 @@ footer {
     opacity: 0;
 }
 
-.animate-fade.visible {
+.animate-fade.state-visible {
     animation: fadeIn 1s ease var(--delay, 0s) forwards;
 }
 

@@ -20,13 +20,13 @@
 
         <div class="test-container">
             <span class="test-label">2. Modal States (Overlay)</span>
-            <button onclick="document.getElementById('modalOverlay').classList.add('active')">Open Modal</button>
+            <button onclick="document.getElementById('modalOverlay').classList.add('state-active')">Open Modal</button>
         </div>
     </div>
 
     <div class="ModalOverlay" id="modalOverlay">
         <div class="ModalContent">
-            <button class="ModalClose" onclick="document.getElementById('modalOverlay').classList.remove('active')">&times;</button>
+            <button class="ModalClose" onclick="document.getElementById('modalOverlay').classList.remove('state-active')">&times;</button>
             <h2 class="ModalTitle">Test Modal</h2>
             <div id="modalBody">
                 <div class="LoadingSpinner">Loading spinner test...</div>
@@ -63,8 +63,9 @@
             const grid = document.getElementById('testGrid');
             grid.innerHTML = `
                 <!-- Normal Project -->
-                <div class="GameCard visible">
-                    <div class="GameImg" style="background-image: url('${SAMPLE_PROJECT.image}');">
+                <div class="GameCard state-visible">
+                    <div class="GameImg">
+                        <img class="GameCardImage" src="${SAMPLE_PROJECT.image}" alt="">
                         <span class="badge">RELEASED</span>
                     </div>
                     <div class="GameInfo">
@@ -80,8 +81,9 @@
                 </div>
 
                 <!-- Disabled Project -->
-                <div class="GameCard visible">
-                    <div class="GameImg" style="background-image: url('${SAMPLE_PROJECT.image}');">
+                <div class="GameCard state-visible">
+                    <div class="GameImg">
+                        <img class="GameCardImage" src="${SAMPLE_PROJECT.image}" alt="">
                         <span class="badge">COMING SOON</span>
                     </div>
                     <div class="GameInfo">

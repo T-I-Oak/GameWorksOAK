@@ -93,8 +93,8 @@ describe('TutorialManager common module', () => {
             <button id="secondary-target">Secondary</button>
             <button id="canvas-owned-target">Canvas Owned</button>
             <button id="tutorial-next-btn">Next</button>
-            <canvas id="tutorial-mask-canvas" class="hidden"></canvas>
-            <div id="tutorial-tooltip" class="hidden">
+            <canvas id="tutorial-mask-canvas" class="state-hidden"></canvas>
+            <div id="tutorial-tooltip" class="state-hidden">
                 <div class="tooltip-arrow"></div>
                 <h3 id="tutorial-title"></h3>
                 <p id="tutorial-message"></p>
@@ -134,7 +134,44 @@ describe('TutorialManager common module', () => {
 
         expect(willTrigger).toBe(true);
         expect(manager.isShowing).toBe(false);
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(true);
+    });
+
+    test('works with the documented tutorial CSS classes', () => {
+        const mask = document.getElementById('tutorial-mask-canvas');
+        const tooltip = document.getElementById('tutorial-tooltip');
+        const arrow = tooltip.querySelector('.tooltip-arrow');
+        const style = document.createElement('style');
+        style.textContent = '.state-hidden { display: none; } .state-arrow-up { order: 1; } .state-arrow-down { order: 2; }';
+        document.body.append(style);
+        arrow.classList.add('texture-custom');
+        const expectHidden = value => {
+            for (const element of [mask, tooltip]) {
+                expect(getComputedStyle(element).display === 'none').toBe(value);
+            }
+        };
+
+        expectHidden(true);
+        manager.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
+        expectHidden(false);
+
+        const page = { highlight: [{ targetType: 'board' }] };
+        options.onCalculateRect.mockReturnValue({ top: 0, left: 20, width: 40, height: 20 });
+        manager.positionTooltip(page);
+        expect(getComputedStyle(arrow).order).toBe('1');
+        options.onCalculateRect.mockReturnValue({ top: window.innerHeight - 30, left: 20, width: 40, height: 20 });
+        manager.positionTooltip(page);
+        expect(getComputedStyle(arrow).order).toBe('2');
+        expect(arrow.classList.contains('texture-custom')).toBe(true);
+
+        manager.advanceScenario();
+        manager.advanceScenario();
+        expectHidden(true);
+        manager.resetTutorial();
+        manager.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
+        expectHidden(false);
+        manager.resetTutorial();
+        expectHidden(true);
     });
 
     test('uses DOM element rects directly when elementId is provided', () => {
@@ -314,7 +351,7 @@ describe('TutorialManager common module', () => {
 
         expect(triggered).toBe(true);
         expect(button.disabled).toBe(true);
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(true);
         expect(onBeforeScenario).toHaveBeenCalledWith(expect.objectContaining({
             scenario: mockScenarios[0],
             page: mockScenarios[0].pages[0],
@@ -331,12 +368,12 @@ describe('TutorialManager common module', () => {
             scenarioIndex: 0,
             pageIndex: 0
         }));
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(true);
 
         beforeShow.resolve();
         await flushPromises();
 
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(false);
         expect(document.getElementById('tutorial-message').textContent).toBe('First page');
         expect(onAfterShowPage).toHaveBeenCalledWith(expect.objectContaining({
             scenario: mockScenarios[0],
@@ -426,12 +463,12 @@ describe('TutorialManager common module', () => {
             page: mockScenarios[0].pages[1],
             pageIndex: 1
         }));
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(false);
 
         beforeHide.resolve();
         await flushPromises();
 
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(true);
         expect(onAfterHidePage).toHaveBeenLastCalledWith(expect.objectContaining({
             page: mockScenarios[0].pages[1],
             pageIndex: 1
@@ -460,7 +497,7 @@ describe('TutorialManager common module', () => {
 
         managed.checkTrigger('turnStart', { allowedTriggers: ['turnStart'] });
         await flushPromises();
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(false);
 
         managed.resetTutorial();
         expect(button.disabled).toBe(true);
@@ -468,12 +505,12 @@ describe('TutorialManager common module', () => {
             page: mockScenarios[0].pages[0],
             pageIndex: 0
         }));
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(false);
 
         beforeHide.resolve();
         await flushPromises();
 
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(true);
         expect(onAfterHidePage).toHaveBeenCalledWith(expect.objectContaining({
             page: mockScenarios[0].pages[0],
             pageIndex: 0
@@ -556,13 +593,13 @@ describe('TutorialManager common module', () => {
             ]
         });
 
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(true);
         await vi.advanceTimersByTimeAsync(349);
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(true);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(true);
         await vi.advanceTimersByTimeAsync(1);
         await showing;
 
-        expect(document.getElementById('tutorial-tooltip').classList.contains('hidden')).toBe(false);
+        expect(document.getElementById('tutorial-tooltip').classList.contains('state-hidden')).toBe(false);
         vi.useRealTimers();
     });
 

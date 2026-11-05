@@ -217,19 +217,82 @@ min(radius, width / 2, height / 2)
 - `defaultPadding`: ハイライト余白の既定値を指定します。
 - `defaultRadius`: `rect` ハイライトの角丸半径の既定値を指定します。
 
-## 必須DOM
-利用側は以下の要素を用意します。
+## ゲーム側が用意する DOM と CSS
 
-- `#tutorial-mask-canvas`
-- `#tutorial-tooltip`
-- `#tutorial-title`
-- `#tutorial-message`
+TutorialManager を生成する前に、以下の要素をページに用意します。CSS はゲーム側のスタイルシートに記述します。
 
-Next / OK ボタンの制御を TutorialManager に委譲する場合は、`nextButtonSelector` で指定するボタンも用意します。
+| 要素 | ゲーム側で用意するもの | ライブラリの動作 |
+| --- | --- | --- |
+| `canvas#tutorial-mask-canvas` | 初期状態に `state-hidden` を付け、表示時はビューポート全体を覆うように配置する。 | 暗幕とハイライトを描画し、表示・非表示を切り替える。 |
+| `#tutorial-tooltip` | 初期状態に `state-hidden` を付け、ビューポートを基準に固定配置し、マスクより手前に重ねる。 | 表示・非表示を切り替え、対象に合わせて `top` と `left` を設定する。 |
+| `#tutorial-title`、`#tutorial-message` | ツールチップ内に用意する。 | シナリオのタイトルとページのメッセージを設定する。 |
+| `.tooltip-arrow` | 矢印を使う場合に、ツールチップの子孫に1つ置く。CSS でツールチップを基準に絶対配置し、上下それぞれの見た目を定義する。 | `left` と向きのクラスを設定する。 |
+| Next / OK ボタン | 管理制御モードでは、生成時に指定する `nextButtonSelector` に一致するボタンを置く。 | クリックで進行し、非同期進行中はボタンを無効にする。 |
+
+- `state-hidden` は、ゲーム側がマスクとツールチップの初期 HTML に指定します。ライブラリが表示時に外し、非表示時に付けます。ゲーム側の CSS では、非表示中に画面を覆ったり操作を遮ったりしないようにします。
+- `state-arrow-up` はツールチップが対象の下にあるときに付きます。矢印はツールチップの上辺に置き、上向きに描画します。`state-arrow-down` はツールチップが対象の上にあるときに付きます。矢印は下辺に置き、下向きに描画します。向きのクラスはライブラリが付け替えます。
+- ツールチップの位置と矢印の向きは、ページの先頭ハイライトから座標を取得できた場合に更新します。ハイライトがない場合や座標を取得できない場合は既存の位置と向きを維持します。そのようなページを使う場合、中央表示や矢印の非表示などはゲーム側で設定できます。管理制御モードではページの hook を使えます。
+
+以下は、先頭ハイライトの座標が取得できるページ向けの最小例です。管理制御モードでは `nextButtonSelector: '#tutorial-next-btn'` を指定します。
 
 ```html
-<button id="tutorial-next-btn">Next</button>
+<canvas id="tutorial-mask-canvas" class="state-hidden" aria-hidden="true"></canvas>
+<section id="tutorial-tooltip" class="state-hidden" aria-labelledby="tutorial-title">
+    <span class="tooltip-arrow" aria-hidden="true"></span>
+    <h2 id="tutorial-title"></h2>
+    <p id="tutorial-message"></p>
+    <button id="tutorial-next-btn" type="button">次へ</button>
+</section>
 ```
+
+```css
+#tutorial-mask-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+}
+
+#tutorial-tooltip {
+    position: fixed;
+    z-index: 101;
+    box-sizing: border-box;
+    width: min(20rem, calc(100vw - 20px));
+    padding: 1rem;
+    background: #20202b;
+    color: #fff;
+}
+
+#tutorial-mask-canvas.state-hidden,
+#tutorial-tooltip.state-hidden {
+    display: none;
+}
+
+.tooltip-arrow {
+    display: none;
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #20202b;
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+.tooltip-arrow.state-arrow-up {
+    display: block;
+    top: -6px;
+}
+
+.tooltip-arrow.state-arrow-down {
+    display: block;
+    bottom: -6px;
+}
+```
+
+### 旧版からの移行
+
+マスクとツールチップの初期 HTML および非表示用 CSS では `.hidden` を `.state-hidden` に変更します。ゲーム側の JavaScript がこれらの要素を直接隠す場合も、新しいクラスを使います。矢印の CSS は `.arrow-up` と `.arrow-down` をそれぞれ `.state-arrow-up` と `.state-arrow-down` に置き換えます。新版のライブラリが切り替えるのは `state-*` のクラスです。
 
 ## 制御モード
 移行期間中は、`nextButtonSelector` の有無で制御モードを切り替えます。
@@ -307,7 +370,7 @@ hook の実行順は以下です。
 `resetTutorial()` で表示中の tutorial UI を閉じる場合は、現在ページの `onBeforeHidePage` / `onAfterHidePage` を実行します。
 
 ## スタイル
-マスクとハイライトの見た目は CSS カスタムプロパティで指定できます。
+マスクとハイライトの見た目は、ゲーム側の `:root` に指定する CSS カスタムプロパティで調整できます。指定は任意です。
 
 - `--tutorial-mask-color`
 - `--tutorial-highlight-stroke`

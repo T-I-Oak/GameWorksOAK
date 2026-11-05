@@ -17,7 +17,7 @@
     transition: all 0.4s ease;
 }
 
-.ModalOverlay.active {
+.ModalOverlay.state-active {
     opacity: 1;
     visibility: visible;
 }
@@ -38,7 +38,7 @@
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 
-.ModalOverlay.active .ModalContent {
+.ModalOverlay.state-active .ModalContent {
     transform: translateY(0);
 }
 

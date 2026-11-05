@@ -28,11 +28,20 @@
 .GameImg {
     width: 100%;
     height: 220px;
-    background-image: var(--bg-image);
-    background-size: cover;
-    background-position: center;
     position: relative;
     overflow: hidden;
+}
+
+.GameImg > .GameCardImage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.GameCardImage:not([src]) {
+    display: none;
 }
 
 .badge {
@@ -54,7 +63,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.badge.texture-info.is-featured {
+.badge.texture-info.state-featured {
     overflow: hidden;
     background: linear-gradient(180deg, #f0a13a 0%, #b95324 100%);
     color: #1a0c04;
@@ -66,7 +75,7 @@
     text-shadow: 0 1px 0 rgba(255, 226, 164, 0.55);
 }
 
-.badge.texture-info.is-featured::after {
+.badge.texture-info.state-featured::after {
     content: "";
     position: absolute;
     inset: -40% -30%;
@@ -85,7 +94,7 @@
     pointer-events: none;
 }
 
-.badge.none {
+.badge.state-hidden {
     display: none;
 }
 
@@ -101,7 +110,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .badge.texture-info.is-featured::after {
+    .badge.texture-info.state-featured::after {
         animation: none;
         display: none;
     }

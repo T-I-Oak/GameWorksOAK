@@ -148,7 +148,7 @@ function renderProjects(projects) {
     const grid = document.getElementById('gamesGrid');
     const loc = expandLanguageResource(portalLocRaw);
 
-    grid.innerHTML = projects.map((project, index) => {
+    grid.innerHTML = projects.map(project => {
         const logo = project.logo;
         const badge = project.badge || { content: '', type: 'none' };
         const button = project.button;
@@ -173,7 +173,8 @@ function renderProjects(projects) {
 
         return `
         <div class="GameCard ${isMaintenance ? 'state-maintenance' : ''} animate-fade">
-            <div class="GameImg" style="--bg-image: url('${project.image}')">
+            <div class="GameImg">
+                <img class="GameCardImage" alt="" decoding="async">
                 <div class="GameTitleOverlay">
                     ${logoContentHtml}
                 </div>
@@ -202,6 +203,9 @@ function renderProjects(projects) {
         `;
     }).join('');
 
+    grid.querySelectorAll(':scope > .GameCard > .GameImg > .GameCardImage').forEach((image, index) => {
+        if (projects[index].image) image.src = projects[index].image;
+    });
     setCardAnimationDelays(grid);
 
     // イベントリスナー of 付与
@@ -216,12 +220,12 @@ export function getBadgeClassName(badge, today = getTodayDateString()) {
     const type = badge?.type || 'none';
 
     if (type === 'none') {
-        return 'badge none';
+        return 'badge state-hidden';
     }
 
     const classes = ['badge', `texture-${type}`];
     if (type === 'info' && isBadgeFeatured(badge, today)) {
-        classes.push('is-featured');
+        classes.push('state-featured');
     }
 
     return classes.join(' ');
@@ -270,7 +274,7 @@ function initObserver() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                entry.target.classList.add('state-visible');
             }
         });
     }, observerOptions);
@@ -304,7 +308,7 @@ export async function showHistory(projectId) {
 
     modalTitle.textContent = loc.updateHistory; 
     modalBody.innerHTML = `<div class="LoadingSpinner">${loc.loadingHistory}</div>`;
-    modalOverlay.classList.add('active');
+    modalOverlay.classList.add('state-active');
 
     try {
         // マニフェストからタイトルを取得 (キャッシュ付き多言語ロード)
@@ -368,9 +372,9 @@ function initScrollEffects() {
 
         // Header shrink
         if (scrollY > 50) {
-            header.classList.add('scrolled');
+            header.classList.add('state-scrolled');
         } else {
-            header.classList.remove('scrolled');
+            header.classList.remove('state-scrolled');
         }
 
         // Cog rotation
@@ -385,11 +389,11 @@ function initScrollEffects() {
 
     // Modal Close Events
     modalClose.addEventListener('click', () => {
-        modalOverlay.classList.remove('active');
+        modalOverlay.classList.remove('state-active');
     });
 
     modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+        if (e.target === modalOverlay) modalOverlay.classList.remove('state-active');
     });
 }
 
