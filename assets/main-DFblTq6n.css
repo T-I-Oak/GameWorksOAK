@@ -129,7 +129,7 @@ header {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-header.scrolled {
+header.state-scrolled {
     height: 70px;
     background: rgba(5, 5, 10, 0.8);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -155,7 +155,7 @@ header.scrolled {
     transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-header.scrolled .logo-svg {
+header.state-scrolled .logo-svg {
     height: 55px;
 }
 
@@ -241,7 +241,7 @@ footer {
     opacity: 0;
 }
 
-.animate-fade.visible {
+.animate-fade.state-visible {
     animation: fadeIn 1s ease var(--delay, 0s) forwards;
 }
 
@@ -370,11 +370,20 @@ footer {
 .GameImg {
     width: 100%;
     height: 220px;
-    background-image: var(--bg-image);
-    background-size: cover;
-    background-position: center;
     position: relative;
     overflow: hidden;
+}
+
+.GameImg > .GameCardImage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.GameCardImage:not([src]) {
+    display: none;
 }
 
 .badge {
@@ -396,7 +405,7 @@ footer {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.badge.texture-info.is-featured {
+.badge.texture-info.state-featured {
     overflow: hidden;
     background: linear-gradient(180deg, #f0a13a 0%, #b95324 100%);
     color: #1a0c04;
@@ -408,7 +417,7 @@ footer {
     text-shadow: 0 1px 0 rgba(255, 226, 164, 0.55);
 }
 
-.badge.texture-info.is-featured::after {
+.badge.texture-info.state-featured::after {
     content: "";
     position: absolute;
     inset: -40% -30%;
@@ -427,7 +436,7 @@ footer {
     pointer-events: none;
 }
 
-.badge.none {
+.badge.state-hidden {
     display: none;
 }
 
@@ -443,7 +452,7 @@ footer {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .badge.texture-info.is-featured::after {
+    .badge.texture-info.state-featured::after {
         animation: none;
         display: none;
     }
@@ -811,7 +820,7 @@ footer {
     transition: all 0.4s ease;
 }
 
-.ModalOverlay.active {
+.ModalOverlay.state-active {
     opacity: 1;
     visibility: visible;
 }
@@ -832,7 +841,7 @@ footer {
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 
-.ModalOverlay.active .ModalContent {
+.ModalOverlay.state-active .ModalContent {
     transform: translateY(0);
 }
 
