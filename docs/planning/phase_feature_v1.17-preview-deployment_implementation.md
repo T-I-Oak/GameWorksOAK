@@ -84,3 +84,24 @@ PRE17-01確認後、確認用サーバーを停止。
 - 上記はローカルでの成功とは区別し、公開後に実施する。各ゲームのpreview連携確認は各ゲームの後続移行で扱う。
 - 実装担当はマージ・pushを行わない。次担当もレビュー結果と所定のマージ承認を得るまで実行しない。
 - 6ゲームのバックログは各作業ツリーへ反映済みだが未コミット。既存変更と混在するため、次担当が各リポジトリの担当と取り扱いを調整する。共通側の終了コミットには含められない。
+
+## REV17-01への対応（1.17.1）
+
+- 再実装開始時にpackage.jsonとpackage-lock.jsonを1.17.1へ更新。
+- 正式版の正常なCSSと仮版のJavaScriptが混在する再現HTMLを子プロセスで検証する回帰テストを先に追加し、修正前に終了コード0となってテストが失敗することを確認。
+- scripts/deployment.jsで正式版検証時にbase配下の予約済みpreview/参照を拒否する。仮版側への正式版アセット混在も回帰テストへ追加。
+- npm.cmd test -- tests/implementation/deployment.test.js: 修正後5件成功。
+- npm.cmd test: 8ファイル・78件成功。
+- DEPLOY_BASE_PATH=/GameWorksOAK/ で npm.cmd run build 成功。その後 GITHUB_EVENT_NAME=push、GITHUB_REF=refs/heads/master、GITHUB_REPOSITORY=T-I-Oak/GameWorksOAK で node scripts/deployment.js verify 成功。
+- DEPLOY_BASE_PATH=/GameWorksOAK/preview/ で npm.cmd run build 成功。その後 GITHUB_EVENT_NAME=workflow_dispatch、GITHUB_REF=refs/heads/feature/v1.17-preview-deployment、GITHUB_REPOSITORY=T-I-Oak/GameWorksOAK で node scripts/deployment.js verify 成功。
+- 今回は公開前検証とバージョン設定の修正であり、見た目・ユーザビリティの変更はない。PRE17-01の確認済み判断を維持し、再確認は依頼しない。
+- PRE17-02～04は公開後の担当作業として未実施を維持する。マージ・pushは行わない。
+
+### 6ゲームのバックログ追記の保存・引継ぎ方法
+
+- phase_feature_v1.17-preview-deployment_backlogs/ に各ゲームの今回追記だけのpatchと、確認時のバックログ全体SHA-256をmanifest.jsonとして保存した。既存の未コミット変更はパッチの追加行へ含めない。
+- これらも共通側の実装終了コミットへ含め、現在の兄弟作業ツリー以外にも今回の追記をGit履歴で保存する。兄弟リポジトリのコミット・pushは行わない。
+- 次担当は同名の移行項目が既にある場合は再適用せず、現状の項目を各ゲーム担当へ引き継ぐ。既存変更を一括コミットしない。
+- 追記が失われた場合は、終了コミットの docs/planning/phase_feature_v1.17-preview-deployment_backlogs/<Repository>.patch をGit履歴から取得し、対象ゲームで git apply --check <patchの絶対パス> を先に実行する。成功時のみ適用し、競合時は既存内容を読んで移行項目だけを追加する。
+- マージ前のphase_削除後も終了コミットから復元できる。manifestのハッシュは確認時点の照合用であり、別開発が進んだ後の一致を必須条件にしない。
+- 6ゲームすべてで git apply --reverse --check --ignore-space-change <patch> が成功し、保存パッチと現在の追記の対応を確認。読み取り確認のみで各作業ツリーは変更していない。

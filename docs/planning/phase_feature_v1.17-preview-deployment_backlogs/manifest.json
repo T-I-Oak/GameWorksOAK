@@ -1,0 +1,38 @@
+[
+  {
+    "repository": "BurstCascade",
+    "file": "docs/planning/backlog.md",
+    "working_file_sha256": "eb324b026719ae48c6e0b5d76b4daf28bbf7c59f01140b04d7171dcdbe0d2282",
+    "patch": "BurstCascade.patch"
+  },
+  {
+    "repository": "GravityFreight",
+    "file": "docs/planning/backlog.md",
+    "working_file_sha256": "b2b89b78e3ab8ab92113a0c58d6872ddbcbcff8764cf9bc4c9abd16874f2304f",
+    "patch": "GravityFreight.patch"
+  },
+  {
+    "repository": "MagicCrystal",
+    "file": "docs/planning/backlog.md",
+    "working_file_sha256": "ef5ad1f74f7bc8b217ccb5041deb7abe034643520f2938644c16e148651cb934",
+    "patch": "MagicCrystal.patch"
+  },
+  {
+    "repository": "CanWeBecomeHeroes",
+    "file": "docs/planning/backlog.md",
+    "working_file_sha256": "d3cfaa294cfac86f3826bc304d5186c3958fc9269aec01ce1594055fc32aec66",
+    "patch": "CanWeBecomeHeroes.patch"
+  },
+  {
+    "repository": "MyPalette",
+    "file": "docs/planning/backlog.md",
+    "working_file_sha256": "fd98b3a56a2873baad62a7ee689381aa6c4d7cf3266b5866579428a104906d99",
+    "patch": "MyPalette.patch"
+  },
+  {
+    "repository": "PrismDrift",
+    "file": "docs/planning/backlog.md",
+    "working_file_sha256": "4a0bc68b80bccbde4538ff0e3e580ee49d506380f6750e525a0b55ead24182a9",
+    "patch": "PrismDrift.patch"
+  }
+]

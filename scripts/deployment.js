@@ -18,7 +18,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         if (existsSync('dist/preview')) throw new Error('dist/preview is reserved');
         const html = readFileSync('dist/index.html', 'utf8');
         const assets = [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)].map(match => match[1]);
-        if (!assets.some(url => url.startsWith(base + 'assets/')) || assets.some(url => url.startsWith('/') && !url.startsWith(base))) {
+        if (!assets.some(url => url.startsWith(base + 'assets/')) || assets.some(url => url.startsWith('/') && (
+            !url.startsWith(base) || (target === '' && url.startsWith(base + 'preview/'))
+        ))) {
             throw new Error('Build assets do not match deployment base');
         }
     } else {

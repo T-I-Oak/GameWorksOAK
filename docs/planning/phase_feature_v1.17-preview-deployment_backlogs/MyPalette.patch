@@ -1,0 +1,16 @@
+--- a/docs/planning/backlog.md
++++ b/docs/planning/backlog.md
+@@ -2,6 +2,13 @@
+ 
+ ## 要望・バグ指摘
+ 
++### 正式版・仮版の共通公開へ移行する
++
++- 依存条件: GameWorksOAK の共通公開処理が master へマージ・push されていること。
++- GameWorksOAK/docs/common/12.preview_deployment.md に従い、共通ワークフロー呼び出しへ切り替える。正式版は master push、仮版は開発ブランチの手動実行とし、公開先の任意入力を設けない。
++- npm run build / dist と DEPLOY_BASE_PATH を Vite の base に反映し、隣接する公開済み GameWorksOAK の共通ライブラリを使用する。
++- project_info.json の image・logo.path・button.url を共通標準の公開ルート相対パスに揃え、自ゲームの絶対URLと外部リンクを確認する。
++- 完了条件: 正式版・仮版の公開成功、他方の成果物の保持、仮版からの素材・標準JSON・バージョンの読み込み、ポータルの preview=on による紹介・画像・ロゴ・プレイ先・更新履歴の連携を確認する。
+ 
+ 
+ 以下の順序で開発を進める。各項目の具体的なスコープと完了条件は、着手する計画フェーズで定める。

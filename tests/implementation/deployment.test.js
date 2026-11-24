@@ -18,6 +18,27 @@ describe('deployment policy', () => {
 });
 
 describe('build destination validation', () => {
+    it.each([
+        ['push', 'refs/heads/master', '/Game/', '<link href="/Game/assets/main.css"><script src="/Game/preview/assets/main.js"></script>'],
+        ['workflow_dispatch', 'refs/heads/feature/test', '/Game/preview/', '<link href="/Game/preview/assets/main.css"><script src="/Game/assets/main.js"></script>']
+    ])('rejects mixed production and preview assets for %s', (event, ref, base, html) => {
+        const dir = mkdtempSync(join(tmpdir(), 'gameworksoak-deploy-'));
+        mkdirSync(join(dir, 'dist'));
+        const file = join(dir, 'dist/index.html');
+        try {
+            writeFileSync(file, html);
+            const result = spawnSync(process.execPath, [resolve('scripts/deployment.js'), 'verify'], {
+                cwd: dir, env: { ...process.env, GITHUB_EVENT_NAME: event, GITHUB_REF: ref,
+                    GITHUB_REPOSITORY: 'T-I-Oak/Game', DEPLOY_BASE_PATH: base }, encoding: 'utf8'
+            });
+            expect(result.status).not.toBe(0);
+            expect(result.stderr).toContain('Build assets do not match deployment base');
+        } finally {
+            unlinkSync(file);
+            rmdirSync(join(dir, 'dist'));
+            rmdirSync(dir);
+        }
+    });
     it('accepts matching assets and rejects wrong base and reserved preview output', () => {
         const dir = mkdtempSync(join(tmpdir(), 'gameworksoak-deploy-'));
         mkdirSync(join(dir, 'dist'));
