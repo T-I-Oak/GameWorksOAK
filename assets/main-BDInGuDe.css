@@ -340,6 +340,16 @@ footer {
     color: var(--text-main);
 }
 
+.HeaderNav { gap: 0.5rem; flex-shrink: 0; }
+
+@media (max-width: 480px) {
+    .HeaderInner { gap: 0.5rem; padding-inline: 0.75rem; }
+    .logo { min-width: 0; }
+    .logo-svg { width: 100%; max-width: 160px; height: auto; }
+    header.state-scrolled .logo-svg { height: auto; }
+    .LanguageSelector { padding-left: 0.5rem; }
+}
+
 /* Game Cards Section Styles */
 
 .GamesGrid {
@@ -386,10 +396,13 @@ footer {
     display: none;
 }
 
-.badge {
+.GameImg > .badge {
     position: absolute;
     bottom: 1rem;
     right: 1rem;
+}
+
+.badge {
     padding: 0.4rem 1rem;
     border-radius: 100px;
     font-size: 0.8rem;
