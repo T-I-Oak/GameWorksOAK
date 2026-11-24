@@ -6,7 +6,7 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 export default defineConfig({
   // GitHub Pages のリポジトリ名に合わせてベースパスを設定
-  base: '/GameWorksOAK/',
+  base: process.env.DEPLOY_BASE_PATH || '/GameWorksOAK/',
   
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),

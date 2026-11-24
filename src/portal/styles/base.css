@@ -275,3 +275,12 @@ footer {
     background: #0d0e15;
     color: var(--text-main);
 }
+
+.HeaderNav { gap: 0.5rem; flex-shrink: 0; }
+@media (max-width: 480px) {
+    .HeaderInner { gap: 0.5rem; padding-inline: 0.75rem; }
+    .logo { min-width: 0; }
+    .logo-svg { width: 100%; max-width: 160px; height: auto; }
+    header.state-scrolled .logo-svg { height: auto; }
+    .LanguageSelector { padding-left: 0.5rem; }
+}

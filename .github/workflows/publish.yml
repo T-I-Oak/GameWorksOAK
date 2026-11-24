@@ -1,0 +1,64 @@
+name: Common Pages publishing
+on:
+  workflow_call:
+permissions:
+  contents: write
+concurrency:
+  group: pages-${{ github.repository }}
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # Deploy action runs git from GITHUB_WORKSPACE.
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          path: app
+      - uses: actions/checkout@v4
+        with:
+          repository: T-I-Oak/GameWorksOAK
+          ref: master
+          path: GameWorksOAK
+      - name: Select common tooling
+        id: tooling
+        shell: bash
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [[ "${REPOSITORY,,}" == "t-i-oak/gameworksoak" ]]; then
+            echo "path=app" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=GameWorksOAK" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Select destination
+        id: destination
+        working-directory: app
+        env:
+          TOOLING: ${{ steps.tooling.outputs.path }}
+        run: node "../$TOOLING/scripts/deployment.js"
+      - name: Install and build
+        working-directory: app
+        env:
+          DEPLOY_BASE_PATH: ${{ steps.destination.outputs.base }}
+        run: |
+          npm ci
+          npm run build
+      - name: Verify build destination
+        working-directory: app
+        env:
+          TOOLING: ${{ steps.tooling.outputs.path }}
+          DEPLOY_BASE_PATH: ${{ steps.destination.outputs.base }}
+        run: node "../$TOOLING/scripts/deployment.js" verify
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: app/dist
+          target-folder: ${{ steps.destination.outputs.target }}
+          clean: true
+          clean-exclude: |
+            ${{ steps.destination.outputs.target == '' && '/preview/***' || '' }}
+          force: false

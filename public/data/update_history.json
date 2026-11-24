@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.17",
+    "date": "2026-11-24",
+    "content": [
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "preview=on を指定すると各ゲームの仮版を参照でき、ヘッダーに Preview と表示します。",
+            "en": "Add preview=on to browse game previews, with a Preview label in the header."
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.16",
     "date": "2026-11-12",
     "content": [
