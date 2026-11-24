@@ -1,3 +1,4 @@
+import { getProjectBaseUrl, resolveProjectUrl, isPreview } from './projectUrls.js';
 import { commonFetch } from '../lib/utils/fetch.js';
 import { getLanguage, setLanguage, expandLanguageResource, loadJsonWithL10nCached, setupLanguageSelector } from '../lib/core/i18n.js';
 import { DataManager } from '../lib/core/dataManager.js';
@@ -10,6 +11,9 @@ import portalLocRaw from './portal_loc.json';
 let portalDataManager;
 
 export async function initPortal() {
+    const previewTag = document.getElementById('preview-tag');
+    if (previewTag) previewTag.hidden = !isPreview();
+
     // DataManagerの初期化 (Portal用)
     portalDataManager = new DataManager('portal');
 
@@ -61,7 +65,7 @@ async function loadProjects() {
     const projectData = await Promise.all(projects.map(async project => {
         const id = project.id;
         const title = project.title;
-        const baseUrl = `https://t-i-oak.github.io/${id}/`;
+        const baseUrl = getProjectBaseUrl(id);
 
         let data = null;
 
@@ -102,15 +106,17 @@ async function loadProjects() {
                 data.button.url = baseUrl;
             }
 
+            data.button.url = resolveProjectUrl(data.button.url, baseUrl);
+
             // サムネイル画像の相対URLを絶対URLに解決
             if (data.image) {
-                data.image = resolveAbsoluteUrl(data.image, baseUrl);
+                data.image = resolveProjectUrl(data.image, baseUrl);
             }
 
             // ロゴのSVGをfetchしてinlining (SVG自体は多言語化されないアセットと仮定し、一度読み込んだら data.logo.content に記憶)
             // もし data.logo.content がまだ fetch されていない場合のみ fetch する
             if (data.logo && data.logo.path && !data.logo.content) {
-                const absoluteLogoPath = resolveAbsoluteUrl(data.logo.path, baseUrl);
+                const absoluteLogoPath = resolveProjectUrl(data.logo.path, baseUrl);
                 data.logo.path = absoluteLogoPath;
 
                 if (isSvgLogoPath(absoluteLogoPath)) {
@@ -318,7 +324,7 @@ export async function showHistory(projectId) {
 
         modalTitle.textContent = `${title} - ${loc.updateHistory}`;
 
-        const baseUrl = `https://t-i-oak.github.io/${projectId}/`;
+        const baseUrl = getProjectBaseUrl(projectId);
         const fetchUrl = resolveAbsoluteUrl('data/update_history.json', baseUrl);
         
         // 更新履歴を取得 (キャッシュ付き多言語ロード)
