@@ -1,0 +1,254 @@
+[
+  {
+    "version": "1.17",
+    "date": "2026-11-24",
+    "content": [
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "preview=on を指定すると各ゲームの仮版を参照でき、ヘッダーに Preview と表示します。",
+            "en": "Add preview=on to browse game previews, with a Preview label in the header."
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.16",
+    "date": "2026-11-12",
+    "content": [
+      {
+        "type": "etc",
+        "text": {
+          "lang-store": {
+            "ja": "内部改善",
+            "en": "Internal improvements"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.15",
+    "date": "2026-11-10",
+    "content": [
+      {
+        "type": "etc",
+        "text": {
+          "lang-store": {
+            "ja": "内部改善",
+            "en": "Internal improvements"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.14",
+    "date": "2026-11-05",
+    "content": [
+      {
+        "type": "etc",
+        "text": {
+          "lang-store": {
+            "ja": "内部改善",
+            "en": "Internal improvements"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.10",
+    "date": "2026-09-07",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "2段目以降のゲームカードが、スクロール時により自然なタイミングで表示されるよう改善",
+            "en": "Improve wrapped game cards so they appear at a more natural timing while scrolling"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.9",
+    "date": "2026-09-02",
+    "content": [
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "ポータルに Can We Become Heroes? を追加",
+            "en": "Add Can We Become Heroes? to the portal"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.8",
+    "date": "2026-07-29",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "保存データの読み込み時に不要な書き込みを減らし、ゲームの保存処理がより安定するよう改善",
+            "en": "Improve saved data handling by reducing unnecessary writes during loading for more stable game saves"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.7",
+    "date": "2026-07-22",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアル対象が画面外にある場合でも、自動で表示範囲へ移動してから案内されるように改善",
+            "en": "Improve tutorials so off-screen targets are automatically brought into view before guidance is shown"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.6",
+    "date": "2026-07-22",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアルの吹き出しが画面端でも見切れにくく、対象を指す位置が自然になるよう改善",
+            "en": "Improve tutorial tooltips so they stay visible near screen edges and point to targets more naturally"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.5",
+    "date": "2026-07-13",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアルのページ表示・非表示に合わせて、ゲームごとの演出をより細かく組み込めるように改善",
+            "en": "Improve tutorials so each game can attach presentation steps more precisely to page show and hide timing"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.4",
+    "date": "2026-07-13",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "チュートリアル中に、ゲームごとの演出や準備処理を組み込めるように改善",
+            "en": "Improve tutorials so each game can include its own presentation and preparation steps"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.3",
+    "date": "2026-07-08",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "ストーリー分岐型のチュートリアルを表現できるように改善",
+            "en": "Improve tutorials so branching tutorial stories can be represented"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.2",
+    "date": "2026-06-10",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "プロジェクトの表示順を featuredUntil の新しいものから優先して表示するよう変更",
+            "en": "Change the project display order to sort by featuredUntil descending"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.1",
+    "date": "2026-05-26",
+    "content": [
+      {
+        "type": "imp",
+        "text": {
+          "lang-store": {
+            "ja": "ポータルカードのバッジに期間限定の注目表示を追加",
+            "en": "Add time-limited featured display for portal card badges"
+          }
+        }
+      },
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "i18n共通モジュールにHTMLテンプレート描画機能を追加",
+            "en": "Add HTML template rendering helpers to the i18n common module"
+          }
+        }
+      },
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "多言語対応（i18n）共通モジュールの追加とDataManagerの拡張",
+            "en": "Add multi-language (i18n) common module and DataManager extension"
+          }
+        }
+      },
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "ポータルサイトの多言語対応（日本語 / 英語の切り替えプルダウン実装）",
+            "en": "Multi-language support for portal site (implement language selector dropdown)"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "version": "1.0",
+    "date": "2026-05-22",
+    "content": [
+      {
+        "type": "new",
+        "text": {
+          "lang-store": {
+            "ja": "初版リリース",
+            "en": "First release"
+          }
+        }
+      }
+    ]
+  }
+]
