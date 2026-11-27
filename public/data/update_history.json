@@ -1,5 +1,20 @@
 [
   {
+    "version": "1.18",
+    "date": "2026-11-27",
+    "content": [
+      {
+        "type": "etc",
+        "text": {
+          "lang-store": {
+            "ja": "内部改善",
+            "en": "Internal improvements"
+          }
+        }
+      }
+    ]
+  },
+  {
     "version": "1.17",
     "date": "2026-11-24",
     "content": [
